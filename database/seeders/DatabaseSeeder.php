@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\SiakadSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
