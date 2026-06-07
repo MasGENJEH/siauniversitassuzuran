@@ -8,21 +8,21 @@ use App\Repositories\MahasiswaRepository;
 
 class MahasiswaService
 {
-    private MahasiswaRepository $dosenRepository;
+    private MahasiswaRepository $mahasiswaRepository;
 
-    public function __construct(MahasiswaRepository $dosenRepository)
+    public function __construct(MahasiswaRepository $mahasiswaRepository)
     {
-        $this->dosenRepository = $dosenRepository;
+        $this->mahasiswaRepository = $mahasiswaRepository;
     }
 
     public function getAll(array $fields)
     {
-        return $this->dosenRepository->getAll($fields);
+        return $this->mahasiswaRepository->getAll($fields);
     }
 
     public function getById(int $id, array $fields)
     {
-        return $this->dosenRepository->getById($id, $fields);
+        return $this->mahasiswaRepository->getById($id, $fields);
     }
 
     public function create(array $data)
@@ -33,16 +33,16 @@ class MahasiswaService
 
         $data['nim'] = $nimOtomatis;
 
-        return $this->dosenRepository->create($data);
+        return $this->mahasiswaRepository->create($data);
     }
 
     public function update(int $id, array $data)
     {
-        return $this->dosenRepository->update($id, $data);
+        return $this->mahasiswaRepository->update($id, $data);
     }
 
     public function delete(int $id)
     {
-        return $this->dosenRepository->delete($id);
+        return $this->mahasiswaRepository->delete($id);
     }
 }

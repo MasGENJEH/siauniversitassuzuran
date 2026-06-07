@@ -4,8 +4,31 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.jsx';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Lexend Deca', ui-sans-serif, system-ui, sans-serif;
+    
+    --color-monday-background: #f3f5f9;
+    --color-monday-border: #e8e8e8;
+    --color-monday-gray: #6a7686;
+    --color-monday-black: #292d32;
+    --color-monday-blue: #1053d5;
+    --color-monday-gray-background: #f3f3f3;
+    --color-monday-lime-green: #cbee5a;
+    --color-monday-lime-green-char: #deff6e;
+    --color-monday-red: #ff5070;
+}
+
+@utility blue-gradient {
+  background: linear-gradient(336.99deg, #0A3A89 0%, #1053D5 100%);
+}
+
+@utility transition-300 {
+  transition: all 300ms ease-in-out;
+}
+
+body {
+  font-family: 'Lexend Deca', sans-serif;
+  background-color: #f3f5f9;
 }

@@ -22,7 +22,7 @@ class MataKuliahRequest extends FormRequest
      */
     public function rules(): array
     {
-        $mataKuliahId = $this->route('mata_kuliahs');
+        $mataKuliahId = $this->route('mata_kuliah');
 
         return [
             'id_prodi' => [
