@@ -4,18 +4,21 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\DosenPengampuController;
 use App\Http\Controllers\FakultasController;
 use App\Http\Controllers\KelasKuliahController;
+use App\Http\Controllers\KelasMahasiswaController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAkademikController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\KelasMahasiswaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::middleware(['auth:sanctum', 'role:manager'])->group(function () {
+});
 
 Route::apiResource('fakultas', FakultasController::class);
 Route::apiResource('users', UserController::class);
