@@ -42,6 +42,13 @@ class UserRoleSeeder extends Seeder
             $user->assignRole($roleName);
         }
 
+        // Assign 'admin' role to all users whose email matches/contains 'admin'
+        $adminRole = Role::where('name', 'admin')->first();
+        $adminUsers = User::where('email', 'like', '%admin%')->get();
+        foreach ($adminUsers as $user) {
+            $user->assignRole($adminRole);
+        }
+
         // Assign 'dosen' role to all users whose email matches/contains 'dosen'
         $dosenRole = Role::where('name', 'dosen')->first();
         $dosenUsers = User::where('email', 'like', '%dosen%')->get();

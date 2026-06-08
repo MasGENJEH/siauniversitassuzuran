@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp } from 'lucide-react';
+import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp } from 'lucide-react';
 
 export default function MahasiswaTab({
   mahasiswas,
@@ -18,12 +18,18 @@ export default function MahasiswaTab({
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const itemsPerPage = 10;
 
   // Reset to page 1 when search query changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
+
+  // Reset showPassword when selectedMahasiswa changes
+  useEffect(() => {
+    setShowPassword(false);
+  }, [selectedMahasiswa]);
 
   // Filter items based on search query
   const filteredItems = mahasiswas.filter(m =>
@@ -215,7 +221,19 @@ export default function MahasiswaTab({
                   <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
                   <span className="text-monday-gray">Email: <span className="text-monday-black font-bold font-mono">{detailData.user?.email || '-'}</span></span>
                   <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
-                  <span className="text-monday-gray">Sandi: <span className="text-monday-black font-bold font-mono">password123</span></span>
+                  <span className="text-monday-gray flex items-center gap-1.5">
+                    Sandi:{" "}
+                    <span className="text-monday-black font-bold font-mono">
+                      {showPassword ? "password123" : "••••••••"}
+                    </span>
+                    <button
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-1 hover:bg-monday-gray-background rounded-lg text-monday-gray hover:text-monday-black transition-colors"
+                      title={showPassword ? "Sembunyikan Sandi" : "Tampilkan Sandi"}
+                    >
+                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </span>
                 </div>
               </div>
             </div>

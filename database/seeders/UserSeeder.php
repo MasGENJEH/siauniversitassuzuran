@@ -151,6 +151,17 @@ class UserSeeder extends Seeder
             ];
         }
 
+        // Admin User
+        $users[] = [
+            'name' => 'Admin Kampus',
+            'email' => 'admin@kampus.ac.id',
+            'password' => Hash::make('password123'),
+            'phone' => '081234567890',
+            'photo' => 'admin.jpg',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
         DB::table('users')->insert($users);
     }
 }
