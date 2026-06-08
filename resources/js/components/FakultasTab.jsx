@@ -47,7 +47,7 @@ export default function FakultasTab({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">ID</th>
+              <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Kode Fakultas</th>
               <th className="py-4 px-6">Nama Fakultas</th>
               <th className="py-4 px-6 text-right">Aksi</th>
@@ -57,9 +57,9 @@ export default function FakultasTab({
             {fakultas.filter(f => 
               f.nama_fakultas.toLowerCase().includes(searchQuery.toLowerCase()) ||
               f.kode_fakultas.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((fak) => (
+            ).map((fak, index) => (
               <tr key={fak.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{fak.id}</td>
+                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{fak.kode_fakultas}</td>
                 <td className="py-3.5 px-6 font-semibold">{fak.nama_fakultas}</td>
                 <td className="py-3.5 px-6 text-right">

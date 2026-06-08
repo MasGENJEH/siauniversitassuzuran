@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Prodi;
-use App\Models\MataKuliah;
 use App\Helpers\MataKuliahHelper;
+use App\Models\MataKuliah;
+use App\Models\Prodi;
 use Illuminate\Database\Seeder;
 
 class MataKuliahSeeder extends Seeder
@@ -18,13 +18,13 @@ class MataKuliahSeeder extends Seeder
 
         $subjects = [
             'DASAR-DASAR', 'PENGANTAR', 'LANJUTAN', 'PETA TEORI', 'METODOLOGI',
-            'ANALISIS', 'KAPITA SELEKTA', 'SEMINAR', 'PRAKTIKUM', 'DESAIN'
+            'ANALISIS', 'KAPITA SELEKTA', 'SEMINAR', 'PRAKTIKUM', 'DESAIN',
         ];
 
         foreach ($prodis as $prodi) {
-            for ($j = 1; $j <= 5; $j++) {
-                $subjectName = $subjects[array_rand($subjects)] . ' ' . $prodi->nama_prodi . ' ' . $j;
-                
+            for ($j = 1; $j <= 2; $j++) {
+                $subjectName = $subjects[array_rand($subjects)].' '.$prodi->nama_prodi.' '.$j;
+
                 MataKuliah::create([
                     'id_prodi' => $prodi->id,
                     'kode_mk' => MataKuliahHelper::generateUniqueKodeKelas($prodi->kode_prodi),

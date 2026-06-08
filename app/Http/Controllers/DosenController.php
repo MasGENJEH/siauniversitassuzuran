@@ -75,10 +75,44 @@ class DosenController extends Controller
 
     public function kelasKuliahAktif(int $id)
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('dosen')) {
+            $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+            if (!$dosen || $dosen->id !== $id) {
+                return response()->json([
+                    'message' => 'Anda tidak memiliki akses ke kelas dosen lain.'
+                ], 403);
+            }
+        }
+
         try {
             $kelas = $this->dosenService->getKelasKuliahAktif($id);
 
             return response()->json(\App\Http\Resources\KelasKuliahResource::collection($kelas));
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'dosen tidak ditemukan',
+            ], 404);
+        }
+    }
+
+    public function mahasiswaBimbingan(int $id)
+    {
+        $user = auth()->user();
+        if ($user && $user->hasRole('dosen')) {
+            $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+            if (!$dosen || $dosen->id !== $id) {
+                return response()->json([
+                    'message' => 'Anda tidak memiliki akses ke data bimbingan dosen lain.'
+                ], 403);
+            }
+        }
+
+        try {
+            $dosen = \App\Models\Dosen::findOrFail($id);
+            $mahasiswas = \App\Models\Mahasiswa::where('id_dosen_pa', $dosen->id)->get();
+
+            return response()->json(\App\Http\Resources\MahasiswaResource::collection($mahasiswas));
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'dosen tidak ditemukan',

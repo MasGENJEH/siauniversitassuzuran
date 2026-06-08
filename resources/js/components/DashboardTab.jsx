@@ -14,7 +14,7 @@ export default function DashboardTab({
   return (
     <div className="space-y-6">
       {/* Summary Metric Widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: 'Total Fakultas', count: fakultas.length, icon: Building, colorClass: 'bg-monday-blue/10 text-monday-blue' },
           { title: 'Program Studi', count: prodis.length, icon: Award, colorClass: 'bg-violet-500/10 text-violet-600' },

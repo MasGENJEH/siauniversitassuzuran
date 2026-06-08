@@ -1,5 +1,5 @@
-import React from 'react';
-import { Edit3, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Edit3, Plus, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
 
 export default function KelasMahasiswaTab({
   kelasMahasiswas,
@@ -11,6 +11,19 @@ export default function KelasMahasiswaTab({
   openModal,
   handleDeleteItem
 }) {
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  // Reset limit to 10 when searching
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [searchQuery]);
+
+  const filteredItems = kelasMahasiswas.filter(km => {
+    const m = mahasiswas.find(std => std.id === km.id_mahasiswa);
+    return m ? m.nama.toLowerCase().includes(searchQuery.toLowerCase()) : false;
+  });
+
+  const itemsToDisplay = filteredItems.slice(0, visibleCount);
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <div className="flex items-center justify-between pb-4 border-b border-monday-border">
@@ -50,7 +63,7 @@ export default function KelasMahasiswaTab({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">ID</th>
+              <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Mahasiswa</th>
               <th className="py-4 px-6">Mata Kuliah / Kelas</th>
               <th className="py-4 px-6 text-center">Nilai Angka</th>
@@ -59,17 +72,14 @@ export default function KelasMahasiswaTab({
             </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {kelasMahasiswas.filter(km => {
-              const m = mahasiswas.find(std => std.id === km.id_mahasiswa);
-              return m ? m.nama.toLowerCase().includes(searchQuery.toLowerCase()) : false;
-            }).map((km) => {
+            {itemsToDisplay.map((km, index) => {
               const stdObj = mahasiswas.find(m => m.id === km.id_mahasiswa);
               const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
               const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
               
               return (
                 <tr key={km.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{km.id}</td>
+                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                   <td className="py-3.5 px-6">
                     {stdObj ? (
                       <div>
@@ -89,14 +99,17 @@ export default function KelasMahasiswaTab({
                     ) : '-'}
                   </td>
                   <td className="py-3.5 px-6 text-center font-bold">
-                    {km.nilai_angka !== null ? km.nilai_angka : <span className="text-monday-gray font-normal italic">Belum Dinilai</span>}
+                    {km.nilai_akhir !== null && km.nilai_akhir !== undefined ? km.nilai_akhir : <span className="text-monday-gray font-normal italic">Belum Dinilai</span>}
                   </td>
                   <td className="py-3.5 px-6 text-center">
                     {km.nilai_huruf ? (
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-                        ['A', 'B'].includes(km.nilai_huruf) ? 'bg-monday-lime-green/20 text-monday-black' :
-                        ['C', 'D'].includes(km.nilai_huruf) ? 'bg-amber-500/10 text-amber-600' :
-                        km.nilai_huruf === 'E' ? 'bg-monday-red/10 text-monday-red' : 'bg-monday-background text-monday-gray'
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
+                        km.nilai_huruf === 'A' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
+                        km.nilai_huruf === 'B' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
+                        km.nilai_huruf === 'C' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
+                        km.nilai_huruf === 'D' ? 'bg-monday-gray/15 text-monday-gray border-monday-gray/20' :
+                        km.nilai_huruf === 'E' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
+                        'bg-monday-background text-monday-gray border-monday-border'
                       }`}>
                         {km.nilai_huruf}
                       </span>
@@ -126,6 +139,19 @@ export default function KelasMahasiswaTab({
           </tbody>
         </table>
       </div>
+
+      {/* Load More Button */}
+      {visibleCount < filteredItems.length && (
+        <div className="flex justify-center mt-2">
+          <button
+            type="button"
+            onClick={() => setVisibleCount(prev => prev + 10)}
+            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs transition-all duration-300 flex items-center gap-2"
+          >
+            Tampilkan Lebih Banyak <ChevronDown size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -48,7 +48,7 @@ export default function ProdiTab({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">ID</th>
+              <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Kode Prodi</th>
               <th className="py-4 px-6">Nama Program Studi</th>
               <th className="py-4 px-6">Fakultas</th>
@@ -59,11 +59,11 @@ export default function ProdiTab({
             {prodis.filter(p => 
               p.nama_prodi.toLowerCase().includes(searchQuery.toLowerCase()) ||
               p.kode_prodi.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((pr) => {
+            ).map((pr, index) => {
               const fakObj = fakultas.find(f => f.id === pr.id_fakultas);
               return (
                 <tr key={pr.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{pr.id}</td>
+                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                   <td className="py-3.5 px-6 font-bold text-monday-blue">{pr.kode_prodi}</td>
                   <td className="py-3.5 px-6 font-semibold">{pr.nama_prodi}</td>
                   <td className="py-3.5 px-6">

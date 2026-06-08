@@ -29,15 +29,31 @@ class UserRoleSeeder extends Seeder
         $adminRole->givePermissionTo($permissions);
 
         foreach ($roles as $roleName) {
-            $user = User::factory()->create([
-                'name' => ucfirst($roleName).' User',
-                'email' => $roleName.'@mail.com',
-                'phone' => fake()->phoneNumber(),
-                'photo' => fake()->imageUrl(200, 200, 'people', true, 'profile'),
-                'password' => Hash::make('password123'),
-            ]);
+            $user = User::firstOrCreate(
+                ['email' => $roleName.'@mail.com'],
+                [
+                    'name' => ucfirst($roleName).' User',
+                    'phone' => fake()->phoneNumber(),
+                    'photo' => fake()->imageUrl(200, 200, 'people', true, 'profile'),
+                    'password' => Hash::make('password123'),
+                ]
+            );
 
             $user->assignRole($roleName);
+        }
+
+        // Assign 'dosen' role to all users whose email matches/contains 'dosen'
+        $dosenRole = Role::where('name', 'dosen')->first();
+        $dosenUsers = User::where('email', 'like', '%dosen%')->get();
+        foreach ($dosenUsers as $user) {
+            $user->assignRole($dosenRole);
+        }
+
+        // Assign 'mahasiswa' role to all users whose email matches/contains 'mhs'
+        $mahasiswaRole = Role::where('name', 'mahasiswa')->first();
+        $mahasiswaUsers = User::where('email', 'like', '%mhs%')->get();
+        foreach ($mahasiswaUsers as $user) {
+            $user->assignRole($mahasiswaRole);
         }
     }
 }

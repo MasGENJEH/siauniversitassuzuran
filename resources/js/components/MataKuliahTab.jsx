@@ -1,5 +1,5 @@
-import React from 'react';
-import { BookOpen, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Plus, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
 
 export default function MataKuliahTab({
   mataKuliahs,
@@ -9,6 +9,20 @@ export default function MataKuliahTab({
   openModal,
   handleDeleteItem
 }) {
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  // Reset limit to 10 when searching
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [searchQuery]);
+
+  const filteredItems = mataKuliahs.filter(mk => 
+    mk.nama_mk.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    mk.kode_mk.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const itemsToDisplay = filteredItems.slice(0, visibleCount);
+
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <div className="flex items-center justify-between pb-4 border-b border-monday-border">
@@ -48,7 +62,7 @@ export default function MataKuliahTab({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">ID</th>
+              <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Kode MK</th>
               <th className="py-4 px-6">Nama Mata Kuliah</th>
               <th className="py-4 px-6">SKS</th>
@@ -57,14 +71,11 @@ export default function MataKuliahTab({
             </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {mataKuliahs.filter(mk => 
-              mk.nama_mk.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              mk.kode_mk.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((mk) => {
+            {itemsToDisplay.map((mk, index) => {
               const prObj = prodis.find(p => p.id === mk.id_prodi);
               return (
                 <tr key={mk.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{mk.id}</td>
+                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                   <td className="py-3.5 px-6 font-bold text-monday-blue">{mk.kode_mk}</td>
                   <td className="py-3.5 px-6 font-semibold">{mk.nama_mk}</td>
                   <td className="py-3.5 px-6 font-bold text-monday-black">{mk.sks} SKS</td>
@@ -97,6 +108,19 @@ export default function MataKuliahTab({
           </tbody>
         </table>
       </div>
+
+      {/* Load More Button */}
+      {visibleCount < filteredItems.length && (
+        <div className="flex justify-center mt-2">
+          <button
+            type="button"
+            onClick={() => setVisibleCount(prev => prev + 10)}
+            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs transition-all duration-300 flex items-center gap-2"
+          >
+            Tampilkan Lebih Banyak <ChevronDown size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

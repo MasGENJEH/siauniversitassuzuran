@@ -8,7 +8,7 @@ class DosenRepository
 {
     public function getAll(array $fields)
     {
-        return Dosen::select($fields)->latest()->paginate(50);
+        return Dosen::select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields)

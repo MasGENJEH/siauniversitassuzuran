@@ -12,8 +12,13 @@
 */
 
 pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Feature')
+    ->beforeEach(function () {
+        if (!str_contains(get_class($this), 'AuthTest') && !str_contains(get_class($this), 'ExampleTest')) {
+            actingAsAdmin();
+        }
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +46,33 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+use Laravel\Sanctum\Sanctum;
+
+function actingAsAdmin()
 {
-    // ..
+    Role::firstOrCreate(['name' => 'admin']);
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+    Sanctum::actingAs($user, ['*']);
+    return $user;
+}
+
+function actingAsDosen()
+{
+    Role::firstOrCreate(['name' => 'dosen']);
+    $user = User::factory()->create();
+    $user->assignRole('dosen');
+    Sanctum::actingAs($user, ['*']);
+    return $user;
+}
+
+function actingAsMahasiswa()
+{
+    Role::firstOrCreate(['name' => 'mahasiswa']);
+    $user = User::factory()->create();
+    $user->assignRole('mahasiswa');
+    Sanctum::actingAs($user, ['*']);
+    return $user;
 }

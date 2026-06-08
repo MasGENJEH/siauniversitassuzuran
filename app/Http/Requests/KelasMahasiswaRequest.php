@@ -11,7 +11,55 @@ class KelasMahasiswaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        // Admin can perform any action
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Dosen can only update grades for their own classes
+        if ($user->hasRole('dosen')) {
+            // For POST (store) - Dosen is NOT allowed to register students to classes
+            if ($this->isMethod('post')) {
+                return false;
+            }
+
+            // For PUT/PATCH (update)
+            if ($this->isMethod('put') || $this->isMethod('patch')) {
+                $routeParam = $this->route('kelas_mahasiswa');
+                if (!$routeParam) {
+                    return false;
+                }
+
+                if ($routeParam instanceof \App\Models\KelasMahasiswa) {
+                    $kelasMahasiswa = $routeParam;
+                } else {
+                    $kelasMahasiswa = \App\Models\KelasMahasiswa::find($routeParam);
+                }
+
+                if (!$kelasMahasiswa) {
+                    return false;
+                }
+
+                $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+                if (!$dosen) {
+                    return false;
+                }
+
+                // Check if the Dosen is assigned to the class section of the enrollment
+                return \DB::table('dosen_pengampus')
+                    ->where('id_dosen', $dosen->id)
+                    ->where('id_kelas', $kelasMahasiswa->id_kelas)
+                    ->whereNull('deleted_at')
+                    ->exists();
+            }
+        }
+
+        return false;
     }
 
     /**

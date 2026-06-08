@@ -8,7 +8,7 @@ class KelasMahasiswaRepository
 {
     public function getAll(array $fields)
     {
-        return KelasMahasiswa::select($fields)->latest()->paginate(50);
+        return KelasMahasiswa::select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields)

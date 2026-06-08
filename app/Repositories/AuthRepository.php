@@ -27,7 +27,7 @@ class AuthRepository
             'password' => $data['password'],
         ];
 
-        if (!Auth::attempt($credentials)) {
+        if (!Auth::guard('web')->attempt($credentials)) {
             return response()->json([
                 'message' => 'The provided credentials do not match out records',
             ], 401);
@@ -35,7 +35,7 @@ class AuthRepository
 
         request()->session()->regenerate();
 
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
 
         return response()->json([
             'message' => 'Login succesfully',
@@ -45,11 +45,11 @@ class AuthRepository
 
     public function tokenLogin(array $data)
     {
-        if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
+        if (!Auth::guard('web')->attempt(['email' => $data['email'], 'password' => $data['password']])) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([

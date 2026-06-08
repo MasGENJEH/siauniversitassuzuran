@@ -23,7 +23,27 @@ export default function DynamicFormModal({
   if (!showModal) return null;
 
   const handleInputChange = (field, val) => {
-    setFormData(prev => ({ ...prev, [field]: val }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: val };
+      
+      // Auto-compute letter grade if updating numerical grade (nilai_akhir)
+      if (field === 'nilai_akhir') {
+        let letterGrade = null;
+        if (val !== null && val !== '') {
+          const score = Number(val);
+          if (!isNaN(score)) {
+            if (score >= 80 && score <= 100) letterGrade = 'A';
+            else if (score >= 70 && score < 80) letterGrade = 'B';
+            else if (score >= 55 && score < 70) letterGrade = 'C';
+            else if (score >= 40 && score < 55) letterGrade = 'D';
+            else if (score >= 0 && score < 40) letterGrade = 'E';
+          }
+        }
+        updated.nilai_huruf = letterGrade;
+      }
+      
+      return updated;
+    });
   };
 
   const renderFormFields = () => {
@@ -417,12 +437,12 @@ export default function DynamicFormModal({
                   type="number" 
                   min="0"
                   max="100"
-                  value={formData.nilai_angka === null ? '' : formData.nilai_angka} 
-                  onChange={(e) => handleInputChange('nilai_angka', e.target.value === '' ? null : Number(e.target.value))}
+                  value={formData.nilai_akhir === null || formData.nilai_akhir === undefined ? '' : formData.nilai_akhir} 
+                  onChange={(e) => handleInputChange('nilai_akhir', e.target.value === '' ? null : Number(e.target.value))}
                   className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                   placeholder="Nilai Angka (0 - 100)"
                 />
-                {formErrors.nilai_angka && <p className="text-xs text-monday-red font-bold">{formErrors.nilai_angka[0]}</p>}
+                {formErrors.nilai_akhir && <p className="text-xs text-monday-red font-bold">{formErrors.nilai_akhir[0]}</p>}
               </div>
             )}
           </>

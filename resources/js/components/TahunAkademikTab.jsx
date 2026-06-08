@@ -48,7 +48,7 @@ export default function TahunAkademikTab({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">ID</th>
+              <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Kode TA</th>
               <th className="py-4 px-6">Nama TA / Semester</th>
               <th className="py-4 px-6 text-center">Status Keaktifan</th>
@@ -59,9 +59,9 @@ export default function TahunAkademikTab({
             {tahunAkademiks.filter(ta => 
               ta.nama_ta.toLowerCase().includes(searchQuery.toLowerCase()) ||
               ta.kode_ta.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((ta) => (
+            ).map((ta, index) => (
               <tr key={ta.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{ta.id}</td>
+                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{ta.kode_ta}</td>
                 <td className="py-3.5 px-6 font-semibold">{ta.nama_ta}</td>
                 <td className="py-3.5 px-6 text-center">
