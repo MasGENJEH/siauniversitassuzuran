@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 
 export default function DynamicFormModal({
+  currentUser,
   showModal,
   setShowModal,
   modalType,
@@ -571,24 +572,39 @@ export default function DynamicFormModal({
           </>
         );
 
-      case 'kelasMahasiswa':
+      case 'kelasMahasiswa': {
+        const isMahasiswa = (currentUser?.roles || []).some(r => r.name === 'mahasiswa');
+        const myMahasiswa = isMahasiswa ? mahasiswas.find(m => m.id_user === currentUser?.id) : null;
+
         return (
           <>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mahasiswa</label>
-              <select 
-                value={formData.id_mahasiswa || ''} 
-                onChange={(e) => handleInputChange('id_mahasiswa', e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
-                disabled={modalAction === 'edit'}
-              >
-                <option value="">-- Pilih Mahasiswa --</option>
-                {mahasiswas.map(m => (
-                  <option key={m.id} value={m.id}>{m.nim} - {m.nama}</option>
-                ))}
-              </select>
-              {formErrors.id_mahasiswa && <p className="text-xs text-monday-red font-bold">{formErrors.id_mahasiswa[0]}</p>}
-            </div>
+            {isMahasiswa ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mahasiswa</label>
+                <input 
+                  type="text" 
+                  value={myMahasiswa ? `${myMahasiswa.nim} - ${myMahasiswa.nama}` : ''} 
+                  disabled
+                  className="w-full px-4 py-2.5 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold text-monday-gray cursor-not-allowed"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mahasiswa</label>
+                <select 
+                  value={formData.id_mahasiswa || ''} 
+                  onChange={(e) => handleInputChange('id_mahasiswa', e.target.value)}
+                  className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                  disabled={modalAction === 'edit'}
+                >
+                  <option value="">-- Pilih Mahasiswa --</option>
+                  {mahasiswas.map(m => (
+                    <option key={m.id} value={m.id}>{m.nim} - {m.nama}</option>
+                  ))}
+                </select>
+                {formErrors.id_mahasiswa && <p className="text-xs text-monday-red font-bold">{formErrors.id_mahasiswa[0]}</p>}
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kelas Kuliah</label>
               <select 
@@ -627,7 +643,8 @@ export default function DynamicFormModal({
             )}
           </>
         );
-
+      }
+ 
       default:
         return null;
     }

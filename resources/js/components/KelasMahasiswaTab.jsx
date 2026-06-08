@@ -2,10 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Edit3, Plus, Search, Edit, Trash2, ChevronDown, ChevronLeft, ChevronRight, Eye, X, BookOpen, Award, TrendingUp, ArrowLeft } from 'lucide-react';
 
 export default function KelasMahasiswaTab({
+  user,
   kelasMahasiswas,
   mahasiswas,
   kelasKuliahs,
   mataKuliahs,
+  dosens = [],
+  dosenPengampus = [],
   searchQuery,
   setSearchQuery,
   openModal,
@@ -13,7 +16,14 @@ export default function KelasMahasiswaTab({
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
+  const [viewingClass, setViewingClass] = useState(null);
   const itemsPerPage = 10;
+
+  const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
+  const myMahasiswa = useMemo(() => {
+    if (!isMahasiswa || !user) return null;
+    return mahasiswas.find(m => m.id_user === user.id) || null;
+  }, [isMahasiswa, user, mahasiswas]);
 
   // Reset to page 1 when search query changes
   useEffect(() => {
@@ -79,9 +89,19 @@ export default function KelasMahasiswaTab({
 
   // Detail view: get KRS entries for selected mahasiswa
   const selectedStudentData = useMemo(() => {
-    if (!selectedMahasiswa) return null;
-    return studentSummaries.find(s => s.mahasiswa.id === selectedMahasiswa.id) || null;
-  }, [selectedMahasiswa, studentSummaries]);
+    const activeMhs = isMahasiswa ? myMahasiswa : selectedMahasiswa;
+    if (!activeMhs) return null;
+    const summary = studentSummaries.find(s => s.mahasiswa.id === activeMhs.id);
+    if (summary) return summary;
+    return {
+      mahasiswa: activeMhs,
+      enrollments: [],
+      totalMk: 0,
+      totalSks: 0,
+      avgNilai: null,
+      gradedCount: 0
+    };
+  }, [isMahasiswa, myMahasiswa, selectedMahasiswa, studentSummaries]);
 
   // Grade letter badge color helper
   const getGradeBadgeClass = (grade) => {
@@ -95,19 +115,23 @@ export default function KelasMahasiswaTab({
     }
   };
 
+  const activeMahasiswa = isMahasiswa ? myMahasiswa : selectedMahasiswa;
+
   // ─── DETAIL VIEW ───────────────────────────────────────────────────
-  if (selectedMahasiswa && selectedStudentData) {
+  if (activeMahasiswa && selectedStudentData) {
     return (
       <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
         {/* Back Button & Header */}
         <div className="flex items-center justify-between pb-4 border-b border-monday-border">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSelectedMahasiswa(null)}
-              className="p-2.5 bg-monday-background border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background rounded-2xl transition-all duration-200"
-            >
-              <ArrowLeft size={18} />
-            </button>
+            {!isMahasiswa && (
+              <button
+                onClick={() => setSelectedMahasiswa(null)}
+                className="p-2.5 bg-monday-background border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background rounded-2xl transition-all duration-200"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            )}
             <div className="flex flex-col gap-[2px]">
               <p className="flex items-center gap-2">
                 <span className="font-extrabold text-2xl text-monday-black">
@@ -120,7 +144,7 @@ export default function KelasMahasiswaTab({
             </div>
           </div>
           <button
-            onClick={() => openModal('kelasMahasiswa', 'create')}
+            onClick={() => openModal('kelasMahasiswa', 'create', { id_mahasiswa: activeMahasiswa.id })}
             className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
           >
             Daftarkan Kelas (KRS) <Plus size={16} />
@@ -132,11 +156,11 @@ export default function KelasMahasiswaTab({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-monday-blue/10 border border-monday-blue/20 flex items-center justify-center text-monday-blue font-extrabold text-xl">
-                {selectedMahasiswa.nama.charAt(0).toUpperCase()}
+                {activeMahasiswa.nama.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-extrabold text-lg text-monday-black">{selectedMahasiswa.nama}</h3>
-                <p className="font-bold text-sm text-monday-blue">{selectedMahasiswa.nim}</p>
+                <h3 className="font-extrabold text-lg text-monday-black">{activeMahasiswa.nama}</h3>
+                <p className="font-bold text-sm text-monday-blue">{activeMahasiswa.nim}</p>
               </div>
             </div>
 
@@ -225,18 +249,36 @@ export default function KelasMahasiswaTab({
                     </td>
                     <td className="py-3.5 px-6 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openModal('kelasMahasiswa', 'edit', km)}
-                          className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem('kelasMahasiswa', km.id)}
-                          className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {isMahasiswa ? (
+                          <button
+                            onClick={() => {
+                              const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
+                              const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
+                              const teachingLinks = dosenPengampus.filter(dp => dp.id_kelas === km.id_kelas);
+                              const lecturers = teachingLinks.map(dp => dosens.find(d => d.id === dp.id_dosen)).filter(Boolean);
+                              setViewingClass({ kk: kkObj, mk: mkObj, lecturers });
+                            }}
+                            className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5 ml-auto"
+                          >
+                            <Eye size={13} />
+                            Detail Kelas
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => openModal('kelasMahasiswa', 'edit', km)}
+                              className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem('kelasMahasiswa', km.id)}
+                              className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -252,6 +294,68 @@ export default function KelasMahasiswaTab({
             </tbody>
           </table>
         </div>
+        {/* Class Detail Modal for Students */}
+        {viewingClass && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-monday-black/40 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-3xl p-6 shadow-2xl border border-monday-border max-w-md w-full flex flex-col gap-5">
+              <div className="flex items-center justify-between pb-3 border-b border-monday-border">
+                <h3 className="font-extrabold text-lg text-monday-black">Detail Kelas Kuliah</h3>
+                <button 
+                  onClick={() => setViewingClass(null)}
+                  className="p-1 text-monday-gray hover:text-monday-black hover:bg-monday-gray-background rounded-lg transition-300"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="space-y-4 text-left">
+                <div>
+                  <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Mata Kuliah</p>
+                  <p className="font-bold text-sm text-monday-black">{viewingClass.mk?.nama_mk} ({viewingClass.mk?.kode_mk})</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">SKS</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.mk?.sks} SKS</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Kelas</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.nama_kelas}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Jadwal</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.hari}, {viewingClass.kk?.jam_mulai?.substring(0, 5)} - {viewingClass.kk?.jam_selesai?.substring(0, 5)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Ruangan</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.ruangan}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Dosen Pengampu</p>
+                  <div className="space-y-1">
+                    {viewingClass.lecturers && viewingClass.lecturers.length > 0 ? (
+                      viewingClass.lecturers.map(d => (
+                        <p key={d.id} className="text-sm font-semibold text-monday-black">• {d.nama}</p>
+                      ))
+                    ) : (
+                      <p className="text-sm text-monday-gray italic">Belum ditentukan</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-3 border-t border-monday-border">
+                <button
+                  onClick={() => setViewingClass(null)}
+                  className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

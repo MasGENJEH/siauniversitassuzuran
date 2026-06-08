@@ -18,6 +18,16 @@ class KelasMahasiswaController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('mahasiswa')) {
+            $mahasiswa = \App\Models\Mahasiswa::where('id_user', $user->id)->first();
+            if ($mahasiswa) {
+                $kelasMahasiswa = \App\Models\KelasMahasiswa::where('id_mahasiswa', $mahasiswa->id)->get();
+                return response()->json(KelasMahasiswaResource::collection($kelasMahasiswa));
+            }
+            return response()->json([]);
+        }
+
         $fields = ['*'];
         $kelasMahasiswa = $this->kelasMahasiswaService->getAll($fields);
 
@@ -60,6 +70,13 @@ class KelasMahasiswaController extends Controller
 
     public function destroy(int $id)
     {
+        $user = auth()->user();
+        if ($user && ($user->hasRole('mahasiswa') || $user->hasRole('dosen'))) {
+            return response()->json([
+                'message' => 'Mahasiswa dan Dosen tidak diizinkan menghapus pendaftaran kelas (KRS).'
+            ], 403);
+        }
+
         try {
             $this->kelasMahasiswaService->delete($id);
 

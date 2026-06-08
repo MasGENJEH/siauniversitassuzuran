@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('kelas-mahasiswas', [KelasMahasiswaController::class, 'index']);
     Route::get('kelas-mahasiswas/{kelas_mahasiswa}', [KelasMahasiswaController::class, 'show']);
+    Route::post('kelas-mahasiswas', [KelasMahasiswaController::class, 'store']);
 
     // --- Admin-only CRUD Write operations ---
     Route::middleware(['role:admin'])->group(function () {
@@ -92,7 +93,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('dosen-pengampus/{dosen_pengampu}', [DosenPengampuController::class, 'update']);
         Route::delete('dosen-pengampus/{dosen_pengampu}', [DosenPengampuController::class, 'destroy']);
 
-        Route::post('kelas-mahasiswas', [KelasMahasiswaController::class, 'store']);
         Route::delete('kelas-mahasiswas/{kelas_mahasiswa}', [KelasMahasiswaController::class, 'destroy']);
     });
 

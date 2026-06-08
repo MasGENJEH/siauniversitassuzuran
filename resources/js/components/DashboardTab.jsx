@@ -2,6 +2,7 @@ import React from 'react';
 import { Building, Award, Users, GraduationCap, Star } from 'lucide-react';
 
 export default function DashboardTab({
+  user,
   fakultas,
   prodis,
   dosens,
@@ -11,6 +12,7 @@ export default function DashboardTab({
   dosenPengampus,
   setActiveTab
 }) {
+  const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
   return (
     <div className="space-y-6">
       {/* Summary Metric Widgets */}
@@ -84,15 +86,17 @@ export default function DashboardTab({
               <span className="text-2xl font-extrabold text-monday-black block mt-1">{dosenPengampus.length} penugasan</span>
             </div>
           </div>
-          <div className="p-4 bg-monday-blue/10 rounded-2xl border border-monday-blue/20 flex items-center justify-between text-xs gap-3">
-            <span className="text-monday-gray font-semibold">Gunakan portal pengampu dosen aktif untuk memproses nilai KHS.</span>
-            <button
-              onClick={() => setActiveTab('lecturer-portal')}
-              className="px-4 py-2 bg-monday-blue text-white rounded-full font-bold text-xs hover:bg-opacity-90 transition-300 text-nowrap"
-            >
-              Masuk Portal Dosen
-            </button>
-          </div>
+          {!isMahasiswa && (
+            <div className="p-4 bg-monday-blue/10 rounded-2xl border border-monday-blue/20 flex items-center justify-between text-xs gap-3">
+              <span className="text-monday-gray font-semibold">Gunakan portal pengampu dosen aktif untuk memproses nilai KHS.</span>
+              <button
+                onClick={() => setActiveTab('lecturer-portal')}
+                className="px-4 py-2 bg-monday-blue text-white rounded-full font-bold text-xs hover:bg-opacity-90 transition-300 text-nowrap"
+              >
+                Masuk Portal Dosen
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

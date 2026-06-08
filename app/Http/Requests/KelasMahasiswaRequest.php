@@ -59,6 +59,24 @@ class KelasMahasiswaRequest extends FormRequest
             }
         }
 
+        // Mahasiswa can only create/update their own KRS
+        if ($user->hasRole('mahasiswa')) {
+            $mahasiswa = \App\Models\Mahasiswa::where('id_user', $user->id)->first();
+            if (!$mahasiswa) {
+                return false;
+            }
+
+            // For POST (store) - Mahasiswa can only register classes for themselves
+            if ($this->isMethod('post')) {
+                return (int)$this->input('id_mahasiswa') === $mahasiswa->id;
+            }
+
+            // For PUT/PATCH (update) - Mahasiswa is NOT allowed to update KRS records
+            if ($this->isMethod('put') || $this->isMethod('patch')) {
+                return false;
+            }
+        }
+
         return false;
     }
 

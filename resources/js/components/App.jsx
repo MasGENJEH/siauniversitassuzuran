@@ -444,6 +444,9 @@ export default function App() {
     setSelectedItem(item);
     setFormErrors({});
 
+    const isUserMhs = (user?.roles || []).some(r => r.name === 'mahasiswa');
+    const myMhsObj = isUserMhs ? mahasiswas.find(m => m.id_user === user.id) : null;
+
     if (action === 'edit' && item) {
       if (type === 'kelasKuliah') {
         const linkedDosenIds = dosenPengampus
@@ -456,7 +459,13 @@ export default function App() {
     } else if (type === 'dosenPengampu' && item) {
       setFormData({ id_kelas: item.id }); // Use correct property 'id' from kelasKuliah item
     } else {
-      setFormData({});
+      if (type === 'kelasMahasiswa' && myMhsObj) {
+        setFormData({ id_mahasiswa: myMhsObj.id });
+      } else if (item) {
+        setFormData({ ...item });
+      } else {
+        setFormData({});
+      }
     }
 
     setShowModal(true);
@@ -535,6 +544,7 @@ export default function App() {
               {/* DASHBOARD TAB */}
               {activeTab === 'dashboard' && (
                 <DashboardTab
+                  user={user}
                   fakultas={fakultas}
                   prodis={prodis}
                   dosens={dosens}
@@ -673,13 +683,15 @@ export default function App() {
                 />
               )}
 
-              {/* KELAS MAHASISWA TAB (KRS/KHS) */}
               {activeTab === 'kelas-mahasiswa' && (
                 <KelasMahasiswaTab
+                  user={user}
                   kelasMahasiswas={kelasMahasiswas}
                   mahasiswas={mahasiswas}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
+                  dosens={dosens}
+                  dosenPengampus={dosenPengampus}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -693,6 +705,7 @@ export default function App() {
 
       {/* Dynamic Form Overlay Modal */}
       <DynamicFormModal
+        currentUser={user}
         showModal={showModal}
         setShowModal={setShowModal}
         modalType={modalType}
