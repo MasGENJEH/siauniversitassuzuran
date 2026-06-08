@@ -6,6 +6,7 @@ use App\Http\Requests\DosenRequest;
 use App\Http\Resources\DosenResource;
 use App\Services\DosenService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Storage;
 
 class DosenController extends Controller
 {
@@ -40,7 +41,14 @@ class DosenController extends Controller
 
     public function store(DosenRequest $request)
     {
-        $dosen = $this->dosenService->create($request->validated());
+        $data = $request->validated();
+
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('foto-dosen', 'public');
+        }
+
+        $dosen = $this->dosenService->create($data);
 
         return response()->json(new DosenResource($dosen), 201);
     }
@@ -48,7 +56,19 @@ class DosenController extends Controller
     public function update(DosenRequest $request, int $id)
     {
         try {
-            $dosen = $this->dosenService->update($id, $request->validated());
+            $data = $request->validated();
+
+            // Handle foto upload
+            if ($request->hasFile('foto')) {
+                // Delete old foto if exists
+                $oldDosen = $this->dosenService->getById($id, ['*']);
+                if ($oldDosen->foto) {
+                    Storage::disk('public')->delete($oldDosen->foto);
+                }
+                $data['foto'] = $request->file('foto')->store('foto-dosen', 'public');
+            }
+
+            $dosen = $this->dosenService->update($id, $data);
 
             return response()->json(new DosenResource($dosen));
         } catch (ModelNotFoundException $e) {
@@ -61,6 +81,12 @@ class DosenController extends Controller
     public function destroy(int $id)
     {
         try {
+            // Delete foto file if exists
+            $dosen = $this->dosenService->getById($id, ['*']);
+            if ($dosen->foto) {
+                Storage::disk('public')->delete($dosen->foto);
+            }
+
             $this->dosenService->delete($id);
 
             return response()->json([

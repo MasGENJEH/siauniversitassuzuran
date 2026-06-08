@@ -9,7 +9,7 @@ class Mahasiswa extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['id_user', 'nim', 'nama', 'id_prodi', 'id_dosen_pa', 'tahun_masuk', 'status_mahasiswa'];
+    protected $fillable = ['id_user', 'nim', 'nama', 'id_prodi', 'id_dosen_pa', 'tahun_masuk', 'status_mahasiswa', 'foto'];
 
     public function user()
     {

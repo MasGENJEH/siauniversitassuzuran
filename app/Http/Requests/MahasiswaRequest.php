@@ -55,6 +55,12 @@ class MahasiswaRequest extends FormRequest
                 'required',
                 Rule::in(['AKTIF', 'CUTI', 'LULUS', 'DO']), // Membatasi input sesuai opsi ENUM database
             ],
+            'foto' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:2048', // Max 2MB
+            ],
         ];
     }
 
@@ -78,6 +84,10 @@ class MahasiswaRequest extends FormRequest
 
             'status_mahasiswa.required' => 'STATUS MAHASISWA wajib dipilih.',
             'status_mahasiswa.in' => 'STATUS MAHASISWA harus berupa pilihan: AKTIF, CUTI, LULUS, atau DO.',
+
+            'foto.image' => 'FOTO harus berupa file gambar.',
+            'foto.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
+            'foto.max' => 'Ukuran FOTO maksimal 2MB.',
         ];
     }
 

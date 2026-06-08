@@ -22,6 +22,29 @@ export default function DynamicFormModal({
 }) {
   if (!showModal) return null;
 
+  const calculateJamSelesai = (jamMulai, idMk) => {
+    if (!jamMulai || !idMk) return '';
+    const mk = mataKuliahs.find(m => String(m.id) === String(idMk));
+    if (!mk) return '';
+    const sks = Number(mk.sks) || 2;
+    const durationMinutes = sks * 50;
+
+    const parts = jamMulai.split(':');
+    if (parts.length < 2) return '';
+    let hours = parseInt(parts[0], 10);
+    let minutes = parseInt(parts[1], 10);
+
+    if (isNaN(hours) || isNaN(minutes)) return '';
+
+    minutes += durationMinutes;
+    hours += Math.floor(minutes / 60);
+    minutes = minutes % 60;
+    hours = hours % 24;
+
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:00`;
+  };
+
   const handleInputChange = (field, val) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: val };
@@ -199,6 +222,38 @@ export default function DynamicFormModal({
               </select>
               {formErrors.id_user && <p className="text-xs text-monday-red font-bold">{formErrors.id_user[0]}</p>}
             </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Foto Dosen</label>
+              <div className="flex items-center gap-4">
+                {/* Preview */}
+                {formData._fotoPreview ? (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
+                    <img src={formData._fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                ) : formData.foto && typeof formData.foto === 'string' ? (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
+                    <img src={`/storage/${formData.foto}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  </div>
+                ) : null}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleInputChange('_fotoFile', file);
+                        const previewUrl = URL.createObjectURL(file);
+                        handleInputChange('_fotoPreview', previewUrl);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-monday-blue/10 file:text-monday-blue hover:file:bg-monday-blue/20 file:cursor-pointer"
+                  />
+                  <p className="text-[11px] text-monday-gray font-medium mt-1">Format: JPEG, PNG, WEBP. Maks: 2MB.</p>
+                </div>
+              </div>
+              {formErrors.foto && <p className="text-xs text-monday-red font-bold">{formErrors.foto[0]}</p>}
+            </div>
           </>
         );
 
@@ -254,6 +309,39 @@ export default function DynamicFormModal({
                 ))}
               </select>
               {formErrors.id_dosen_pa && <p className="text-xs text-monday-red font-bold">{formErrors.id_dosen_pa[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Foto Mahasiswa</label>
+              <div className="flex items-center gap-4">
+                {/* Preview */}
+                {formData._fotoPreview ? (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
+                    <img src={formData._fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                ) : formData.foto && typeof formData.foto === 'string' ? (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
+                    <img src={`/storage/${formData.foto}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  </div>
+                ) : null}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleInputChange('_fotoFile', file);
+                        // Create preview URL
+                        const previewUrl = URL.createObjectURL(file);
+                        handleInputChange('_fotoPreview', previewUrl);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-monday-blue/10 file:text-monday-blue hover:file:bg-monday-blue/20 file:cursor-pointer"
+                  />
+                  <p className="text-[11px] text-monday-gray font-medium mt-1">Format: JPEG, PNG, WEBP. Maks: 2MB.</p>
+                </div>
+              </div>
+              {formErrors.foto && <p className="text-xs text-monday-red font-bold">{formErrors.foto[0]}</p>}
             </div>
           </>
         );
@@ -320,12 +408,20 @@ export default function DynamicFormModal({
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mata Kuliah</label>
               <select 
                 value={formData.id_mk || ''} 
-                onChange={(e) => handleInputChange('id_mk', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const calculatedSelesai = calculateJamSelesai(formData.jam_mulai, val);
+                  setFormData(prev => ({
+                    ...prev,
+                    id_mk: val,
+                    jam_selesai: calculatedSelesai
+                  }));
+                }}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Mata Kuliah --</option>
                 {mataKuliahs.map(m => (
-                  <option key={m.id} value={m.id}>{m.kode_mk} - {m.nama_mk}</option>
+                  <option key={m.id} value={m.id}>{m.kode_mk} - {m.nama_mk} ({m.sks} SKS)</option>
                 ))}
               </select>
               {formErrors.id_mk && <p className="text-xs text-monday-red font-bold">{formErrors.id_mk[0]}</p>}
@@ -354,6 +450,90 @@ export default function DynamicFormModal({
                 placeholder="Contoh: A, B, ATAU REGULER"
               />
               {formErrors.nama_kelas && <p className="text-xs text-monday-red font-bold">{formErrors.nama_kelas[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Hari</label>
+              <select
+                value={formData.hari || ''}
+                onChange={(e) => handleInputChange('hari', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+              >
+                <option value="">-- Pilih Hari --</option>
+                <option value="SENIN">SENIN</option>
+                <option value="SELASA">SELASA</option>
+                <option value="RABU">RABU</option>
+                <option value="KAMIS">KAMIS</option>
+                <option value="JUMAT">JUMAT</option>
+              </select>
+              {formErrors.hari && <p className="text-xs text-monday-red font-bold">{formErrors.hari[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Jam Mulai</label>
+              <input
+                type="time"
+                value={formData.jam_mulai ? formData.jam_mulai.substring(0, 5) : ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const calculatedSelesai = calculateJamSelesai(val, formData.id_mk);
+                  setFormData(prev => ({
+                    ...prev,
+                    jam_mulai: val ? `${val}:00` : '',
+                    jam_selesai: calculatedSelesai
+                  }));
+                }}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+              />
+              {formErrors.jam_mulai && <p className="text-xs text-monday-red font-bold">{formErrors.jam_mulai[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Jam Selesai (Otomatis)</label>
+              <input
+                type="time"
+                value={formData.jam_selesai ? formData.jam_selesai.substring(0, 5) : ''}
+                disabled
+                className="w-full px-4 py-2.5 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold text-monday-gray cursor-not-allowed"
+                placeholder="Akan terisi otomatis"
+              />
+              {formErrors.jam_selesai && <p className="text-xs text-monday-red font-bold">{formErrors.jam_selesai[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Ruangan</label>
+              <input
+                type="text"
+                value={formData.ruangan || ''}
+                onChange={(e) => handleInputChange('ruangan', e.target.value.toUpperCase())}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                placeholder="Contoh: LAB KOMPUTER 3 ATAU H.2"
+              />
+              {formErrors.ruangan && <p className="text-xs text-monday-red font-bold">{formErrors.ruangan[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Dosen Pengampu (Team Teaching)</label>
+              <div className="grid grid-cols-1 gap-2 max-h-[140px] overflow-y-auto border border-monday-border rounded-xl p-3 bg-monday-background/50">
+                {dosens.map(d => {
+                  const isChecked = (formData.dosen_ids || []).includes(d.id);
+                  return (
+                    <label key={d.id} className="flex items-center gap-2.5 text-sm font-semibold text-monday-black cursor-pointer hover:bg-monday-gray-background/20 p-1 rounded-lg transition-colors">
+                      <input 
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const currentIds = formData.dosen_ids || [];
+                          let nextIds;
+                          if (e.target.checked) {
+                            nextIds = [...currentIds, d.id];
+                          } else {
+                            nextIds = currentIds.filter(id => id !== d.id);
+                          }
+                          handleInputChange('dosen_ids', nextIds);
+                        }}
+                        className="rounded text-monday-blue focus:ring-monday-blue border-monday-border"
+                      />
+                      <span>{d.nama}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </>
         );

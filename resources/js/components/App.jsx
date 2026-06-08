@@ -339,14 +339,51 @@ export default function App() {
     const method = modalAction === 'edit' ? 'PUT' : 'POST';
 
     try {
-      const res = await apiFetch(url, {
-        method,
-        body: JSON.stringify(formData)
-      });
+      let fetchOptions = {};
+
+      // Use FormData for types with file upload support (mahasiswa, dosen)
+      if (modalType === 'mahasiswa' || modalType === 'dosen') {
+        const fd = new FormData();
+
+        Object.entries(formData).forEach(([key, val]) => {
+          // Skip internal preview/file keys and null values
+          if (key === '_fotoPreview' || key === '_fotoFile') return;
+          if (key === 'foto' && typeof val !== 'string') return; // Skip non-string foto
+          if (val !== null && val !== undefined && val !== '') {
+            fd.append(key, val);
+          }
+        });
+
+        // Append the actual file if selected
+        if (formData._fotoFile) {
+          fd.append('foto', formData._fotoFile);
+        }
+
+        // Laravel requires POST + _method for FormData PUT
+        if (method === 'PUT') {
+          fd.append('_method', 'PUT');
+        }
+
+        fetchOptions = {
+          method: 'POST', // Always POST for FormData (use _method for PUT)
+          body: fd,
+        };
+      } else {
+        fetchOptions = {
+          method,
+          body: JSON.stringify(formData),
+        };
+      }
+
+      const res = await apiFetch(url, fetchOptions);
 
       const responseData = await res.json();
 
       if (res.ok) {
+        // Cleanup preview URL
+        if (formData._fotoPreview) {
+          URL.revokeObjectURL(formData._fotoPreview);
+        }
         setShowModal(false);
         setFormData({});
         fetchData();
@@ -408,7 +445,14 @@ export default function App() {
     setFormErrors({});
 
     if (action === 'edit' && item) {
-      setFormData({ ...item });
+      if (type === 'kelasKuliah') {
+        const linkedDosenIds = dosenPengampus
+          .filter(dp => dp.id_kelas === item.id)
+          .map(dp => dp.id_dosen);
+        setFormData({ ...item, dosen_ids: linkedDosenIds });
+      } else {
+        setFormData({ ...item });
+      }
     } else if (type === 'dosenPengampu' && item) {
       setFormData({ id_kelas: item.id }); // Use correct property 'id' from kelasKuliah item
     } else {
@@ -542,6 +586,11 @@ export default function App() {
                 <DosenTab
                   dosens={dosens}
                   users={users}
+                  mahasiswas={mahasiswas}
+                  dosenPengampus={dosenPengampus}
+                  kelasKuliahs={kelasKuliahs}
+                  mataKuliahs={mataKuliahs}
+                  tahunAkademiks={tahunAkademiks}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -555,6 +604,12 @@ export default function App() {
                   mahasiswas={mahasiswas}
                   prodis={prodis}
                   dosens={dosens}
+                  fakultas={fakultas}
+                  kelasMahasiswas={kelasMahasiswas}
+                  kelasKuliahs={kelasKuliahs}
+                  mataKuliahs={mataKuliahs}
+                  tahunAkademiks={tahunAkademiks}
+                  users={users}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}

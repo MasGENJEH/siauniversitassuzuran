@@ -307,6 +307,22 @@ class SiakadSeeder extends Seeder
         ]);
 
         // 8. SEEDER TABEL KELAS KULIAH
+        $startOptions = ['07:00', '08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+        $getTime = function($sks) use ($startOptions) {
+            $durationMinutes = $sks * 50;
+            $startStr = $startOptions[array_rand($startOptions)];
+            $startTime = \Carbon\Carbon::createFromFormat('H:i', $startStr);
+            $endTime = (clone $startTime)->addMinutes($durationMinutes);
+            return [
+                'jam_mulai' => $startTime->format('H:i:00'),
+                'jam_selesai' => $endTime->format('H:i:00')
+            ];
+        };
+
+        $t1 = $getTime(3); // Desain Basis Data (3 SKS)
+        $t2 = $getTime(4); // Pemrograman Web Lanjut (4 SKS)
+        $t3 = $getTime(3); // Algoritma (3 SKS)
+
         DB::table('kelas_kuliahs')->insert([
             [
                 'id' => 1,
@@ -315,8 +331,8 @@ class SiakadSeeder extends Seeder
                 'kode_kelas' => 'adsf3223r',
                 'nama_kelas' => 'SI-45-A',
                 'hari' => 'SENIN',
-                'jam_mulai' => '08:00:00',
-                'jam_selesai' => '10:30:00',
+                'jam_mulai' => $t1['jam_mulai'],
+                'jam_selesai' => $t1['jam_selesai'],
                 'ruangan' => 'LAB KOMPUTER 3',
             ],
             [
@@ -324,11 +340,10 @@ class SiakadSeeder extends Seeder
                 'id_mk' => 2, // Pemrograman Web Lanjut
                 'id_ta' => 3,
                 'kode_kelas' => '34dfrg34efr',
-
                 'nama_kelas' => 'SI-44-B',
                 'hari' => 'RABU',
-                'jam_mulai' => '13:00:00',
-                'jam_selesai' => '16:20:00',
+                'jam_mulai' => $t2['jam_mulai'],
+                'jam_selesai' => $t2['jam_selesai'],
                 'ruangan' => 'RUANG GEDUNG H.2',
             ],
             [
@@ -336,11 +351,10 @@ class SiakadSeeder extends Seeder
                 'id_mk' => 3, // Algoritma
                 'id_ta' => 3,
                 'kode_kelas' => '3456grtg4',
-
                 'nama_kelas' => 'IF-46-A',
                 'hari' => 'KAMIS',
-                'jam_mulai' => '10:00:00',
-                'jam_selesai' => '12:30:00',
+                'jam_mulai' => $t3['jam_mulai'],
+                'jam_selesai' => $t3['jam_selesai'],
                 'ruangan' => 'RUANG GEDUNG E.4',
             ],
         ]);

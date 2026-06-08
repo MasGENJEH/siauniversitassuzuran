@@ -30,12 +30,28 @@ class KelasKuliahService
         $mataKuliah = MataKuliah::findOrFail($data['id_mk']);
         $data['kode_kelas'] = KelasKuliahHelper::generateUniqueKodeKelas($mataKuliah->kode_mk);
 
-        return $this->kelasKuliahRepository->create($data);
+        $dosenIds = $data['dosen_ids'] ?? [];
+        unset($data['dosen_ids']);
+
+        $kelasKuliah = $this->kelasKuliahRepository->create($data);
+        if (!empty($dosenIds)) {
+            $kelasKuliah->dosen()->sync($dosenIds);
+        }
+
+        return $kelasKuliah;
     }
 
     public function update(int $id, array $data)
     {
-        return $this->kelasKuliahRepository->update($id, $data);
+        $dosenIds = $data['dosen_ids'] ?? null;
+        unset($data['dosen_ids']);
+
+        $kelasKuliah = $this->kelasKuliahRepository->update($id, $data);
+        if ($dosenIds !== null) {
+            $kelasKuliah->dosen()->sync($dosenIds);
+        }
+
+        return $kelasKuliah;
     }
 
     public function delete(int $id)

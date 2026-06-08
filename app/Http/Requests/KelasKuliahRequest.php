@@ -65,6 +65,14 @@ class KelasKuliahRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'dosen_ids' => [
+                'nullable',
+                'array',
+            ],
+            'dosen_ids.*' => [
+                'integer',
+                'exists:dosens,id',
+            ],
         ];
     }
 

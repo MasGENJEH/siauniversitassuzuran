@@ -42,6 +42,12 @@ class DosenRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'foto' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:2048', // Max 2MB
+            ],
         ];
     }
 
@@ -60,6 +66,10 @@ class DosenRequest extends FormRequest
             'nama.required' => 'NAMA DOSEN wajib diisi.',
             'nama.string' => 'NAMA DOSEN harus berupa teks.',
             'nama.max' => 'NAMA DOSEN maksimal berjumlah 255 karakter.',
+
+            'foto.image' => 'FOTO harus berupa file gambar.',
+            'foto.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
+            'foto.max' => 'Ukuran FOTO maksimal 2MB.',
         ];
     }
 

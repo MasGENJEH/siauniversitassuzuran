@@ -9,7 +9,7 @@ class Dosen extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['id_user', 'nidn', 'nama'];
+    protected $fillable = ['id_user', 'nidn', 'nama', 'foto'];
 
     public function pengampu()
     {

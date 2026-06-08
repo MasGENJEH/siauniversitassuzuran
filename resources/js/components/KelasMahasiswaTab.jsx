@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Edit3, Plus, Search, Edit, Trash2, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Edit3, Plus, Search, Edit, Trash2, ChevronDown, ChevronLeft, ChevronRight, Eye, X, BookOpen, Award, TrendingUp, ArrowLeft } from 'lucide-react';
 
 export default function KelasMahasiswaTab({
   kelasMahasiswas,
@@ -11,19 +11,252 @@ export default function KelasMahasiswaTab({
   openModal,
   handleDeleteItem
 }) {
-  const [visibleCount, setVisibleCount] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
+  const itemsPerPage = 10;
 
-  // Reset limit to 10 when searching
+  // Reset to page 1 when search query changes
   useEffect(() => {
-    setVisibleCount(10);
+    setCurrentPage(1);
   }, [searchQuery]);
 
-  const filteredItems = kelasMahasiswas.filter(km => {
-    const m = mahasiswas.find(std => std.id === km.id_mahasiswa);
-    return m ? m.nama.toLowerCase().includes(searchQuery.toLowerCase()) : false;
-  });
+  // Build student-centric data: group kelasMahasiswas by mahasiswa
+  const studentSummaries = useMemo(() => {
+    // Get unique mahasiswa IDs from kelas_mahasiswas
+    const studentMap = {};
 
-  const itemsToDisplay = filteredItems.slice(0, visibleCount);
+    kelasMahasiswas.forEach(km => {
+      if (!studentMap[km.id_mahasiswa]) {
+        studentMap[km.id_mahasiswa] = [];
+      }
+      studentMap[km.id_mahasiswa].push(km);
+    });
+
+    // Build summaries
+    return Object.entries(studentMap).map(([mahasiswaId, enrollments]) => {
+      const mhs = mahasiswas.find(m => m.id === Number(mahasiswaId));
+      if (!mhs) return null;
+
+      let totalSks = 0;
+      let totalNilai = 0;
+      let gradedCount = 0;
+
+      enrollments.forEach(km => {
+        const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
+        const mk = kk ? mataKuliahs.find(m => m.id === kk.id_mk) : null;
+        if (mk && mk.sks) totalSks += Number(mk.sks);
+        if (km.nilai_akhir !== null && km.nilai_akhir !== undefined) {
+          totalNilai += Number(km.nilai_akhir);
+          gradedCount++;
+        }
+      });
+
+      const avgNilai = gradedCount > 0 ? (totalNilai / gradedCount).toFixed(1) : null;
+
+      return {
+        mahasiswa: mhs,
+        enrollments,
+        totalMk: enrollments.length,
+        totalSks,
+        avgNilai,
+        gradedCount
+      };
+    }).filter(Boolean);
+  }, [kelasMahasiswas, mahasiswas, kelasKuliahs, mataKuliahs]);
+
+  // Filter students
+  const filteredStudents = studentSummaries.filter(s =>
+    s.mahasiswa.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.mahasiswa.nim.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination
+  const totalItems = filteredStudents.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+  // Detail view: get KRS entries for selected mahasiswa
+  const selectedStudentData = useMemo(() => {
+    if (!selectedMahasiswa) return null;
+    return studentSummaries.find(s => s.mahasiswa.id === selectedMahasiswa.id) || null;
+  }, [selectedMahasiswa, studentSummaries]);
+
+  // Grade letter badge color helper
+  const getGradeBadgeClass = (grade) => {
+    switch (grade) {
+      case 'A': return 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20';
+      case 'B': return 'bg-monday-blue/15 text-monday-blue border-monday-blue/20';
+      case 'C': return 'bg-amber-500/15 text-amber-700 border-amber-500/20';
+      case 'D': return 'bg-monday-gray/15 text-monday-gray border-monday-gray/20';
+      case 'E': return 'bg-monday-red/15 text-monday-red border-monday-red/20';
+      default: return 'bg-monday-background text-monday-gray border-monday-border';
+    }
+  };
+
+  // ─── DETAIL VIEW ───────────────────────────────────────────────────
+  if (selectedMahasiswa && selectedStudentData) {
+    return (
+      <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
+        {/* Back Button & Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-monday-border">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSelectedMahasiswa(null)}
+              className="p-2.5 bg-monday-background border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background rounded-2xl transition-all duration-200"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div className="flex flex-col gap-[2px]">
+              <p className="flex items-center gap-2">
+                <span className="font-extrabold text-2xl text-monday-black">
+                  Detail KRS Mahasiswa
+                </span>
+              </p>
+              <p className="font-semibold text-sm text-monday-gray">
+                Rincian mata kuliah yang diambil oleh mahasiswa ini.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => openModal('kelasMahasiswa', 'create')}
+            className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
+          >
+            Daftarkan Kelas (KRS) <Plus size={16} />
+          </button>
+        </div>
+
+        {/* Student Info Card */}
+        <div className="rounded-2xl border border-monday-border bg-gradient-to-br from-monday-blue/5 to-transparent p-5">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-monday-blue/10 border border-monday-blue/20 flex items-center justify-center text-monday-blue font-extrabold text-xl">
+                {selectedMahasiswa.nama.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg text-monday-black">{selectedMahasiswa.nama}</h3>
+                <p className="font-bold text-sm text-monday-blue">{selectedMahasiswa.nim}</p>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center gap-1 px-4">
+                <div className="flex items-center gap-1.5 text-monday-blue">
+                  <BookOpen size={16} />
+                  <span className="font-extrabold text-xl">{selectedStudentData.totalMk}</span>
+                </div>
+                <span className="text-xs font-bold text-monday-gray">Mata Kuliah</span>
+              </div>
+              <div className="w-px h-10 bg-monday-border" />
+              <div className="flex flex-col items-center gap-1 px-4">
+                <div className="flex items-center gap-1.5 text-emerald-600">
+                  <Award size={16} />
+                  <span className="font-extrabold text-xl">{selectedStudentData.totalSks}</span>
+                </div>
+                <span className="text-xs font-bold text-monday-gray">Total SKS</span>
+              </div>
+              <div className="w-px h-10 bg-monday-border" />
+              <div className="flex flex-col items-center gap-1 px-4">
+                <div className="flex items-center gap-1.5 text-amber-600">
+                  <TrendingUp size={16} />
+                  <span className="font-extrabold text-xl">{selectedStudentData.avgNilai ?? '-'}</span>
+                </div>
+                <span className="text-xs font-bold text-monday-gray">Rata-rata Nilai</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* KRS Table */}
+        <div className="border border-monday-border rounded-2xl overflow-hidden bg-white">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
+                <th className="py-4 px-6">No</th>
+                <th className="py-4 px-6">Mata Kuliah</th>
+                <th className="py-4 px-6">Kelas</th>
+                <th className="py-4 px-6 text-center">SKS</th>
+                <th className="py-4 px-6 text-center">Nilai Angka</th>
+                <th className="py-4 px-6 text-center">Nilai Huruf</th>
+                <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
+              {selectedStudentData.enrollments.map((km, index) => {
+                const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
+                const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
+
+                return (
+                  <tr key={km.id} className="hover:bg-monday-gray-background/30 transition-colors">
+                    <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
+                    <td className="py-3.5 px-6">
+                      {mkObj ? (
+                        <div className="flex flex-col">
+                          <span className="font-bold text-monday-black">{mkObj.nama_mk}</span>
+                          <span className="text-xs font-semibold text-monday-gray">{mkObj.kode_mk}</span>
+                        </div>
+                      ) : <span className="text-monday-gray italic">-</span>}
+                    </td>
+                    <td className="py-3.5 px-6">
+                      {kkObj ? (
+                        <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
+                          {kkObj.nama_kelas}
+                        </span>
+                      ) : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 text-center font-bold">
+                      {mkObj && mkObj.sks ? mkObj.sks : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 text-center font-bold">
+                      {km.nilai_akhir !== null && km.nilai_akhir !== undefined
+                        ? km.nilai_akhir
+                        : <span className="text-monday-gray font-normal italic">Belum Dinilai</span>}
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      {km.nilai_huruf ? (
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getGradeBadgeClass(km.nilai_huruf)}`}>
+                          {km.nilai_huruf}
+                        </span>
+                      ) : (
+                        <span className="text-monday-gray text-xs italic">N/A</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openModal('kelasMahasiswa', 'edit', km)}
+                          className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem('kelasMahasiswa', km.id)}
+                          className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {selectedStudentData.enrollments.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-monday-gray font-semibold italic">
+                    Belum ada mata kuliah yang diambil mahasiswa ini.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── MAIN VIEW: STUDENT LIST ─────────────────────────────────────
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <div className="flex items-center justify-between pb-4 border-b border-monday-border">
@@ -35,10 +268,10 @@ export default function KelasMahasiswaTab({
             </span>
           </p>
           <p className="font-semibold text-sm text-monday-gray">
-            Daftarkan mahasiswa ke kelas kuliah (Rencana Studi / KRS) dan pantau hasil akhir studi (Hasil Studi / KHS). Total: {kelasMahasiswas.length} data.
+            Daftarkan mahasiswa ke kelas kuliah (Rencana Studi / KRS) dan pantau hasil akhir studi (Hasil Studi / KHS). Total: {filteredStudents.length} mahasiswa.
           </p>
         </div>
-        <button 
+        <button
           onClick={() => openModal('kelasMahasiswa', 'create')}
           className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
         >
@@ -49,9 +282,9 @@ export default function KelasMahasiswaTab({
       <div className="flex items-center justify-between">
         <div className="relative w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
-          <input 
-            type="text" 
-            placeholder="Cari nama mahasiswa..." 
+          <input
+            type="text"
+            placeholder="Cari nama / NIM mahasiswa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-monday-background border border-monday-border rounded-2xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
@@ -64,92 +297,94 @@ export default function KelasMahasiswaTab({
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
               <th className="py-4 px-6">No</th>
-              <th className="py-4 px-6">Mahasiswa</th>
-              <th className="py-4 px-6">Mata Kuliah / Kelas</th>
-              <th className="py-4 px-6 text-center">Nilai Angka</th>
-              <th className="py-4 px-6 text-center">Nilai Huruf</th>
+              <th className="py-4 px-6">NIM</th>
+              <th className="py-4 px-6">Nama Mahasiswa</th>
+              <th className="py-4 px-6 text-center">Jumlah MK</th>
+              <th className="py-4 px-6 text-center">Total SKS</th>
+              <th className="py-4 px-6 text-center">Rata-rata Nilai</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {itemsToDisplay.map((km, index) => {
-              const stdObj = mahasiswas.find(m => m.id === km.id_mahasiswa);
-              const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
-              const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
-              
-              return (
-                <tr key={km.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
-                  <td className="py-3.5 px-6">
-                    {stdObj ? (
-                      <div>
-                        <span className="font-bold text-monday-blue">{stdObj.nim}</span>
-                        <span className="ml-2 font-semibold">{stdObj.nama}</span>
-                      </div>
-                    ) : '-'}
-                  </td>
-                  <td className="py-3.5 px-6">
-                    {mkObj ? (
-                      <div>
-                        <span className="font-semibold text-monday-black">{mkObj.nama_mk}</span>
-                        <span className="ml-2 px-1.5 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                          Kelas: {kkObj.nama_kelas}
-                        </span>
-                      </div>
-                    ) : '-'}
-                  </td>
-                  <td className="py-3.5 px-6 text-center font-bold">
-                    {km.nilai_akhir !== null && km.nilai_akhir !== undefined ? km.nilai_akhir : <span className="text-monday-gray font-normal italic">Belum Dinilai</span>}
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    {km.nilai_huruf ? (
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
-                        km.nilai_huruf === 'A' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
-                        km.nilai_huruf === 'B' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
-                        km.nilai_huruf === 'C' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
-                        km.nilai_huruf === 'D' ? 'bg-monday-gray/15 text-monday-gray border-monday-gray/20' :
-                        km.nilai_huruf === 'E' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
-                        'bg-monday-background text-monday-gray border-monday-border'
-                      }`}>
-                        {km.nilai_huruf}
-                      </span>
-                    ) : (
-                      <span className="text-monday-gray text-xs italic">N/A</span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => openModal('kelasMahasiswa', 'edit', km)}
-                        className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteItem('kelasMahasiswa', km.id)}
-                        className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {paginatedStudents.map((s, index) => (
+              <tr key={s.mahasiswa.id} className="hover:bg-monday-gray-background/30 transition-colors">
+                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
+                <td className="py-3.5 px-6 font-bold text-monday-blue">{s.mahasiswa.nim}</td>
+                <td className="py-3.5 px-6 font-semibold">{s.mahasiswa.nama}</td>
+                <td className="py-3.5 px-6 text-center">
+                  <span className="px-2.5 py-1 bg-monday-blue/10 text-monday-blue border border-monday-blue/15 rounded-lg text-xs font-bold">
+                    {s.totalMk} MK
+                  </span>
+                </td>
+                <td className="py-3.5 px-6 text-center font-bold">{s.totalSks} SKS</td>
+                <td className="py-3.5 px-6 text-center">
+                  {s.avgNilai !== null ? (
+                    <span className="font-bold text-monday-black">{s.avgNilai}</span>
+                  ) : (
+                    <span className="text-monday-gray text-xs italic">Belum Dinilai</span>
+                  )}
+                </td>
+                <td className="py-3.5 px-6 text-right">
+                  <button
+                    onClick={() => setSelectedMahasiswa(s.mahasiswa)}
+                    className="px-4 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5 ml-auto"
+                  >
+                    <Eye size={14} />
+                    Detail
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {paginatedStudents.length === 0 && (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-monday-gray font-semibold italic">
+                  {searchQuery ? 'Tidak ada mahasiswa yang cocok dengan pencarian.' : 'Belum ada data KRS mahasiswa.'}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Load More Button */}
-      {visibleCount < filteredItems.length && (
-        <div className="flex justify-center mt-2">
-          <button
-            type="button"
-            onClick={() => setVisibleCount(prev => prev + 10)}
-            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs transition-all duration-300 flex items-center gap-2"
-          >
-            Tampilkan Lebih Banyak <ChevronDown size={14} />
-          </button>
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
+          <p className="text-sm font-semibold text-monday-gray">
+            Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> mahasiswa
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 border border-monday-border rounded-xl text-monday-gray hover:text-monday-black hover:bg-monday-gray-background disabled:opacity-50 disabled:pointer-events-none transition-300"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${
+                    currentPage === page
+                      ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
+                      : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2 border border-monday-border rounded-xl text-monday-gray hover:text-monday-black hover:bg-monday-gray-background disabled:opacity-50 disabled:pointer-events-none transition-300"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       )}
     </div>

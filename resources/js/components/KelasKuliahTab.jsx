@@ -73,6 +73,7 @@ export default function KelasKuliahTab({
               <th className="py-4 px-6">Mata Kuliah</th>
               <th className="py-4 px-6">Nama Kelas</th>
               <th className="py-4 px-6">Tahun Akademik</th>
+              <th className="py-4 px-6">Jadwal & Ruangan</th>
               <th className="py-4 px-6">Dosen Pengampu</th>
               <th className="py-4 px-6">Peserta</th>
               <th className="py-4 px-6 text-right">Aksi</th>
@@ -113,6 +114,12 @@ export default function KelasKuliahTab({
                     ) : '-'}
                   </td>
                   <td className="py-3.5 px-6">
+                    <div className="text-xs text-monday-gray font-semibold">
+                      <span className="font-bold text-monday-black block">{k.hari}</span>
+                      <span>{k.jam_mulai.substring(0, 5)} - {k.jam_selesai.substring(0, 5)} ({k.ruangan})</span>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-6">
                     <div className="flex flex-wrap gap-1.5 items-center">
                       {linkedDosenNames.length > 0 ? (
                         linkedDosenNames.map((name, i) => (
@@ -123,13 +130,6 @@ export default function KelasKuliahTab({
                       ) : (
                         <span className="text-monday-red text-xs font-bold italic">Belum Ada Pengampu</span>
                       )}
-
-                      <button
-                        onClick={() => openModal('dosenPengampu', 'assign', k)}
-                        className="px-2 py-0.5 bg-monday-blue text-white rounded-lg text-[10px] font-bold hover:bg-opacity-90 transition-300 ml-1.5"
-                      >
-                        + Atur Dosen
-                      </button>
                     </div>
                   </td>
                   <td className="py-3.5 px-6">
