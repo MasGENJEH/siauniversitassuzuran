@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\AuthRepository;
-use Illuminate\Http\UploadedFile;
 
 class AuthService
 {
@@ -16,10 +15,6 @@ class AuthService
 
     public function register(array $data)
     {
-        if (isset($data['photo']) && $data['photo'] instanceof UploadedFile) {
-            $data['photo'] = $this->uploadPhoto($data['photo']);
-        }
-
         return $this->authRepository->register($data);
     }
 
@@ -31,10 +26,5 @@ class AuthService
     public function tokenLogin(array $data)
     {
         return $this->authRepository->tokenLogin($data);
-    }
-
-    private function uploadPhoto(UploadedFile $photo)
-    {
-        return $photo->store('users', 'public');
     }
 }
