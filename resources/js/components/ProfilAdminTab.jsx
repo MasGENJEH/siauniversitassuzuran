@@ -1,44 +1,25 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { User, Mail, Phone, Lock, Camera, CheckCircle2, AlertCircle, Eye, EyeOff, Save, Shield, Info } from 'lucide-react';
+import { User, Mail, Phone, Lock, Camera, CheckCircle2, AlertCircle, Eye, EyeOff, Save, Shield, Info, Settings, Database, Users, GraduationCap, BookOpen, Layers } from 'lucide-react';
 
-export default function ProfilMahasiswaTab({
+export default function ProfilAdminTab({
   user,
-  mahasiswas,
-  prodis = [],
   fakultas = [],
+  prodis = [],
   dosens = [],
+  mahasiswas = [],
+  mataKuliahs = [],
+  kelasKuliahs = [],
+  users = [],
   refreshUser
 }) {
   const fileInputRef = useRef(null);
-
-  // Find the student record associated with this user
-  const myMahasiswa = useMemo(() => {
-    if (!user) return null;
-    return mahasiswas.find(m => m.id_user === user.id) || null;
-  }, [user, mahasiswas]);
-
-  // Find academic references
-  const prodiObj = useMemo(() => {
-    if (!myMahasiswa) return null;
-    return prodis.find(p => p.id === myMahasiswa.id_prodi) || null;
-  }, [myMahasiswa, prodis]);
-
-  const fakultasObj = useMemo(() => {
-    if (!prodiObj) return null;
-    return fakultas.find(f => f.id === prodiObj.id_fakultas) || null;
-  }, [prodiObj, fakultas]);
-
-  const dosenPaObj = useMemo(() => {
-    if (!myMahasiswa) return null;
-    return dosens.find(d => d.id === myMahasiswa.id_dosen_pa) || null;
-  }, [myMahasiswa, dosens]);
 
   // Form states
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  
+
   // File upload states
   const [fotoFile, setFotoFile] = useState(null);
   const [fotoPreview, setFotoPreview] = useState(null);
@@ -67,23 +48,17 @@ export default function ProfilMahasiswaTab({
     };
   }, [fotoPreview]);
 
-  if (!myMahasiswa) {
-    return (
-      <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
-        <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-          <div className="p-4 bg-monday-red/10 text-monday-red rounded-full">
-            <Info size={32} />
-          </div>
-          <div>
-            <h3 className="font-extrabold text-lg text-monday-black">Profil Mahasiswa Tidak Ditemukan</h3>
-            <p className="text-sm font-semibold text-monday-gray max-w-sm mt-1">
-              Akun Anda belum terhubung dengan data mahasiswa aktif. Silakan hubungi Administrator.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // System overview stats
+  const systemStats = useMemo(() => ({
+    totalUsers: users.length,
+    totalDosens: dosens.length,
+    totalMahasiswas: mahasiswas.length,
+    totalFakultas: fakultas.length,
+    totalProdis: prodis.length,
+    totalMataKuliahs: mataKuliahs.length,
+    totalKelasKuliahs: kelasKuliahs.length,
+    aktivMahasiswas: mahasiswas.filter(m => m.status_mahasiswa === 'AKTIF').length,
+  }), [users, dosens, mahasiswas, fakultas, prodis, mataKuliahs, kelasKuliahs]);
 
   // Handle image selection
   const handleImageChange = (e) => {
@@ -122,7 +97,7 @@ export default function ProfilMahasiswaTab({
     const fd = new FormData();
     fd.append('email', email);
     fd.append('phone', phone);
-    
+
     if (password) {
       fd.append('password', password);
       fd.append('password_confirmation', passwordConfirmation);
@@ -134,7 +109,7 @@ export default function ProfilMahasiswaTab({
 
     try {
       const res = await fetch('/api/profile/update', {
-        method: 'POST', // Use POST for FormData payload
+        method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -149,7 +124,6 @@ export default function ProfilMahasiswaTab({
         setPassword('');
         setPasswordConfirmation('');
         setFotoFile(null);
-        // Trigger parent state update
         if (refreshUser) {
           await refreshUser();
         }
@@ -171,56 +145,57 @@ export default function ProfilMahasiswaTab({
   // Profile Image URL Helper
   const displayPhoto = useMemo(() => {
     if (fotoPreview) return fotoPreview;
-    if (myMahasiswa.foto) return `/storage/${myMahasiswa.foto}`;
+    // Only use user.photo if it looks like a real storage path (contains a /)
+    if (user?.photo && user.photo.includes('/')) return `/storage/${user.photo}`;
     return null;
-  }, [fotoPreview, myMahasiswa.foto]);
+  }, [fotoPreview, user?.photo]);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
       {/* Header section */}
       <div className="flex flex-col gap-[4px] pb-4 border-b border-monday-border">
         <p className="flex items-center gap-[8px]">
-          <User className="size-6 text-monday-black" />
+          <Settings className="size-6 text-monday-black" />
           <span className="font-extrabold text-2xl text-monday-black">
-            Profil Saya
+            Profil Administrator
           </span>
         </p>
         <p className="font-semibold text-sm text-monday-gray">
-          Kelola informasi biodata akademik dan informasi akun pribadi Anda.
+          Kelola pengaturan akun administrator dan lihat ringkasan sistem SIAKAD.
         </p>
       </div>
 
       {/* Profile Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* Left Section: Photo and Status Card */}
+
+        {/* Left Section: Photo and Role Card */}
         <div className="lg:col-span-1 bg-white border border-monday-border rounded-3xl p-6 shadow-sm flex flex-col items-center text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 left-0 h-24 bg-gradient-to-r from-monday-blue/15 to-violet-500/10" />
+          <div className="absolute top-0 right-0 left-0 h-24 bg-gradient-to-r from-monday-blue/20 to-rose-500/10" />
 
           {/* Avatar Container */}
           <div className="relative mt-8 z-10">
             <div className="w-32 h-32 rounded-3xl border-4 border-white bg-monday-background overflow-hidden shadow-lg flex items-center justify-center text-monday-gray font-extrabold text-4xl">
               {displayPhoto ? (
-                <img 
-                  src={displayPhoto} 
-                  alt="Profil" 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={displayPhoto}
+                  alt="Profil"
+                  className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
               ) : (
-                myMahasiswa.nama.charAt(0).toUpperCase()
+                <Shield size={48} className="text-monday-blue/50" />
               )}
             </div>
 
             {/* Photo upload trigger icon */}
-            <button 
+            <button
               type="button"
               onClick={triggerFilePicker}
               className="absolute -bottom-2 -right-2 p-2.5 bg-monday-blue text-white rounded-2xl hover:bg-opacity-90 transition-all duration-200 border-2 border-white shadow-md cursor-pointer"
             >
               <Camera size={16} />
             </button>
-            <input 
+            <input
               type="file"
               ref={fileInputRef}
               onChange={handleImageChange}
@@ -229,11 +204,11 @@ export default function ProfilMahasiswaTab({
             />
           </div>
 
-          <h3 className="font-extrabold text-xl text-monday-black mt-5 leading-tight">{myMahasiswa.nama}</h3>
-          <p className="font-bold text-sm text-monday-blue mt-1">{myMahasiswa.nim}</p>
+          <h3 className="font-extrabold text-xl text-monday-black mt-5 leading-tight drop-shadow-sm">{user?.name || 'Administrator'}</h3>
+          <p className="font-bold text-sm text-monday-gray mt-1">{user?.email}</p>
 
-          <span className="mt-4 px-4 py-1 bg-emerald-500/15 text-emerald-700 border border-emerald-500/20 rounded-full font-bold text-xs uppercase tracking-wider">
-            {myMahasiswa.status_mahasiswa}
+          <span className="mt-4 px-4 py-1 bg-monday-blue/15 text-monday-blue border border-monday-blue/20 rounded-full font-bold text-xs uppercase tracking-wider border-2 border-white shadow-sm">
+            Administrator
           </span>
 
           {errors.foto && (
@@ -242,26 +217,42 @@ export default function ProfilMahasiswaTab({
 
           <div className="w-full border-t border-monday-border my-5" />
 
-          {/* Side Mini Biodata */}
-          <div className="w-full space-y-3.5 text-left text-xs font-semibold text-monday-gray">
-            <div className="flex justify-between items-center">
-              <span>Program Studi</span>
-              <span className="font-bold text-monday-black text-right max-w-[160px] truncate">{prodiObj?.nama_prodi || '-'}</span>
+          {/* System Stats Mini Cards */}
+          <div className="w-full grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-3 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1 text-monday-blue mb-0.5">
+                <Users size={13} />
+                <span className="font-extrabold text-lg">{systemStats.totalDosens}</span>
+              </div>
+              <p className="text-[10px] font-bold text-monday-gray">Dosen</p>
             </div>
-            <div className="flex justify-between items-center">
-              <span>Fakultas</span>
-              <span className="font-bold text-monday-black text-right max-w-[160px] truncate">{fakultasObj?.nama_fakultas || '-'}</span>
+            <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-3 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1 text-emerald-600 mb-0.5">
+                <GraduationCap size={13} />
+                <span className="font-extrabold text-lg">{systemStats.aktivMahasiswas}</span>
+              </div>
+              <p className="text-[10px] font-bold text-monday-gray">Mhs Aktif</p>
             </div>
-            <div className="flex justify-between items-center">
-              <span>Tahun Angkatan</span>
-              <span className="font-bold text-monday-black">{myMahasiswa.tahun_masuk}</span>
+            <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-3 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1 text-violet-600 mb-0.5">
+                <BookOpen size={13} />
+                <span className="font-extrabold text-lg">{systemStats.totalMataKuliahs}</span>
+              </div>
+              <p className="text-[10px] font-bold text-monday-gray">Mata Kuliah</p>
+            </div>
+            <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/15 p-3 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1 text-amber-600 mb-0.5">
+                <Layers size={13} />
+                <span className="font-extrabold text-lg">{systemStats.totalKelasKuliahs}</span>
+              </div>
+              <p className="text-[10px] font-bold text-monday-gray">Kelas</p>
             </div>
           </div>
         </div>
 
-        {/* Right Section: Forms & Academic Details */}
+        {/* Right Section: Forms & System Info */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Main Edit Profile Form */}
           <form onSubmit={handleSubmit} className="bg-white border border-monday-border rounded-3xl p-6 shadow-sm flex flex-col gap-6">
             <h4 className="font-extrabold text-lg text-monday-black border-b border-monday-border pb-3 flex items-center gap-2">
@@ -289,7 +280,7 @@ export default function ProfilMahasiswaTab({
                 <label className="text-[11px] font-bold text-monday-gray uppercase tracking-wider flex items-center gap-1.5">
                   <Mail size={13} /> Alamat Email
                 </label>
-                <input 
+                <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -305,7 +296,7 @@ export default function ProfilMahasiswaTab({
                 <label className="text-[11px] font-bold text-monday-gray uppercase tracking-wider flex items-center gap-1.5">
                   <Phone size={13} /> Nomor Telepon / HP
                 </label>
-                <input 
+                <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -325,7 +316,7 @@ export default function ProfilMahasiswaTab({
                   <Lock size={13} /> Password Baru (Opsional)
                 </label>
                 <div className="relative">
-                  <input 
+                  <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -351,7 +342,7 @@ export default function ProfilMahasiswaTab({
                   <Lock size={13} /> Konfirmasi Password Baru
                 </label>
                 <div className="relative">
-                  <input 
+                  <input
                     type={showPasswordConf ? "text" : "password"}
                     value={passwordConfirmation}
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
@@ -383,55 +374,74 @@ export default function ProfilMahasiswaTab({
             </div>
           </form>
 
-          {/* Academic Details (Read Only Pane) */}
+          {/* System Overview (Read Only Pane) */}
           <div className="bg-white border border-monday-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
             <h4 className="font-extrabold text-lg text-monday-black border-b border-monday-border pb-3 flex items-center gap-2">
-              <Info size={18} className="text-monday-blue" /> Detail Biodata Akademik Resmi
+              <Database size={18} className="text-monday-blue" /> Ringkasan Sistem SIAKAD
             </h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm font-semibold">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">NIM</span>
-                <span className="text-monday-black font-extrabold">{myMahasiswa.nim}</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="rounded-2xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-center gap-1.5 text-monday-blue mb-1">
+                  <Users size={16} />
+                  <span className="font-extrabold text-2xl">{systemStats.totalUsers}</span>
+                </div>
+                <p className="text-xs font-bold text-monday-gray">Total User</p>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Nama Lengkap</span>
-                <span className="text-monday-black font-extrabold">{myMahasiswa.nama}</span>
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-center gap-1.5 text-emerald-600 mb-1">
+                  <GraduationCap size={16} />
+                  <span className="font-extrabold text-2xl">{systemStats.totalMahasiswas}</span>
+                </div>
+                <p className="text-xs font-bold text-monday-gray">Total Mahasiswa</p>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Program Studi</span>
-                <span className="text-monday-black">{prodiObj?.nama_prodi || '-'}</span>
+              <div className="rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-center gap-1.5 text-violet-600 mb-1">
+                  <BookOpen size={16} />
+                  <span className="font-extrabold text-2xl">{systemStats.totalMataKuliahs}</span>
+                </div>
+                <p className="text-xs font-bold text-monday-gray">Mata Kuliah</p>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Fakultas</span>
-                <span className="text-monday-black">{fakultasObj?.nama_fakultas || '-'}</span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Tahun Masuk</span>
-                <span className="text-monday-black">{myMahasiswa.tahun_masuk}</span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Dosen Pembimbing Akademik</span>
-                <span className="text-monday-black font-bold">
-                  {dosenPaObj ? (
-                    <div className="flex flex-col gap-0.5">
-                      <span>{dosenPaObj.nama}</span>
-                      <span className="text-xs text-monday-gray font-normal">{dosenPaObj.nidn} • {dosenPaObj.email}</span>
-                    </div>
-                  ) : '-'}
-                </span>
+              <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-center gap-1.5 text-amber-600 mb-1">
+                  <Layers size={16} />
+                  <span className="font-extrabold text-2xl">{systemStats.totalKelasKuliahs}</span>
+                </div>
+                <p className="text-xs font-bold text-monday-gray">Kelas Kuliah</p>
               </div>
             </div>
-            
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm font-semibold mt-2">
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Nama Akun</span>
+                <span className="text-monday-black font-extrabold">{user?.name || '-'}</span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Role Akun</span>
+                <span className="text-monday-blue font-extrabold uppercase">
+                  {(user?.roles || []).map(r => r.name).join(', ') || 'Admin'}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Total Fakultas</span>
+                <span className="text-monday-black">{systemStats.totalFakultas} Fakultas</span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Total Program Studi</span>
+                <span className="text-monday-black">{systemStats.totalProdis} Prodi</span>
+              </div>
+            </div>
+
             <div className="p-4 bg-monday-blue/5 border border-monday-blue/10 rounded-2xl mt-2 flex items-start gap-3 text-xs text-monday-gray font-semibold leading-relaxed">
               <Shield size={18} className="text-monday-blue shrink-0 mt-0.5" />
               <p>
-                Informasi biodata di atas bersumber dari database administrasi akademik resmi universitas. Jika terdapat kesalahan data NIM, nama, atau prodi, silakan hubungi bagian Administrasi Akademik (BAAK) di gedung Rektorat.
+                Sebagai Administrator, Anda memiliki akses penuh terhadap seluruh data dan konfigurasi sistem SIAKAD. Pastikan untuk menjaga kerahasiaan akun dan melakukan pergantian password secara berkala.
               </p>
             </div>
           </div>

@@ -18,6 +18,8 @@ import DynamicFormModal from './DynamicFormModal';
 import Login from './Login';
 import JadwalKuliahTab from './JadwalKuliahTab';
 import ProfilMahasiswaTab from './ProfilMahasiswaTab';
+import ProfilDosenTab from './ProfilDosenTab';
+import ProfilAdminTab from './ProfilAdminTab';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -744,6 +746,33 @@ export default function App() {
                   prodis={prodis}
                   fakultas={fakultas}
                   dosens={dosens}
+                  refreshUser={refreshUser}
+                />
+              )}
+
+              {activeTab === 'profil-dosen' && (
+                <ProfilDosenTab
+                  user={user}
+                  dosens={dosens}
+                  mahasiswas={mahasiswas}
+                  dosenPengampus={dosenPengampus}
+                  kelasKuliahs={kelasKuliahs}
+                  mataKuliahs={mataKuliahs}
+                  tahunAkademiks={tahunAkademiks}
+                  refreshUser={refreshUser}
+                />
+              )}
+
+              {activeTab === 'profil-admin' && (
+                <ProfilAdminTab
+                  user={user}
+                  fakultas={fakultas}
+                  prodis={prodis}
+                  dosens={dosens}
+                  mahasiswas={mahasiswas}
+                  mataKuliahs={mataKuliahs}
+                  kelasKuliahs={kelasKuliahs}
+                  users={users}
                   refreshUser={refreshUser}
                 />
               )}

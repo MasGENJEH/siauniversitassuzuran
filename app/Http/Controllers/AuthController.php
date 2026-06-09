@@ -57,7 +57,13 @@ class AuthController extends Controller
         $user = $request->user();
 
         $rules = [
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')
+                    ->ignore($user->id)
+                    ->whereNull('deleted_at'),
+            ],
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6|confirmed',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',

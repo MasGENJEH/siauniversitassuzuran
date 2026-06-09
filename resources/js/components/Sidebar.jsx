@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Building, Award, Calendar, Users, GraduationCap, BookOpen, Layers, Briefcase, Edit3, LogOut, User } from 'lucide-react';
+import { Home, Building, Award, Calendar, Users, GraduationCap, BookOpen, Layers, Briefcase, Edit3, LogOut, User, Settings } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user, onLogout }) {
   const roles = user?.roles || [];
@@ -20,6 +20,8 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
     { id: 'kelas-mahasiswa', label: 'KRS & Nilai KHS', icon: Edit3, roles: ['admin', 'mahasiswa'] },
     { id: 'jadwal-kuliah', label: 'Jadwal Kuliah', icon: Calendar, roles: ['mahasiswa'] },
     { id: 'profil-mahasiswa', label: 'Profil Saya', icon: User, roles: ['mahasiswa'] },
+    { id: 'profil-dosen', label: 'Profil Saya', icon: User, roles: ['dosen'] },
+    { id: 'profil-admin', label: 'Profil Admin', icon: Settings, roles: ['admin'] },
   ].filter(item => item.roles.some(role => roles.some(r => r.name === role)));
 
   return (
