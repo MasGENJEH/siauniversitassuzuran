@@ -312,6 +312,48 @@ export default function DynamicFormModal({
               {formErrors.id_dosen_pa && <p className="text-xs text-monday-red font-bold">{formErrors.id_dosen_pa[0]}</p>}
             </div>
             <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tautkan Akun User</label>
+              <select 
+                value={formData.id_user || ''} 
+                onChange={(e) => handleInputChange('id_user', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+              >
+                <option value="">-- Pilih Akun User --</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
+                ))}
+              </select>
+              {formErrors.id_user && <p className="text-xs text-monday-red font-bold">{formErrors.id_user[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tahun Masuk</label>
+              <input 
+                type="number" 
+                min="1900"
+                max="2100"
+                value={formData.tahun_masuk || ''} 
+                onChange={(e) => handleInputChange('tahun_masuk', e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                placeholder="Contoh: 2026"
+              />
+              {formErrors.tahun_masuk && <p className="text-xs text-monday-red font-bold">{formErrors.tahun_masuk[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Status Mahasiswa</label>
+              <select 
+                value={formData.status_mahasiswa || ''} 
+                onChange={(e) => handleInputChange('status_mahasiswa', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+              >
+                <option value="">-- Pilih Status --</option>
+                <option value="AKTIF">AKTIF</option>
+                <option value="CUTI">CUTI</option>
+                <option value="LULUS">LULUS</option>
+                <option value="DO">DO</option>
+              </select>
+              {formErrors.status_mahasiswa && <p className="text-xs text-monday-red font-bold">{formErrors.status_mahasiswa[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Foto Mahasiswa</label>
               <div className="flex items-center gap-4">
                 {/* Preview */}
