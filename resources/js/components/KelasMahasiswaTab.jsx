@@ -9,6 +9,7 @@ export default function KelasMahasiswaTab({
   mataKuliahs,
   dosens = [],
   dosenPengampus = [],
+  tahunAkademiks = [],
   searchQuery,
   setSearchQuery,
   openModal,
@@ -32,7 +33,7 @@ export default function KelasMahasiswaTab({
 
   // Build student-centric data: group kelasMahasiswas by mahasiswa
   const studentSummaries = useMemo(() => {
-    // Get unique mahasiswa IDs from kelas_mahasiswas
+    const activeSemester = tahunAkademiks.find(ta => ta.status) || null;
     const studentMap = {};
 
     kelasMahasiswas.forEach(km => {
@@ -42,37 +43,75 @@ export default function KelasMahasiswaTab({
       studentMap[km.id_mahasiswa].push(km);
     });
 
+    const getGradeWeight = (letter) => {
+      const char = (letter || '').toUpperCase().trim();
+      switch (char) {
+        case 'A': return 4.0;
+        case 'B': return 3.0;
+        case 'C': return 2.0;
+        case 'D': return 1.0;
+        case 'E': return 0.0;
+        default: return 0.0;
+      }
+    };
+
     // Build summaries
     return Object.entries(studentMap).map(([mahasiswaId, enrollments]) => {
       const mhs = mahasiswas.find(m => m.id === Number(mahasiswaId));
       if (!mhs) return null;
 
-      let totalSks = 0;
-      let totalNilai = 0;
-      let gradedCount = 0;
+      let totalSksDiambil = 0;
+      let totalSksLulus = 0;
+      let sksDiambilSemesterIni = 0;
+
+      let gradedSksSemester = 0;
+      let weightedSumSemester = 0;
+      let gradedSksTotal = 0;
+      let weightedSumTotal = 0;
 
       enrollments.forEach(km => {
         const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
         const mk = kk ? mataKuliahs.find(m => m.id === kk.id_mk) : null;
-        if (mk && mk.sks) totalSks += Number(mk.sks);
-        if (km.nilai_akhir !== null && km.nilai_akhir !== undefined) {
-          totalNilai += Number(km.nilai_akhir);
-          gradedCount++;
+        if (!mk) return;
+
+        const sks = Number(mk.sks || 0);
+        totalSksDiambil += sks;
+
+        const isCurrentSemester = activeSemester && kk.id_ta === activeSemester.id;
+
+        if (isCurrentSemester) {
+          sksDiambilSemesterIni += sks;
+          if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+            gradedSksSemester += sks;
+            weightedSumSemester += sks * getGradeWeight(km.nilai_huruf);
+          }
+        }
+
+        if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+          gradedSksTotal += sks;
+          weightedSumTotal += sks * getGradeWeight(km.nilai_huruf);
+          if (km.nilai_huruf.toUpperCase().trim() !== 'E') {
+            totalSksLulus += sks;
+          }
         }
       });
 
-      const avgNilai = gradedCount > 0 ? (totalNilai / gradedCount).toFixed(1) : null;
+      const ips = gradedSksSemester > 0 ? (weightedSumSemester / gradedSksSemester).toFixed(2) : '0.00';
+      const ipk = gradedSksTotal > 0 ? (weightedSumTotal / gradedSksTotal).toFixed(2) : '0.00';
 
       return {
         mahasiswa: mhs,
         enrollments,
         totalMk: enrollments.length,
-        totalSks,
-        avgNilai,
-        gradedCount
+        totalSks: totalSksDiambil,
+        sksDiambil: totalSksDiambil,
+        sksLulus: totalSksLulus,
+        sksDiambilSemesterIni,
+        ips,
+        ipk
       };
     }).filter(Boolean);
-  }, [kelasMahasiswas, mahasiswas, kelasKuliahs, mataKuliahs]);
+  }, [kelasMahasiswas, mahasiswas, kelasKuliahs, mataKuliahs, tahunAkademiks]);
 
   // Filter students
   const filteredStudents = studentSummaries.filter(s =>
@@ -177,17 +216,21 @@ export default function KelasMahasiswaTab({
               <div className="flex flex-col items-center gap-1 px-4">
                 <div className="flex items-center gap-1.5 text-emerald-600">
                   <Award size={16} />
-                  <span className="font-extrabold text-xl">{selectedStudentData.totalSks}</span>
+                  <span className="font-extrabold text-xl">
+                    {selectedStudentData.sksLulus} / {selectedStudentData.sksDiambil}
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-monday-gray">Total SKS</span>
+                <span className="text-xs font-bold text-monday-gray">SKS Lulus / Diambil</span>
               </div>
               <div className="w-px h-10 bg-monday-border" />
               <div className="flex flex-col items-center gap-1 px-4">
                 <div className="flex items-center gap-1.5 text-amber-600">
                   <TrendingUp size={16} />
-                  <span className="font-extrabold text-xl">{selectedStudentData.avgNilai ?? '-'}</span>
+                  <span className="font-extrabold text-xl">
+                    {selectedStudentData.ipk} <span className="text-xs text-monday-gray font-normal">({selectedStudentData.ips} IPS)</span>
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-monday-gray">Rata-rata Nilai</span>
+                <span className="text-xs font-bold text-monday-gray">IPK (Semester IPS)</span>
               </div>
             </div>
           </div>
@@ -404,8 +447,8 @@ export default function KelasMahasiswaTab({
               <th className="py-4 px-6">NIM</th>
               <th className="py-4 px-6">Nama Mahasiswa</th>
               <th className="py-4 px-6 text-center">Jumlah MK</th>
-              <th className="py-4 px-6 text-center">Total SKS</th>
-              <th className="py-4 px-6 text-center">Rata-rata Nilai</th>
+              <th className="py-4 px-6 text-center">SKS Lulus / Diambil</th>
+              <th className="py-4 px-6 text-center">IPK</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
           </thead>
@@ -420,13 +463,9 @@ export default function KelasMahasiswaTab({
                     {s.totalMk} MK
                   </span>
                 </td>
-                <td className="py-3.5 px-6 text-center font-bold">{s.totalSks} SKS</td>
+                <td className="py-3.5 px-6 text-center font-bold">{s.sksLulus} / {s.sksDiambil} SKS</td>
                 <td className="py-3.5 px-6 text-center">
-                  {s.avgNilai !== null ? (
-                    <span className="font-bold text-monday-black">{s.avgNilai}</span>
-                  ) : (
-                    <span className="text-monday-gray text-xs italic">Belum Dinilai</span>
-                  )}
+                  <span className="font-bold text-monday-black">{s.ipk}</span>
                 </td>
                 <td className="py-3.5 px-6 text-right">
                   <button

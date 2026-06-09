@@ -20,6 +20,7 @@ Route::post('/login', [AuthController::class, 'tokenLogin']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::get('dosens/{dosen}/kelas-kuliah-aktif', [DosenController::class, 'kelasKuliahAktif']);
     Route::get('dosens/{dosen}/mahasiswa-bimbingan', [DosenController::class, 'mahasiswaBimbingan']);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, MapPin } from 'lucide-react';
+import { Users, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, MapPin, Mail, Lock } from 'lucide-react';
 
 export default function DosenTab({
   dosens,
@@ -30,7 +30,7 @@ export default function DosenTab({
   }, [selectedDosen]);
 
   // Filter items based on search query
-  const filteredItems = dosens.filter(d => 
+  const filteredItems = dosens.filter(d =>
     d.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.nidn.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -90,7 +90,7 @@ export default function DosenTab({
 
     if (fotoUrl && !imgError) {
       return (
-        <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0`}>
+        <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0 ${size === 'lg' ? 'border-4 border-white bg-white relative z-20 shadow-xl' : ''}`}>
           <img
             src={fotoUrl}
             alt={dosen.nama}
@@ -101,10 +101,16 @@ export default function DosenTab({
       );
     }
 
-    // Fallback: user icon with gradient
+    // Fallback: user icon with solid bg for lg size to block banner background
     return (
-      <div className={`${sizeClasses} rounded-2xl bg-gradient-to-br from-monday-blue/20 via-monday-blue/10 to-indigo-500/10 border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex items-center justify-center flex-shrink-0`}>
-        <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+      <div className={`${sizeClasses} rounded-2xl ${size === 'lg' ? 'bg-white border-4 border-white relative z-20 shadow-xl' : 'bg-gradient-to-br from-monday-blue/20 via-monday-blue/10 to-indigo-500/10 border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10'} flex items-center justify-center flex-shrink-0`}>
+        {size === 'lg' ? (
+          <div className="w-full h-full rounded-xl bg-gradient-to-br from-monday-blue/10 to-indigo-500/5 flex items-center justify-center">
+            <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+          </div>
+        ) : (
+          <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+        )}
       </div>
     );
   };
@@ -144,31 +150,40 @@ export default function DosenTab({
         </div>
 
         {/* Profile Card */}
-        <div className="rounded-2xl border border-monday-border overflow-hidden">
+        <div className="rounded-2xl border border-monday-border overflow-hidden relative">
+          <div className="absolute top-0 right-0 left-0 h-24 bg-gradient-to-r from-monday-blue/15 to-violet-500/10 z-0" />
+
           {/* Profile Info */}
-          <div className="px-8 pb-8 mt-4 relative z-10">
+          <div className="px-8 pb-8 mt-8 relative z-10">
             <div className="flex items-end gap-6 mb-6">
               <DosenPhoto dosen={detailData.dosen} size="lg" />
               <div className="flex-1 pb-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="font-extrabold text-2xl text-monday-black">{detailData.dosen.nama}</h2>
+                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.dosen.nama}</h2>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm font-semibold">
-                  <p className="font-bold text-monday-blue text-base">NIDN: {detailData.dosen.nidn}</p>
-                  <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
-                  <span className="text-monday-gray">Email: <span className="text-monday-black font-bold font-mono">{detailData.user?.email || '-'}</span></span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
-                  <span className="text-monday-gray flex items-center gap-1.5">
-                    Sandi:{" "}
-                    <span className="text-monday-black font-bold font-mono">
-                      {showPassword ? "password123" : "••••••••"}
-                    </span>
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  <span className="px-3 py-1.5 bg-monday-blue/10 rounded-xl flex items-center gap-1.5 border border-monday-blue/20">
+                    <Users size={13} className="text-monday-blue" />
+                    <span className="text-monday-gray text-xs font-semibold">NIDN:</span>
+                    <span className="font-bold text-monday-blue text-base leading-none">{detailData.dosen.nidn}</span>
+                  </span>
+
+                  <span className="px-3 py-1.5 bg-monday-blue/10 text-monday-blue rounded-xl text-xs font-bold flex items-center gap-1.5 border border-monday-blue/20">
+                    <Mail size={13} className="text-monday-blue" />
+                    <span className="text-monday-gray font-normal">Email:</span>
+                    <span className="font-mono text-monday-black select-all">{detailData.user?.email || '-'}</span>
+                  </span>
+
+                  <span className="px-3 py-1.5 bg-violet-500/10 text-violet-600 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-violet-500/20">
+                    <Lock size={13} className="text-violet-600" />
+                    <span className="text-monday-gray font-normal">Sandi:</span>
+                    <span className="font-mono text-monday-black">{showPassword ? "password123" : "••••••••"}</span>
                     <button
                       onClick={() => setShowPassword(!showPassword)}
-                      className="p-1 hover:bg-monday-gray-background rounded-lg text-monday-gray hover:text-monday-black transition-colors"
+                      className="p-0.5 hover:bg-violet-500/25 rounded transition-colors text-violet-600 cursor-pointer"
                       title={showPassword ? "Sembunyikan Sandi" : "Tampilkan Sandi"}
                     >
-                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
                     </button>
                   </span>
                 </div>
@@ -178,7 +193,7 @@ export default function DosenTab({
             {/* Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* Akun User */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-violet-500/10 rounded-xl text-violet-600 flex-shrink-0">
                   <User size={18} />
                 </div>
@@ -196,7 +211,7 @@ export default function DosenTab({
               </div>
 
               {/* Status */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 flex-shrink-0">
                   <Award size={18} />
                 </div>
@@ -210,7 +225,7 @@ export default function DosenTab({
 
             {/* Academic Stats */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="rounded-2xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-monday-blue mb-1">
                   <BookOpen size={16} />
                   <span className="font-extrabold text-2xl">{detailData.totalClasses}</span>
@@ -218,7 +233,7 @@ export default function DosenTab({
                 <p className="text-xs font-bold text-monday-gray">Kelas Diajar</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-emerald-600 mb-1">
                   <Award size={16} />
                   <span className="font-extrabold text-2xl">{detailData.totalTeachingSks}</span>
@@ -226,7 +241,7 @@ export default function DosenTab({
                 <p className="text-xs font-bold text-monday-gray">Total SKS Diajar</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-violet-600 mb-1">
                   <Users size={16} />
                   <span className="font-extrabold text-2xl">{detailData.totalAdvisees}</span>
@@ -323,12 +338,11 @@ export default function DosenTab({
                       <td className="py-3 px-5 font-semibold">{mhs.nama}</td>
                       <td className="py-3 px-5 text-xs text-monday-gray font-semibold">{mhs.tahun_masuk}</td>
                       <td className="py-3 px-5 text-center">
-                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${
-                          mhs.status_mahasiswa === 'AKTIF' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
-                          mhs.status_mahasiswa === 'CUTI' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
-                          mhs.status_mahasiswa === 'LULUS' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
-                          'bg-monday-red/15 text-monday-red border-monday-red/20'
-                        }`}>
+                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${mhs.status_mahasiswa === 'AKTIF' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
+                            mhs.status_mahasiswa === 'CUTI' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
+                              mhs.status_mahasiswa === 'LULUS' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
+                                'bg-monday-red/15 text-monday-red border-monday-red/20'
+                          }`}>
                           {mhs.status_mahasiswa}
                         </span>
                       </td>
@@ -363,7 +377,7 @@ export default function DosenTab({
             Kelola data staf pengajar/dosen dan bimbingan akademik. Total: {dosens.length} dosen terdaftar.
           </p>
         </div>
-        <button 
+        <button
           onClick={() => openModal('dosen', 'create')}
           className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
         >
@@ -374,9 +388,9 @@ export default function DosenTab({
       <div className="flex items-center justify-between">
         <div className="relative w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
-          <input 
-            type="text" 
-            placeholder="Cari dosen..." 
+          <input
+            type="text"
+            placeholder="Cari dosen..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-monday-background border border-monday-border rounded-2xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
@@ -391,7 +405,6 @@ export default function DosenTab({
               <th className="py-4 px-6">No</th>
               <th className="py-4 px-6">Dosen</th>
               <th className="py-4 px-6">Email</th>
-              <th className="py-4 px-6">Akun User</th>
               <th className="py-4 px-6 text-center">Kelas Diampu</th>
               <th className="py-4 px-6 text-center">Mahasiswa Wali</th>
               <th className="py-4 px-6 text-right">Aksi</th>
@@ -418,13 +431,6 @@ export default function DosenTab({
                   <td className="py-3.5 px-6 font-semibold text-monday-gray font-mono">
                     {uObj ? uObj.email : '-'}
                   </td>
-                  <td className="py-3.5 px-6">
-                    {uObj ? (
-                      <span className="px-2.5 py-1 bg-violet-500/10 border border-violet-500/20 rounded-xl text-xs font-bold text-violet-600 font-mono">
-                        {uObj.username}
-                      </span>
-                    ) : '-'}
-                  </td>
                   <td className="py-3.5 px-6 text-center">
                     <span className="px-2.5 py-1 bg-monday-blue/10 text-monday-blue border border-monday-blue/15 rounded-lg text-xs font-bold font-mono">
                       {classCount} Kelas
@@ -444,13 +450,13 @@ export default function DosenTab({
                         <Eye size={13} />
                         Detail
                       </button>
-                      <button 
+                      <button
                         onClick={() => openModal('dosen', 'edit', d)}
                         className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
                       >
                         <Edit size={16} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteItem('dosen', d.id)}
                         className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
                       >
@@ -479,17 +485,16 @@ export default function DosenTab({
             >
               <ChevronLeft size={16} />
             </button>
-            
+
             <div className="flex items-center gap-1.5">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${
-                    currentPage === page
+                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${currentPage === page
                       ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
                       : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

@@ -16,6 +16,8 @@ import LecturerPortalTab from './LecturerPortalTab';
 import KelasMahasiswaTab from './KelasMahasiswaTab';
 import DynamicFormModal from './DynamicFormModal';
 import Login from './Login';
+import JadwalKuliahTab from './JadwalKuliahTab';
+import ProfilMahasiswaTab from './ProfilMahasiswaTab';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -87,6 +89,26 @@ export default function App() {
     }
 
     return res;
+  };
+
+  // Refresh current user data
+  const refreshUser = async () => {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) return;
+    try {
+      const res = await fetch('/api/user', {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      }
+    } catch (err) {
+      console.error("Failed to refresh user profile:", err);
+    }
   };
 
   // Login handler
@@ -552,6 +574,8 @@ export default function App() {
                   activeSemester={activeSemester}
                   kelasKuliahs={kelasKuliahs}
                   dosenPengampus={dosenPengampus}
+                  kelasMahasiswas={kelasMahasiswas}
+                  mataKuliahs={mataKuliahs}
                   setActiveTab={setActiveTab}
                 />
               )}
@@ -692,10 +716,35 @@ export default function App() {
                   mataKuliahs={mataKuliahs}
                   dosens={dosens}
                   dosenPengampus={dosenPengampus}
+                  tahunAkademiks={tahunAkademiks}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                />
+              )}
+
+              {activeTab === 'jadwal-kuliah' && (
+                <JadwalKuliahTab
+                  user={user}
+                  mahasiswas={mahasiswas}
+                  kelasMahasiswas={kelasMahasiswas}
+                  kelasKuliahs={kelasKuliahs}
+                  mataKuliahs={mataKuliahs}
+                  dosens={dosens}
+                  dosenPengampus={dosenPengampus}
+                  tahunAkademiks={tahunAkademiks}
+                />
+              )}
+
+              {activeTab === 'profil-mahasiswa' && (
+                <ProfilMahasiswaTab
+                  user={user}
+                  mahasiswas={mahasiswas}
+                  prodis={prodis}
+                  fakultas={fakultas}
+                  dosens={dosens}
+                  refreshUser={refreshUser}
                 />
               )}
             </>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp } from 'lucide-react';
+import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp, Mail, Lock } from 'lucide-react';
 
 export default function MahasiswaTab({
   mahasiswas,
@@ -145,7 +145,7 @@ export default function MahasiswaTab({
 
     if (fotoUrl && !imgError) {
       return (
-        <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0`}>
+        <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0 ${size === 'lg' ? 'border-4 border-white bg-white relative z-20 shadow-xl' : ''}`}>
           <img
             src={fotoUrl}
             alt={mahasiswa.nama}
@@ -156,10 +156,16 @@ export default function MahasiswaTab({
       );
     }
 
-    // Fallback: user icon with gradient
+    // Fallback: user icon with solid bg for lg size to block banner background
     return (
-      <div className={`${sizeClasses} rounded-2xl bg-gradient-to-br from-monday-blue/20 via-monday-blue/10 to-indigo-500/10 border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex items-center justify-center flex-shrink-0`}>
-        <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+      <div className={`${sizeClasses} rounded-2xl ${size === 'lg' ? 'bg-white border-4 border-white relative z-20 shadow-xl' : 'bg-gradient-to-br from-monday-blue/20 via-monday-blue/10 to-indigo-500/10 border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10'} flex items-center justify-center flex-shrink-0`}>
+        {size === 'lg' ? (
+          <div className="w-full h-full rounded-xl bg-gradient-to-br from-monday-blue/10 to-indigo-500/5 flex items-center justify-center">
+            <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+          </div>
+        ) : (
+          <User size={iconSize} className="text-monday-blue/60" strokeWidth={1.5} />
+        )}
       </div>
     );
   };
@@ -199,39 +205,43 @@ export default function MahasiswaTab({
         </div>
 
         {/* Profile Card */}
-        <div className="rounded-2xl border border-monday-border overflow-hidden">
-          {/* Gradient Banner
-          <div className="h-32 bg-gradient-to-r from-monday-blue via-indigo-500 to-violet-500 relative z-0">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNC40LTMuNi04LTgtOHMtOCAzLjYtOCA4IDMuNiA4IDggOCA4LTMuNiA4LTgiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
-          </div> */}
+        <div className="rounded-2xl border border-monday-border overflow-hidden relative">
+          <div className="absolute top-0 right-0 left-0 h-24 bg-gradient-to-r from-monday-blue/15 to-violet-500/10" />
 
           {/* Profile Info */}
-          <div className="px-8 pb-8 mt-4 relative z-10 ">
+          <div className="px-8 pb-8 mt-8 relative z-10 ">
             <div className="flex items-end gap-6 mb-6">
               <StudentPhoto mahasiswa={detailData.mahasiswa} size="lg" />
               <div className="flex-1 pb-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="font-extrabold text-2xl text-monday-black">{detailData.mahasiswa.nama}</h2>
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusBadge(detailData.mahasiswa.status_mahasiswa)}`}>
+                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.mahasiswa.nama}</h2>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full border-2 border-white shadow-sm ${getStatusBadge(detailData.mahasiswa.status_mahasiswa).replace(/border-[^\s]+/g, '')}`}>
                     {detailData.mahasiswa.status_mahasiswa}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm font-semibold">
-                  <p className="font-bold text-monday-blue text-base">{detailData.mahasiswa.nim}</p>
-                  <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
-                  <span className="text-monday-gray">Email: <span className="text-monday-black font-bold font-mono">{detailData.user?.email || '-'}</span></span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-monday-border hidden sm:block" />
-                  <span className="text-monday-gray flex items-center gap-1.5">
-                    Sandi:{" "}
-                    <span className="text-monday-black font-bold font-mono">
-                      {showPassword ? "password123" : "••••••••"}
-                    </span>
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  <span className="px-3 py-1.5 bg-monday-blue/10 rounded-xl flex items-center gap-1.5 border border-monday-blue/20">
+                    <GraduationCap size={13} className="text-monday-blue" />
+                    <span className="text-monday-gray text-xs font-semibold">NIM:</span>
+                    <span className="font-bold text-monday-blue text-base leading-none">{detailData.mahasiswa.nim}</span>
+                  </span>
+
+                  <span className="px-3 py-1.5 bg-monday-blue/10 text-monday-blue rounded-xl text-xs font-bold flex items-center gap-1.5 border border-monday-blue/20">
+                    <Mail size={13} className="text-monday-blue" />
+                    <span className="text-monday-gray font-normal">Email:</span>
+                    <span className="font-mono text-monday-black select-all">{detailData.user?.email || '-'}</span>
+                  </span>
+
+                  <span className="px-3 py-1.5 bg-violet-500/10 text-violet-600 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-violet-500/20">
+                    <Lock size={13} className="text-violet-600" />
+                    <span className="text-monday-gray font-normal">Sandi:</span>
+                    <span className="font-mono text-monday-black">{showPassword ? "password123" : "••••••••"}</span>
                     <button
                       onClick={() => setShowPassword(!showPassword)}
-                      className="p-1 hover:bg-monday-gray-background rounded-lg text-monday-gray hover:text-monday-black transition-colors"
+                      className="p-0.5 hover:bg-violet-500/25 rounded transition-colors text-violet-600 cursor-pointer"
                       title={showPassword ? "Sembunyikan Sandi" : "Tampilkan Sandi"}
                     >
-                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
                     </button>
                   </span>
                 </div>
@@ -241,7 +251,7 @@ export default function MahasiswaTab({
             {/* Info Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {/* Program Studi */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-monday-blue/10 rounded-xl text-monday-blue flex-shrink-0">
                   <GraduationCap size={18} />
                 </div>
@@ -255,7 +265,7 @@ export default function MahasiswaTab({
               </div>
 
               {/* Fakultas */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-violet-500/10 rounded-xl text-violet-600 flex-shrink-0">
                   <MapPin size={18} />
                 </div>
@@ -266,7 +276,7 @@ export default function MahasiswaTab({
               </div>
 
               {/* Tahun Masuk */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-amber-500/10 rounded-xl text-amber-600 flex-shrink-0">
                   <Calendar size={18} />
                 </div>
@@ -277,7 +287,7 @@ export default function MahasiswaTab({
               </div>
 
               {/* Dosen PA */}
-              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3">
+              <div className="rounded-2xl bg-monday-background/60 border border-monday-border p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 flex-shrink-0">
                   <Users size={18} />
                 </div>
@@ -293,7 +303,7 @@ export default function MahasiswaTab({
 
             {/* Academic Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="rounded-2xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-monday-blue/10 to-monday-blue/5 border border-monday-blue/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-monday-blue mb-1">
                   <BookOpen size={16} />
                   <span className="font-extrabold text-2xl">{detailData.totalMk}</span>
@@ -301,7 +311,7 @@ export default function MahasiswaTab({
                 <p className="text-xs font-bold text-monday-gray">Mata Kuliah</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-emerald-600 mb-1">
                   <Award size={16} />
                   <span className="font-extrabold text-2xl">{detailData.totalSks}</span>
@@ -309,7 +319,7 @@ export default function MahasiswaTab({
                 <p className="text-xs font-bold text-monday-gray">Total SKS</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-violet-600 mb-1">
                   <Clock size={16} />
                   <span className="font-extrabold text-2xl">{detailData.semesterCount}</span>
@@ -317,7 +327,7 @@ export default function MahasiswaTab({
                 <p className="text-xs font-bold text-monday-gray">Semester Ditempuh</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-amber-600 mb-1">
                   <TrendingUp size={16} />
                   <span className="font-extrabold text-2xl">{detailData.avgNilai ?? '-'}</span>
@@ -325,7 +335,7 @@ export default function MahasiswaTab({
                 <p className="text-xs font-bold text-monday-gray">Rata-rata Nilai</p>
               </div>
 
-              <div className="rounded-2xl bg-gradient-to-br from-rose-500/10 to-rose-500/5 border border-rose-500/15 p-4 text-center">
+              <div className="rounded-2xl bg-gradient-to-br from-rose-500/10 to-rose-500/5 border border-rose-500/15 p-4 text-center shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center justify-center gap-1.5 text-rose-600 mb-1">
                   <ShieldCheck size={16} />
                   <span className="font-extrabold text-2xl">{detailData.ipk ?? '-'}</span>
