@@ -123,7 +123,7 @@ export default function KelasKuliahTab({
                     <div className="flex flex-wrap gap-1.5 items-center">
                       {linkedDosenNames.length > 0 ? (
                         linkedDosenNames.map((name, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 text-violet-600 rounded-lg text-[11px] font-bold">
+                          <span key={i} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg text-[11px] font-bold">
                             {name}
                           </span>
                         ))

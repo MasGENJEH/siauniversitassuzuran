@@ -27,7 +27,7 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
   return (
     <aside className="relative flex h-auto w-[280px] shrink-0 bg-white border-r border-monday-border print:hidden">
       <div className="flex flex-col fixed top-0 w-[280px] shrink-0 h-screen pt-[30px] px-4 gap-[24px]">
-        
+
         {/* Logo Brand */}
         <div className="px-4 flex items-center gap-3">
           <div className="bg-monday-blue p-2.5 rounded-2xl text-white">
@@ -35,7 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
           </div>
           <div>
             <h1 className="font-extrabold text-xl text-monday-black uppercase tracking-tight">SIAKAD</h1>
-            <p className="text-[9px] text-monday-gray font-extrabold tracking-widest uppercase">SUZURAN PORTAL</p>
+            <p className="text-[9px] text-monday-gray font-extrabold tracking-widest uppercase">SUZURAN ANJAY</p>
           </div>
         </div>
 
@@ -57,11 +57,10 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
                         setActiveTab(tab.id);
                         setSearchQuery('');
                       }}
-                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${
-                        isActive 
-                          ? 'bg-monday-blue/10 text-monday-blue' 
+                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${isActive
+                          ? 'bg-monday-blue/10 text-monday-blue'
                           : 'text-monday-black hover:bg-monday-gray-background'
-                      }`}
+                        }`}
                     >
                       <Icon size={18} className={isActive ? 'text-monday-blue' : 'text-monday-black'} />
                       <span className="flex-1 text-left">{tab.label}</span>
@@ -87,11 +86,10 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
                         setActiveTab(tab.id);
                         setSearchQuery('');
                       }}
-                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${
-                        isActive 
-                          ? 'bg-monday-blue/10 text-monday-blue' 
+                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${isActive
+                          ? 'bg-monday-blue/10 text-monday-blue'
                           : 'text-monday-black hover:bg-monday-gray-background'
-                      }`}
+                        }`}
                     >
                       <Icon size={18} className={isActive ? 'text-monday-blue' : 'text-monday-black'} />
                       <span className="flex-1 text-left">{tab.label}</span>
@@ -114,7 +112,7 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
             <LogOut size={18} className="text-monday-red" />
             <span className="flex-1 text-left">Keluar Akun</span>
           </button>
-          
+
           <div className="p-4 text-center">
             <p className="text-xs text-monday-gray font-bold">SIAKAD v1.0.0 &copy; 2026</p>
             <p className="text-[10px] text-monday-blue font-extrabold mt-0.5">Antigravity Design</p>

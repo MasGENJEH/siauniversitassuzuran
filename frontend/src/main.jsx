@@ -1,4 +1,5 @@
 import './bootstrap';
+import './assets/index.css';
 import React from 'react';
 useApp();
 
