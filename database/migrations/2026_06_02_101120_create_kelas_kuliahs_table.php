@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelas_kuliahs', function (Blueprint $table) {
+        Schema::create('course_classes', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_kelas')->unique();
-            $table->foreignId('id_mk')->constrained('mata_kuliahs')->cascadeOnDelete();
-            $table->foreignId('id_ta')->constrained('tahun_akademiks')->cascadeOnDelete();
-            $table->string('nama_kelas');
-            $table->string('hari'); // Input KAPITAL, cth: "SENIN"
-            $table->time('jam_mulai');
-            $table->time('jam_selesai');
-            $table->string('ruangan');
+            $table->string('class_code')->unique();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->foreignId('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
+            $table->string('class_name');
+            $table->string('day');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->string('room');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelas_kuliahs');
+        Schema::dropIfExists('course_classes');
     }
 };

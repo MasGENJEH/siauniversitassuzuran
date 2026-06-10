@@ -6,9 +6,9 @@ export default function KelasKuliahTab({
   mataKuliahs,
   tahunAkademiks,
   dosenPengampus,
-  dosens,
+  lecturers,
   kelasMahasiswas = [],
-  mahasiswas = [],
+  students = [],
   searchQuery,
   setSearchQuery,
   openModal,
@@ -23,9 +23,9 @@ export default function KelasKuliahTab({
   }, [searchQuery]);
 
   const filteredItems = kelasKuliahs.filter(k => {
-    const mk = mataKuliahs.find(m => m.id === k.id_mk);
-    const mkName = mk ? mk.nama_mk.toLowerCase() : '';
-    return k.nama_kelas.toLowerCase().includes(searchQuery.toLowerCase()) || mkName.includes(searchQuery.toLowerCase());
+    const mk = mataKuliahs.find(m => m.id === k.course_id);
+    const mkName = mk ? mk.name.toLowerCase() : '';
+    return k.class_name.toLowerCase().includes(searchQuery.toLowerCase()) || mkName.includes(searchQuery.toLowerCase());
   });
 
   const itemsToDisplay = filteredItems.slice(0, visibleCount);
@@ -81,18 +81,18 @@ export default function KelasKuliahTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {itemsToDisplay.map((k, index) => {
-              const mkObj = mataKuliahs.find(m => m.id === k.id_mk);
-              const taObj = tahunAkademiks.find(t => t.id === k.id_ta);
+              const mkObj = mataKuliahs.find(m => m.id === k.course_id);
+              const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
 
               // Get assigned lecturers for this class
-              const activeLecturerLinks = dosenPengampus.filter(dp => dp.id_kelas === k.id);
+              const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
               const linkedDosenNames = activeLecturerLinks.map(dp => {
-                const d = dosens.find(ds => ds.id === dp.id_dosen);
-                return d ? d.nama : null;
+                const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+                return d ? d.name : null;
               }).filter(Boolean);
 
               // Get student count for this class
-              const studentCount = kelasMahasiswas.filter(km => km.id_kelas === k.id).length;
+              const studentCount = kelasMahasiswas.filter(km => km.course_class_id === k.id).length;
 
               return (
                 <tr key={k.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -100,23 +100,23 @@ export default function KelasKuliahTab({
                   <td className="py-3.5 px-6">
                     {mkObj ? (
                       <div>
-                        <span className="font-bold text-monday-blue">{mkObj.kode_mk}</span>
-                        <span className="ml-2 font-semibold">{mkObj.nama_mk}</span>
+                        <span className="font-bold text-monday-blue">{mkObj.code}</span>
+                        <span className="ml-2 font-semibold">{mkObj.name}</span>
                       </div>
                     ) : '-'}
                   </td>
-                  <td className="py-3.5 px-6 font-bold">{k.nama_kelas}</td>
+                  <td className="py-3.5 px-6 font-bold">{k.class_name}</td>
                   <td className="py-3.5 px-6">
                     {taObj ? (
                       <span className="px-2 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                        {taObj.kode_ta}
+                        {taObj.code}
                       </span>
                     ) : '-'}
                   </td>
                   <td className="py-3.5 px-6">
                     <div className="text-xs text-monday-gray font-semibold">
-                      <span className="font-bold text-monday-black block">{k.hari}</span>
-                      <span>{k.jam_mulai.substring(0, 5)} - {k.jam_selesai.substring(0, 5)} ({k.ruangan})</span>
+                      <span className="font-bold text-monday-black block">{k.day}</span>
+                      <span>{k.start_time.substring(0, 5)} - {k.end_time.substring(0, 5)} ({k.room})</span>
                     </div>
                   </td>
                   <td className="py-3.5 px-6">
@@ -181,18 +181,18 @@ export default function KelasKuliahTab({
       )}
       {/* Detail Modal */}
       {selectedClassForDetail && (() => {
-        const mkObj = mataKuliahs.find(m => m.id === selectedClassForDetail.id_mk);
-        const taObj = tahunAkademiks.find(t => t.id === selectedClassForDetail.id_ta);
+        const mkObj = mataKuliahs.find(m => m.id === selectedClassForDetail.course_id);
+        const taObj = tahunAkademiks.find(t => t.id === selectedClassForDetail.academic_year_id);
 
         // Dosen Pengampu
-        const activeLecturerLinks = dosenPengampus.filter(dp => dp.id_kelas === selectedClassForDetail.id);
+        const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === selectedClassForDetail.id);
         const linkedDosenNames = activeLecturerLinks.map(dp => {
-          const d = dosens.find(ds => ds.id === dp.id_dosen);
-          return d ? d.nama : null;
+          const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+          return d ? d.name : null;
         }).filter(Boolean);
 
         // Enrolled Students
-        const enrollments = kelasMahasiswas.filter(km => km.id_kelas === selectedClassForDetail.id);
+        const enrollments = kelasMahasiswas.filter(km => km.course_class_id === selectedClassForDetail.id);
 
         return (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-monday-black/40 backdrop-blur-sm p-4 animate-fade-in">
@@ -220,21 +220,21 @@ export default function KelasKuliahTab({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-monday-background p-5 rounded-2xl border border-monday-border text-sm">
                 <div className="flex flex-col gap-2">
                   <p className="font-semibold text-monday-gray">
-                    Mata Kuliah: <span className="text-monday-black font-extrabold block mt-0.5">{mkObj ? `${mkObj.kode_mk} - ${mkObj.nama_mk}` : '-'}</span>
+                    Mata Kuliah: <span className="text-monday-black font-extrabold block mt-0.5">{mkObj ? `${mkObj.code} - ${mkObj.name}` : '-'}</span>
                   </p>
                   <p className="font-semibold text-monday-gray">
-                    Nama Kelas: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.nama_kelas}</span>
+                    Nama Kelas: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.class_name}</span>
                   </p>
                   <p className="font-semibold text-monday-gray">
-                    Tahun Akademik: <span className="text-monday-black font-extrabold block mt-0.5">{taObj ? taObj.nama_ta : '-'}</span>
+                    Tahun Akademik: <span className="text-monday-black font-extrabold block mt-0.5">{taObj ? taObj.name : '-'}</span>
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-semibold text-monday-gray">
-                    Jadwal Kuliah: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.hari}, {selectedClassForDetail.jam_mulai.substring(0, 5)} - {selectedClassForDetail.jam_selesai.substring(0, 5)}</span>
+                    Jadwal Kuliah: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.day}, {selectedClassForDetail.start_time.substring(0, 5)} - {selectedClassForDetail.end_time.substring(0, 5)}</span>
                   </p>
                   <p className="font-semibold text-monday-gray">
-                    Ruangan: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.ruangan}</span>
+                    Ruangan: <span className="text-monday-black font-extrabold block mt-0.5">{selectedClassForDetail.room}</span>
                   </p>
                   <p className="font-semibold text-monday-gray">
                     Dosen Pengampu: <span className="text-monday-black font-extrabold block mt-0.5">{linkedDosenNames.length > 0 ? linkedDosenNames.join(', ') : 'Belum Ada Dosen'}</span>
@@ -262,23 +262,23 @@ export default function KelasKuliahTab({
                     <tbody className="divide-y divide-monday-border text-sm text-monday-black">
                       {enrollments.length > 0 ? (
                         enrollments.map((en, index) => {
-                          const mhs = mahasiswas.find(m => m.id === en.id_mahasiswa);
+                          const mhs = students.find(m => m.id === en.student_id);
                           return (
                             <tr key={en.id} className="hover:bg-monday-gray-background/30 transition-colors">
                               <td className="py-2.5 px-5 text-monday-gray font-mono font-semibold">{index + 1}</td>
                               <td className="py-2.5 px-5 font-bold text-monday-blue font-mono">{mhs ? mhs.nim : '-'}</td>
-                              <td className="py-2.5 px-5 font-semibold">{mhs ? mhs.nama : 'Tidak Diketahui'}</td>
-                              <td className="py-2.5 px-5 text-right font-bold text-monday-black">{en.nilai_akhir || '0'}</td>
+                              <td className="py-2.5 px-5 font-semibold">{mhs ? mhs.name : 'Tidak Diketahui'}</td>
+                              <td className="py-2.5 px-5 text-right font-bold text-monday-black">{en.final_score || '0'}</td>
                               <td className="py-2.5 px-5 text-right">
-                                {en.nilai_huruf ? (
-                                  <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-lg border ${en.nilai_huruf === 'A' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
-                                    en.nilai_huruf === 'B' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
-                                      en.nilai_huruf === 'C' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
-                                        en.nilai_huruf === 'D' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
-                                          en.nilai_huruf === 'E' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
+                                {en.letter_grade ? (
+                                  <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-lg border ${en.letter_grade === 'A' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
+                                    en.letter_grade === 'B' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
+                                      en.letter_grade === 'C' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
+                                        en.letter_grade === 'D' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
+                                          en.letter_grade === 'E' ? 'bg-monday-red/15 text-monday-red border-monday-red/20' :
                                             'bg-monday-background text-monday-gray border-monday-border'
                                     }`}>
-                                    {en.nilai_huruf}
+                                    {en.letter_grade}
                                   </span>
                                 ) : (
                                   <span className="text-monday-gray text-xs italic">-</span>

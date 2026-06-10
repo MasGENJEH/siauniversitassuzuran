@@ -22,9 +22,9 @@ class KelasMahasiswaController extends Controller
     {
         $user = auth()->user();
         if ($user && $user->hasRole('mahasiswa')) {
-            $mahasiswa = Mahasiswa::where('id_user', $user->id)->first();
+            $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
             if ($mahasiswa) {
-                $kelasMahasiswa = KelasMahasiswa::where('id_mahasiswa', $mahasiswa->id)->get();
+                $kelasMahasiswa = KelasMahasiswa::where('student_id', $mahasiswa->id)->get();
 
                 return response()->json(KelasMahasiswaResource::collection($kelasMahasiswa));
             }

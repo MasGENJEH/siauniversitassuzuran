@@ -3,10 +3,10 @@ import { User, Mail, Phone, Lock, Camera, CheckCircle2, AlertCircle, Eye, EyeOff
 
 export default function ProfilAdminTab({
   user,
-  fakultas = [],
-  prodis = [],
-  dosens = [],
-  mahasiswas = [],
+  faculties = [],
+  studyPrograms = [],
+  lecturers = [],
+  students = [],
   mataKuliahs = [],
   kelasKuliahs = [],
   users = [],
@@ -21,8 +21,8 @@ export default function ProfilAdminTab({
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
   // File upload states
-  const [fotoFile, setFotoFile] = useState(null);
-  const [fotoPreview, setFotoPreview] = useState(null);
+  const [photoFile, setFotoFile] = useState(null);
+  const [photoPreview, setFotoPreview] = useState(null);
 
   // UI state
   const [showPassword, setShowPassword] = useState(false);
@@ -42,30 +42,30 @@ export default function ProfilAdminTab({
   // Cleanup preview URL on unmount
   useEffect(() => {
     return () => {
-      if (fotoPreview) {
-        URL.revokeObjectURL(fotoPreview);
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
       }
     };
-  }, [fotoPreview]);
+  }, [photoPreview]);
 
   // System overview stats
   const systemStats = useMemo(() => ({
     totalUsers: users.length,
-    totalDosens: dosens.length,
-    totalMahasiswas: mahasiswas.length,
-    totalFakultas: fakultas.length,
-    totalProdis: prodis.length,
+    totalDosens: lecturers.length,
+    totalMahasiswas: students.length,
+    totalFakultas: faculties.length,
+    totalProdis: studyPrograms.length,
     totalMataKuliahs: mataKuliahs.length,
     totalKelasKuliahs: kelasKuliahs.length,
-    aktivMahasiswas: mahasiswas.filter(m => m.status_mahasiswa === 'AKTIF').length,
-  }), [users, dosens, mahasiswas, fakultas, prodis, mataKuliahs, kelasKuliahs]);
+    aktivMahasiswas: students.filter(m => m.status === 'AKTIF').length,
+  }), [users, lecturers, students, faculties, studyPrograms, mataKuliahs, kelasKuliahs]);
 
   // Handle image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, foto: ['Ukuran foto maksimal 2MB.'] }));
+        setErrors(prev => ({ ...prev, photo: ['Ukuran photo maksimal 2MB.'] }));
         return;
       }
       setFotoFile(file);
@@ -73,7 +73,7 @@ export default function ProfilAdminTab({
       setFotoPreview(previewUrl);
       setErrors(prev => {
         const copy = { ...prev };
-        delete copy.foto;
+        delete copy.photo;
         return copy;
       });
     }
@@ -103,8 +103,8 @@ export default function ProfilAdminTab({
       fd.append('password_confirmation', passwordConfirmation);
     }
 
-    if (fotoFile) {
-      fd.append('foto', fotoFile);
+    if (photoFile) {
+      fd.append('photo', photoFile);
     }
 
     try {
@@ -144,11 +144,11 @@ export default function ProfilAdminTab({
 
   // Profile Image URL Helper
   const displayPhoto = useMemo(() => {
-    if (fotoPreview) return fotoPreview;
+    if (photoPreview) return photoPreview;
     // Only use user.photo if it looks like a real storage path (contains a /)
     if (user?.photo && user.photo.includes('/')) return `/storage/${user.photo}`;
     return null;
-  }, [fotoPreview, user?.photo]);
+  }, [photoPreview, user?.photo]);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
@@ -211,8 +211,8 @@ export default function ProfilAdminTab({
             Administrator
           </span>
 
-          {errors.foto && (
-            <p className="text-xs text-monday-red font-semibold mt-2">{errors.foto[0]}</p>
+          {errors.photo && (
+            <p className="text-xs text-monday-red font-semibold mt-2">{errors.photo[0]}</p>
           )}
 
           <div className="w-full border-t border-monday-border my-5" />

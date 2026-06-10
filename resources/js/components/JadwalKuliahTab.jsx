@@ -3,11 +3,11 @@ import { Calendar, Clock, MapPin, BookOpen, Users, Info, Smile } from 'lucide-re
 
 export default function JadwalKuliahTab({
   user,
-  mahasiswas,
+  students,
   kelasMahasiswas,
   kelasKuliahs,
   mataKuliahs,
-  dosens = [],
+  lecturers = [],
   dosenPengampus = [],
   tahunAkademiks = []
 }) {
@@ -16,8 +16,8 @@ export default function JadwalKuliahTab({
   // Find current student record
   const myMahasiswa = useMemo(() => {
     if (!isMahasiswa || !user) return null;
-    return mahasiswas.find(m => m.id_user === user.id) || null;
-  }, [isMahasiswa, user, mahasiswas]);
+    return students.find(m => m.user_id === user.id) || null;
+  }, [isMahasiswa, user, students]);
 
   // Find active academic year
   const activeSemester = useMemo(() => {
@@ -40,7 +40,7 @@ export default function JadwalKuliahTab({
     if (!myMahasiswa || !activeSemester) return { days: {}, totalSks: 0, totalClasses: 0 };
 
     // Get all enrollments for this student
-    const studentEnrollments = kelasMahasiswas.filter(km => km.id_mahasiswa === myMahasiswa.id);
+    const studentEnrollments = kelasMahasiswas.filter(km => km.student_id === myMahasiswa.id);
 
     let totalSks = 0;
     let totalClasses = 0;
@@ -56,35 +56,35 @@ export default function JadwalKuliahTab({
 
     studentEnrollments.forEach(km => {
       // Find class details
-      const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
+      const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
       if (!kk) return;
 
       // Filter by active semester
-      if (kk.id_ta !== activeSemester.id) return;
+      if (kk.academic_year_id !== activeSemester.id) return;
 
       // Find course details
-      const mk = mataKuliahs.find(m => m.id === kk.id_mk);
+      const mk = mataKuliahs.find(m => m.id === kk.course_id);
       if (!mk) return;
 
       totalSks += Number(mk.sks || 0);
       totalClasses++;
 
       // Find lecturers
-      const teachingLinks = dosenPengampus.filter(dp => dp.id_kelas === kk.id);
+      const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === kk.id);
       const lecturers = teachingLinks
-        .map(dp => dosens.find(d => d.id === dp.id_dosen))
+        .map(dp => lecturers.find(d => d.id === dp.lecturer_id))
         .filter(Boolean);
 
-      const dayName = (kk.hari || '').toUpperCase().trim();
+      const dayName = (kk.day || '').toUpperCase().trim();
       
       if (daysGroup[dayName]) {
         daysGroup[dayName].push({
           id: kk.id,
-          kode_kelas: kk.kode_kelas,
-          nama_kelas: kk.nama_kelas,
-          jam_mulai: kk.jam_mulai,
-          jam_selesai: kk.jam_selesai,
-          ruangan: kk.ruangan,
+          class_code: kk.class_code,
+          class_name: kk.class_name,
+          start_time: kk.start_time,
+          end_time: kk.end_time,
+          room: kk.room,
           mata_kuliah: mk,
           lecturers: lecturers
         });
@@ -94,8 +94,8 @@ export default function JadwalKuliahTab({
     // Sort classes inside each day by start time
     Object.keys(daysGroup).forEach(day => {
       daysGroup[day].sort((a, b) => {
-        const timeA = a.jam_mulai || '00:00:00';
-        const timeB = b.jam_mulai || '00:00:00';
+        const timeA = a.start_time || '00:00:00';
+        const timeB = b.start_time || '00:00:00';
         return timeA.localeCompare(timeB);
       });
     });
@@ -105,7 +105,7 @@ export default function JadwalKuliahTab({
       totalSks,
       totalClasses
     };
-  }, [myMahasiswa, activeSemester, kelasMahasiswas, kelasKuliahs, mataKuliahs, dosens, dosenPengampus]);
+  }, [myMahasiswa, activeSemester, kelasMahasiswas, kelasKuliahs, mataKuliahs, lecturers, dosenPengampus]);
 
   if (!isMahasiswa) {
     return (
@@ -182,7 +182,7 @@ export default function JadwalKuliahTab({
         <div className="flex items-center gap-2 px-4 py-2 bg-monday-blue/10 border border-monday-blue/15 rounded-2xl md:self-center self-start">
           <Clock size={16} className="text-monday-blue" />
           <span className="text-xs font-bold text-monday-blue">
-            Semester Aktif: {activeSemester.nama_ta}
+            Semester Aktif: {activeSemester.name}
           </span>
         </div>
       </div>
@@ -258,10 +258,10 @@ export default function JadwalKuliahTab({
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex flex-col">
                             <span className="font-extrabold text-base text-monday-black leading-snug">
-                              {cls.mata_kuliah.nama_mk}
+                              {cls.mata_kuliah.name}
                             </span>
                             <span className="text-xs font-bold text-monday-gray mt-0.5">
-                              {cls.mata_kuliah.kode_mk} • {cls.nama_kelas}
+                              {cls.mata_kuliah.code} • {cls.class_name}
                             </span>
                           </div>
                           <span className="px-2 py-1 bg-monday-background border border-monday-border text-[10px] font-extrabold text-monday-gray rounded-lg whitespace-nowrap">
@@ -274,13 +274,13 @@ export default function JadwalKuliahTab({
                           <div className="flex items-center gap-2 text-xs font-bold text-monday-black">
                             <Clock size={14} className="text-monday-blue" />
                             <span>
-                              {cls.jam_mulai.substring(0, 5)} - {cls.jam_selesai.substring(0, 5)}
+                              {cls.start_time.substring(0, 5)} - {cls.end_time.substring(0, 5)}
                             </span>
                           </div>
                           
                           <div className="flex items-center gap-2 text-xs font-semibold text-monday-gray">
                             <MapPin size={14} className="text-monday-gray" />
-                            <span>Ruang {cls.ruangan}</span>
+                            <span>Ruang {cls.room}</span>
                           </div>
                         </div>
                       </div>
@@ -294,7 +294,7 @@ export default function JadwalKuliahTab({
                             {cls.lecturers.length > 0 ? (
                               cls.lecturers.map(doc => (
                                 <span key={doc.id} className="text-xs font-bold text-monday-black leading-relaxed">
-                                  {doc.nama}
+                                  {doc.name}
                                 </span>
                               ))
                             ) : (
@@ -312,7 +312,7 @@ export default function JadwalKuliahTab({
                 /* Empty Day Card */
                 <div className="flex items-center gap-3 p-4 bg-monday-gray-background/30 border border-dashed border-monday-border rounded-2xl text-monday-gray text-xs font-bold">
                   <Smile size={16} className="text-monday-gray/60" />
-                  <span>Tidak ada jadwal kuliah hari ini. Waktunya istirahat atau belajar mandiri!</span>
+                  <span>Tidak ada jadwal kuliah day ini. Waktunya istirahat atau belajar mandiri!</span>
                 </div>
               )}
             </div>

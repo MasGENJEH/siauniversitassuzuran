@@ -25,7 +25,7 @@ class DosenRequest extends FormRequest
         $dosenId = $this->route('dosen');
 
         return [
-            'id_user' => [
+            'user_id' => [
                 'required',
                 'integer',
                 'exists:users,id', // Memastikan ID User terdaftar di tabel users
@@ -35,14 +35,14 @@ class DosenRequest extends FormRequest
                 'string',
                 'max:20',
                 // Jika create: wajib unik di tabel dosen. Jika update: abaikan keunikan untuk ID dosen saat ini.
-                'unique:dosens,nidn,'.$dosenId,
+                'unique:lecturers,nidn,'.$dosenId,
             ],
-            'nama' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'foto' => [
+            'photo' => [
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg,webp',
@@ -54,30 +54,30 @@ class DosenRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_user.required' => 'AKUN USER pengikat dosen wajib dipilih.',
-            'id_user.integer' => 'AKUN USER harus berupa angka.',
-            'id_user.exists' => 'AKUN USER yang dipilih tidak valid atau tidak terdaftar.',
+            'user_id.required' => 'AKUN USER pengikat dosen wajib dipilih.',
+            'user_id.integer' => 'AKUN USER harus berupa angka.',
+            'user_id.exists' => 'AKUN USER yang dipilih tidak valid atau tidak terdaftar.',
 
             'nidn.required' => 'NIDN wajib diisi.',
             'nidn.string' => 'NIDN harus berupa teks.',
             'nidn.max' => 'NIDN maksimal berjumlah 20 karakter.',
             'nidn.unique' => 'NIDN sudah terdaftar di dalam sistem.',
 
-            'nama.required' => 'NAMA DOSEN wajib diisi.',
-            'nama.string' => 'NAMA DOSEN harus berupa teks.',
-            'nama.max' => 'NAMA DOSEN maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA DOSEN wajib diisi.',
+            'name.string' => 'NAMA DOSEN harus berupa teks.',
+            'name.max' => 'NAMA DOSEN maksimal berjumlah 255 karakter.',
 
-            'foto.image' => 'FOTO harus berupa file gambar.',
-            'foto.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
-            'foto.max' => 'Ukuran FOTO maksimal 2MB.',
+            'photo.image' => 'FOTO harus berupa file gambar.',
+            'photo.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
+            'photo.max' => 'Ukuran FOTO maksimal 2MB.',
         ];
     }
 
     protected function prepareForValidation()
     {
-        if ($this->has('nama')) {
+        if ($this->has('name')) {
             $this->merge([
-                'nama' => strtoupper($this->nama),
+                'name' => strtoupper($this->name),
             ]);
         }
     }

@@ -3,10 +3,10 @@ import { Building, Award, Users, GraduationCap, Star, BookOpen, TrendingUp, Chec
 
 export default function DashboardTab({
   user,
-  fakultas,
-  prodis,
-  dosens,
-  mahasiswas,
+  faculties,
+  studyPrograms,
+  lecturers,
+  students,
   activeSemester,
   kelasKuliahs,
   dosenPengampus,
@@ -19,10 +19,10 @@ export default function DashboardTab({
   // Compute student stats
   const studentMetrics = useMemo(() => {
     if (!isMahasiswa || !user) return null;
-    const myMhs = mahasiswas.find(m => m.id_user === user.id);
+    const myMhs = students.find(m => m.user_id === user.id);
     if (!myMhs) return null;
 
-    const studentEnrollments = kelasMahasiswas.filter(km => km.id_mahasiswa === myMhs.id);
+    const studentEnrollments = kelasMahasiswas.filter(km => km.student_id === myMhs.id);
 
     const getGradeWeight = (letter) => {
       const char = (letter || '').toUpperCase().trim();
@@ -44,28 +44,28 @@ export default function DashboardTab({
     let weightedSumTotal = 0;
 
     studentEnrollments.forEach(km => {
-      const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
+      const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
       if (!kk) return;
 
-      const mk = mataKuliahs.find(m => m.id === kk.id_mk);
+      const mk = mataKuliahs.find(m => m.id === kk.course_id);
       if (!mk) return;
 
       const sks = Number(mk.sks || 0);
 
-      const isCurrentSemester = activeSemester && kk.id_ta === activeSemester.id;
+      const isCurrentSemester = activeSemester && kk.academic_year_id === activeSemester.id;
 
       if (isCurrentSemester) {
         sksDiambilSemesterIni += sks;
-        if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+        if (km.letter_grade !== null && km.letter_grade !== undefined) {
           gradedSksSemester += sks;
-          weightedSumSemester += sks * getGradeWeight(km.nilai_huruf);
+          weightedSumSemester += sks * getGradeWeight(km.letter_grade);
         }
       }
 
-      if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+      if (km.letter_grade !== null && km.letter_grade !== undefined) {
         gradedSksTotal += sks;
-        weightedSumTotal += sks * getGradeWeight(km.nilai_huruf);
-        if (km.nilai_huruf.toUpperCase().trim() !== 'E') {
+        weightedSumTotal += sks * getGradeWeight(km.letter_grade);
+        if (km.letter_grade.toUpperCase().trim() !== 'E') {
           sksLulusTotal += sks;
         }
       }
@@ -80,7 +80,7 @@ export default function DashboardTab({
       sksLulus: sksLulusTotal,
       sksDiambil: sksDiambilSemesterIni
     };
-  }, [isMahasiswa, user, mahasiswas, kelasMahasiswas, kelasKuliahs, mataKuliahs, activeSemester]);
+  }, [isMahasiswa, user, students, kelasMahasiswas, kelasKuliahs, mataKuliahs, activeSemester]);
 
   // Determine which metrics cards to render
   const metrics = useMemo(() => {
@@ -93,12 +93,12 @@ export default function DashboardTab({
       ];
     }
     return [
-      { title: 'Total Fakultas', count: fakultas.length, icon: Building, colorClass: 'bg-monday-blue/10 text-monday-blue' },
-      { title: 'Program Studi', count: prodis.length, icon: Award, colorClass: 'bg-violet-500/10 text-violet-600' },
-      { title: 'Dosen Pengajar', count: dosens.length, icon: Users, colorClass: 'bg-emerald-500/10 text-emerald-600' },
-      { title: 'Mahasiswa Terdaftar', count: mahasiswas.length, icon: GraduationCap, colorClass: 'bg-amber-500/10 text-amber-600' },
+      { title: 'Total Fakultas', count: faculties.length, icon: Building, colorClass: 'bg-monday-blue/10 text-monday-blue' },
+      { title: 'Program Studi', count: studyPrograms.length, icon: Award, colorClass: 'bg-violet-500/10 text-violet-600' },
+      { title: 'Dosen Pengajar', count: lecturers.length, icon: Users, colorClass: 'bg-emerald-500/10 text-emerald-600' },
+      { title: 'Mahasiswa Terdaftar', count: students.length, icon: GraduationCap, colorClass: 'bg-amber-500/10 text-amber-600' },
     ];
-  }, [isMahasiswa, studentMetrics, fakultas, prodis, dosens, mahasiswas]);
+  }, [isMahasiswa, studentMetrics, faculties, studyPrograms, lecturers, students]);
 
   return (
     <div className="space-y-6">
@@ -151,8 +151,8 @@ export default function DashboardTab({
           {activeSemester ? (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-monday-lime-green/20 border border-monday-lime-green/30 text-center">
-                <span className="text-2xl font-extrabold text-monday-black block">{activeSemester.kode_ta}</span>
-                <span className="text-xs text-monday-gray font-bold uppercase mt-1 block">{activeSemester.nama_ta}</span>
+                <span className="text-2xl font-extrabold text-monday-black block">{activeSemester.code}</span>
+                <span className="text-xs text-monday-gray font-bold uppercase mt-1 block">{activeSemester.name}</span>
               </div>
               <p className="text-xs text-monday-gray font-semibold leading-relaxed">
                 Seluruh penugasan dosen pengampu dan pengambilan kelas kuliah mahasiswa terikat pada semester aktif ini.

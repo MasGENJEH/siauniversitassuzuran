@@ -6,7 +6,7 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
 
   const mainMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, roles: ['admin', 'dosen', 'mahasiswa'] },
-    { id: 'fakultas', label: 'Fakultas', icon: Building, roles: ['admin'] },
+    { id: 'faculties', label: 'Fakultas', icon: Building, roles: ['admin'] },
     { id: 'prodi', label: 'Program Studi', icon: Award, roles: ['admin'] },
     { id: 'tahun-akademik', label: 'Tahun Akademik', icon: Calendar, roles: ['admin'] },
     { id: 'dosen', label: 'Data Dosen', icon: Users, roles: ['admin'] },

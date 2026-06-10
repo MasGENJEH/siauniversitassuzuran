@@ -4,10 +4,10 @@ import { Edit3, Plus, Search, Edit, Trash2, ChevronDown, ChevronLeft, ChevronRig
 export default function KelasMahasiswaTab({
   user,
   kelasMahasiswas,
-  mahasiswas,
+  students,
   kelasKuliahs,
   mataKuliahs,
-  dosens = [],
+  lecturers = [],
   dosenPengampus = [],
   tahunAkademiks = [],
   searchQuery,
@@ -23,8 +23,8 @@ export default function KelasMahasiswaTab({
   const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
   const myMahasiswa = useMemo(() => {
     if (!isMahasiswa || !user) return null;
-    return mahasiswas.find(m => m.id_user === user.id) || null;
-  }, [isMahasiswa, user, mahasiswas]);
+    return students.find(m => m.user_id === user.id) || null;
+  }, [isMahasiswa, user, students]);
 
   // Reset to page 1 when search query changes
   useEffect(() => {
@@ -37,10 +37,10 @@ export default function KelasMahasiswaTab({
     const studentMap = {};
 
     kelasMahasiswas.forEach(km => {
-      if (!studentMap[km.id_mahasiswa]) {
-        studentMap[km.id_mahasiswa] = [];
+      if (!studentMap[km.student_id]) {
+        studentMap[km.student_id] = [];
       }
-      studentMap[km.id_mahasiswa].push(km);
+      studentMap[km.student_id].push(km);
     });
 
     const getGradeWeight = (letter) => {
@@ -57,7 +57,7 @@ export default function KelasMahasiswaTab({
 
     // Build summaries
     return Object.entries(studentMap).map(([mahasiswaId, enrollments]) => {
-      const mhs = mahasiswas.find(m => m.id === Number(mahasiswaId));
+      const mhs = students.find(m => m.id === Number(mahasiswaId));
       if (!mhs) return null;
 
       let totalSksDiambil = 0;
@@ -70,27 +70,27 @@ export default function KelasMahasiswaTab({
       let weightedSumTotal = 0;
 
       enrollments.forEach(km => {
-        const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
-        const mk = kk ? mataKuliahs.find(m => m.id === kk.id_mk) : null;
+        const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
+        const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
         if (!mk) return;
 
         const sks = Number(mk.sks || 0);
         totalSksDiambil += sks;
 
-        const isCurrentSemester = activeSemester && kk.id_ta === activeSemester.id;
+        const isCurrentSemester = activeSemester && kk.academic_year_id === activeSemester.id;
 
         if (isCurrentSemester) {
           sksDiambilSemesterIni += sks;
-          if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+          if (km.letter_grade !== null && km.letter_grade !== undefined) {
             gradedSksSemester += sks;
-            weightedSumSemester += sks * getGradeWeight(km.nilai_huruf);
+            weightedSumSemester += sks * getGradeWeight(km.letter_grade);
           }
         }
 
-        if (km.nilai_huruf !== null && km.nilai_huruf !== undefined) {
+        if (km.letter_grade !== null && km.letter_grade !== undefined) {
           gradedSksTotal += sks;
-          weightedSumTotal += sks * getGradeWeight(km.nilai_huruf);
-          if (km.nilai_huruf.toUpperCase().trim() !== 'E') {
+          weightedSumTotal += sks * getGradeWeight(km.letter_grade);
+          if (km.letter_grade.toUpperCase().trim() !== 'E') {
             totalSksLulus += sks;
           }
         }
@@ -111,11 +111,11 @@ export default function KelasMahasiswaTab({
         ipk
       };
     }).filter(Boolean);
-  }, [kelasMahasiswas, mahasiswas, kelasKuliahs, mataKuliahs, tahunAkademiks]);
+  }, [kelasMahasiswas, students, kelasKuliahs, mataKuliahs, tahunAkademiks]);
 
   // Filter students
   const filteredStudents = studentSummaries.filter(s =>
-    s.mahasiswa.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.mahasiswa.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.mahasiswa.nim.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -183,7 +183,7 @@ export default function KelasMahasiswaTab({
             </div>
           </div>
           <button
-            onClick={() => openModal('kelasMahasiswa', 'create', { id_mahasiswa: activeMahasiswa.id })}
+            onClick={() => openModal('kelasMahasiswa', 'create', { student_id: activeMahasiswa.id })}
             className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
           >
             Daftarkan Kelas (KRS) <Plus size={16} />
@@ -195,10 +195,10 @@ export default function KelasMahasiswaTab({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-monday-blue/10 border border-monday-blue/20 flex items-center justify-center text-monday-blue font-extrabold text-xl">
-                {activeMahasiswa.nama.charAt(0).toUpperCase()}
+                {activeMahasiswa.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-extrabold text-lg text-monday-black">{activeMahasiswa.nama}</h3>
+                <h3 className="font-extrabold text-lg text-monday-black">{activeMahasiswa.name}</h3>
                 <p className="font-bold text-sm text-monday-blue">{activeMahasiswa.nim}</p>
               </div>
             </div>
@@ -252,8 +252,8 @@ export default function KelasMahasiswaTab({
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
               {selectedStudentData.enrollments.map((km, index) => {
-                const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
-                const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
+                const kkObj = kelasKuliahs.find(k => k.id === km.course_class_id);
+                const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.course_id) : null;
 
                 return (
                   <tr key={km.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -261,15 +261,15 @@ export default function KelasMahasiswaTab({
                     <td className="py-3.5 px-6">
                       {mkObj ? (
                         <div className="flex flex-col">
-                          <span className="font-bold text-monday-black">{mkObj.nama_mk}</span>
-                          <span className="text-xs font-semibold text-monday-gray">{mkObj.kode_mk}</span>
+                          <span className="font-bold text-monday-black">{mkObj.name}</span>
+                          <span className="text-xs font-semibold text-monday-gray">{mkObj.code}</span>
                         </div>
                       ) : <span className="text-monday-gray italic">-</span>}
                     </td>
                     <td className="py-3.5 px-6">
                       {kkObj ? (
                         <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                          {kkObj.nama_kelas}
+                          {kkObj.class_name}
                         </span>
                       ) : '-'}
                     </td>
@@ -277,14 +277,14 @@ export default function KelasMahasiswaTab({
                       {mkObj && mkObj.sks ? mkObj.sks : '-'}
                     </td>
                     <td className="py-3.5 px-6 text-center font-bold">
-                      {km.nilai_akhir !== null && km.nilai_akhir !== undefined
-                        ? km.nilai_akhir
+                      {km.final_score !== null && km.final_score !== undefined
+                        ? km.final_score
                         : <span className="text-monday-gray font-normal italic">Belum Dinilai</span>}
                     </td>
                     <td className="py-3.5 px-6 text-center">
-                      {km.nilai_huruf ? (
-                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getGradeBadgeClass(km.nilai_huruf)}`}>
-                          {km.nilai_huruf}
+                      {km.letter_grade ? (
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getGradeBadgeClass(km.letter_grade)}`}>
+                          {km.letter_grade}
                         </span>
                       ) : (
                         <span className="text-monday-gray text-xs italic">N/A</span>
@@ -295,10 +295,10 @@ export default function KelasMahasiswaTab({
                         {isMahasiswa ? (
                           <button
                             onClick={() => {
-                              const kkObj = kelasKuliahs.find(k => k.id === km.id_kelas);
-                              const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.id_mk) : null;
-                              const teachingLinks = dosenPengampus.filter(dp => dp.id_kelas === km.id_kelas);
-                              const lecturers = teachingLinks.map(dp => dosens.find(d => d.id === dp.id_dosen)).filter(Boolean);
+                              const kkObj = kelasKuliahs.find(k => k.id === km.course_class_id);
+                              const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.course_id) : null;
+                              const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === km.course_class_id);
+                              const lecturers = teachingLinks.map(dp => lecturers.find(d => d.id === dp.lecturer_id)).filter(Boolean);
                               setViewingClass({ kk: kkObj, mk: mkObj, lecturers });
                             }}
                             className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5 ml-auto"
@@ -353,7 +353,7 @@ export default function KelasMahasiswaTab({
               <div className="space-y-4 text-left">
                 <div>
                   <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Mata Kuliah</p>
-                  <p className="font-bold text-sm text-monday-black">{viewingClass.mk?.nama_mk} ({viewingClass.mk?.kode_mk})</p>
+                  <p className="font-bold text-sm text-monday-black">{viewingClass.mk?.name} ({viewingClass.mk?.code})</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -362,17 +362,17 @@ export default function KelasMahasiswaTab({
                   </div>
                   <div>
                     <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Kelas</p>
-                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.nama_kelas}</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.class_name}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Jadwal</p>
-                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.hari}, {viewingClass.kk?.jam_mulai?.substring(0, 5)} - {viewingClass.kk?.jam_selesai?.substring(0, 5)}</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.day}, {viewingClass.kk?.start_time?.substring(0, 5)} - {viewingClass.kk?.end_time?.substring(0, 5)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Ruangan</p>
-                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.ruangan}</p>
+                    <p className="font-bold text-sm text-monday-black">{viewingClass.kk?.room}</p>
                   </div>
                 </div>
                 <div>
@@ -380,7 +380,7 @@ export default function KelasMahasiswaTab({
                   <div className="space-y-1">
                     {viewingClass.lecturers && viewingClass.lecturers.length > 0 ? (
                       viewingClass.lecturers.map(d => (
-                        <p key={d.id} className="text-sm font-semibold text-monday-black">• {d.nama}</p>
+                        <p key={d.id} className="text-sm font-semibold text-monday-black">• {d.name}</p>
                       ))
                     ) : (
                       <p className="text-sm text-monday-gray italic">Belum ditentukan</p>
@@ -431,7 +431,7 @@ export default function KelasMahasiswaTab({
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
           <input
             type="text"
-            placeholder="Cari nama / NIM mahasiswa..."
+            placeholder="Cari name / NIM mahasiswa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-monday-background border border-monday-border rounded-2xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
@@ -457,7 +457,7 @@ export default function KelasMahasiswaTab({
               <tr key={s.mahasiswa.id} className="hover:bg-monday-gray-background/30 transition-colors">
                 <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{s.mahasiswa.nim}</td>
-                <td className="py-3.5 px-6 font-semibold">{s.mahasiswa.nama}</td>
+                <td className="py-3.5 px-6 font-semibold">{s.mahasiswa.name}</td>
                 <td className="py-3.5 px-6 text-center">
                   <span className="px-2.5 py-1 bg-monday-blue/10 text-monday-blue border border-monday-blue/15 rounded-lg text-xs font-bold">
                     {s.totalMk} MK

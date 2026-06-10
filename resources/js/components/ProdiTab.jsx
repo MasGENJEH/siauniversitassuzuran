@@ -2,8 +2,8 @@ import React from 'react';
 import { Award, Plus, Search, Edit, Trash2 } from 'lucide-react';
 
 export default function ProdiTab({
-  prodis,
-  fakultas,
+  studyPrograms,
+  faculties,
   searchQuery,
   setSearchQuery,
   openModal,
@@ -20,7 +20,7 @@ export default function ProdiTab({
             </span>
           </p>
           <p className="font-semibold text-sm text-monday-gray">
-            Kelola data program studi dan hubungannya dengan fakultas. Total: {prodis.length} program studi terdaftar.
+            Kelola data program studi dan hubungannya dengan faculties. Total: {studyPrograms.length} program studi terdaftar.
           </p>
         </div>
         <button 
@@ -56,20 +56,20 @@ export default function ProdiTab({
             </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {prodis.filter(p => 
-              p.nama_prodi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              p.kode_prodi.toLowerCase().includes(searchQuery.toLowerCase())
+            {studyPrograms.filter(p => 
+              p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              p.code.toLowerCase().includes(searchQuery.toLowerCase())
             ).map((pr, index) => {
-              const fakObj = fakultas.find(f => f.id === pr.id_fakultas);
+              const fakObj = faculties.find(f => f.id === pr.faculty_id);
               return (
                 <tr key={pr.id} className="hover:bg-monday-gray-background/30 transition-colors">
                   <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
-                  <td className="py-3.5 px-6 font-bold text-monday-blue">{pr.kode_prodi}</td>
-                  <td className="py-3.5 px-6 font-semibold">{pr.nama_prodi}</td>
+                  <td className="py-3.5 px-6 font-bold text-monday-blue">{pr.code}</td>
+                  <td className="py-3.5 px-6 font-semibold">{pr.name}</td>
                   <td className="py-3.5 px-6">
                     {fakObj ? (
                       <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
-                        {fakObj.nama_fakultas}
+                        {fakObj.name}
                       </span>
                     ) : '-'}
                   </td>

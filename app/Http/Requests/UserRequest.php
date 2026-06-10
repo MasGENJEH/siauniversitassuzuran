@@ -45,7 +45,7 @@ class UserRequest extends FormRequest
             ],
             'photo' => [
                 'nullable',
-                'string', // Mengakomodasi nama file gambar, ganti ke 'image|mimes:jpeg,png,jpg|max:2048' jika berupa file upload langsung
+                'string', // Mengakomodasi name file gambar, ganti ke 'image|mimes:jpeg,png,jpg|max:2048' jika berupa file upload langsung
             ],
         ];
 
@@ -68,7 +68,7 @@ class UserRequest extends FormRequest
 
             'email.required' => 'EMAIL wajib diisi.',
             'email.string' => 'EMAIL harus berupa teks.',
-            'email.email' => 'Format EMAIL tidak valid (gunakan contoh: nama@kampus.ac.id).',
+            'email.email' => 'Format EMAIL tidak valid (gunakan contoh: name@kampus.ac.id).',
             'email.max' => 'EMAIL maksimal berjumlah 255 karakter.',
             'email.unique' => 'EMAIL sudah digunakan oleh akun lain.',
 

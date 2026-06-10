@@ -9,15 +9,17 @@ class DosenPengampu extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['id_kelas', 'id_dosen'];
+    protected $table = 'class_instructors';
+
+    protected $fillable = ['course_class_id', 'lecturer_id'];
 
     public function dosen()
     {
-        return $this->belongsTo(Dosen::class, 'id_dosen', 'id');
+        return $this->belongsTo(Dosen::class, 'lecturer_id', 'id');
     }
 
     public function kelas()
     {
-        return $this->belongsTo(KelasKuliah::class, 'id_kelas', 'id');
+        return $this->belongsTo(KelasKuliah::class, 'course_class_id', 'id');
     }
 }

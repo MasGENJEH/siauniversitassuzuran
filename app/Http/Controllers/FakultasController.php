@@ -9,51 +9,51 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class FakultasController extends Controller
 {
-    private FakultasService $fakultasService;
+    private FakultasService $facultiesService;
 
-    public function __construct(FakultasService $fakultasService)
+    public function __construct(FakultasService $facultiesService)
     {
-        $this->fakultasService = $fakultasService;
+        $this->facultiesService = $facultiesService;
     }
 
     public function index()
     {
         $fields = ['*'];
-        $fakultas = $this->fakultasService->getAll($fields ?: ['*']);
+        $faculties = $this->facultiesService->getAll($fields ?: ['*']);
 
-        return response()->json(FakultasResource::collection($fakultas));
+        return response()->json(FakultasResource::collection($faculties));
     }
 
     public function show(int $id)
     {
         try {
             $fields = ['*'];
-            $fakultas = $this->fakultasService->getById($id, $fields);
+            $faculties = $this->facultiesService->getById($id, $fields);
 
-            return response()->json(new FakultasResource($fakultas));
+            return response()->json(new FakultasResource($faculties));
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'fakultas tidak ditemukan',
+                'message' => 'faculties tidak ditemukan',
             ], 404);
         }
     }
 
     public function store(FakultasRequest $request)
     {
-        $fakultas = $this->fakultasService->create($request->validated());
+        $faculties = $this->facultiesService->create($request->validated());
 
-        return response()->json(new FakultasResource($fakultas), 201);
+        return response()->json(new FakultasResource($faculties), 201);
     }
 
     public function update(FakultasRequest $request, int $id)
     {
         try {
-            $fakultas = $this->fakultasService->update($id, $request->validated());
+            $faculties = $this->facultiesService->update($id, $request->validated());
 
-            return response()->json(new FakultasResource($fakultas));
+            return response()->json(new FakultasResource($faculties));
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'fakultas tidak ditemukan',
+                'message' => 'faculties tidak ditemukan',
             ], 404);
         }
     }
@@ -61,14 +61,14 @@ class FakultasController extends Controller
     public function destroy(int $id)
     {
         try {
-            $this->fakultasService->delete($id);
+            $this->facultiesService->delete($id);
 
             return response()->json([
-                'message' => 'fakultas berhasil dihapus',
+                'message' => 'faculties berhasil dihapus',
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'fakultas tidak ditemukan',
+                'message' => 'faculties tidak ditemukan',
             ], 404);
         }
     }

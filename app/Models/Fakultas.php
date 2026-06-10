@@ -10,10 +10,12 @@ class Fakultas extends Model
     //
     use SoftDeletes;
 
-    protected $fillable = ['kode_fakultas', 'nama_fakultas'];
+    protected $table = 'faculties';
+
+    protected $fillable = ['code', 'name'];
 
     public function prodi()
     {
-        return $this->hasMany(Prodi::class);
+        return $this->hasMany(Prodi::class, 'faculty_id');
     }
 }

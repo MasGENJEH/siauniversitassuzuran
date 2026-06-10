@@ -26,36 +26,36 @@ class MahasiswaRequest extends FormRequest
         $mahasiswaId = $this->route('mahasiswa');
 
         return [
-            'id_user' => [
+            'user_id' => [
                 'required',
                 'integer',
                 'exists:users,id', // Validasi akun user terdaftar
             ],
-            'nama' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'id_prodi' => [
+            'study_program_id' => [
                 'required',
                 'integer',
-                'exists:prodis,id', // Validasi prodi wajib terdaftar di tabel prodi
+                'exists:study-programs,id', // Validasi prodi wajib terdaftar di tabel prodi
             ],
-            'id_dosen_pa' => [
+            'academic_advisor_id' => [
                 'required',
                 'integer',
-                'exists:dosens,id', // Validasi dosen PA wajib terdaftar di tabel dosen
+                'exists:lecturers,id', // Validasi dosen PA wajib terdaftar di tabel dosen
             ],
-            'tahun_masuk' => [
+            'enrollment_year' => [
                 'required',
                 'digits:4', // Memastikan input tahun berupa 4 digit angka (cth: 2026)
                 'integer',
             ],
-            'status_mahasiswa' => [
+            'status' => [
                 'required',
                 Rule::in(['AKTIF', 'CUTI', 'LULUS', 'DO']), // Membatasi input sesuai opsi ENUM database
             ],
-            'foto' => [
+            'photo' => [
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg,webp',
@@ -67,35 +67,35 @@ class MahasiswaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_user.required' => 'AKUN USER pengikat mahasiswa wajib dipilih.',
-            'id_user.exists' => 'AKUN USER yang dipilih tidak terdaftar di sistem.',
+            'user_id.required' => 'AKUN USER pengikat mahasiswa wajib dipilih.',
+            'user_id.exists' => 'AKUN USER yang dipilih tidak terdaftar di sistem.',
 
-            'nama.required' => 'NAMA MAHASISWA wajib diisi.',
-            'nama.max' => 'NAMA MAHASISWA maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA MAHASISWA wajib diisi.',
+            'name.max' => 'NAMA MAHASISWA maksimal berjumlah 255 karakter.',
 
-            'id_prodi.required' => 'PROGRAM STUDI wajib dipilih.',
-            'id_prodi.exists' => 'PROGRAM STUDI yang dipilih tidak valid.',
+            'study_program_id.required' => 'PROGRAM STUDI wajib dipilih.',
+            'study_program_id.exists' => 'PROGRAM STUDI yang dipilih tidak valid.',
 
-            'id_dosen_pa.required' => 'DOSEN PEMBIMBING AKADEMIK (PA) wajib dipilih.',
-            'id_dosen_pa.exists' => 'DOSEN PEMBIMBING AKADEMIK tidak valid.',
+            'academic_advisor_id.required' => 'DOSEN PEMBIMBING AKADEMIK (PA) wajib dipilih.',
+            'academic_advisor_id.exists' => 'DOSEN PEMBIMBING AKADEMIK tidak valid.',
 
-            'tahun_masuk.required' => 'TAHUN MASUK wajib diisi.',
-            'tahun_masuk.digits' => 'TAHUN MASUK harus berupa 4 digit angka tahun (Contoh: 2026).',
+            'enrollment_year.required' => 'TAHUN MASUK wajib diisi.',
+            'enrollment_year.digits' => 'TAHUN MASUK harus berupa 4 digit angka tahun (Contoh: 2026).',
 
-            'status_mahasiswa.required' => 'STATUS MAHASISWA wajib dipilih.',
-            'status_mahasiswa.in' => 'STATUS MAHASISWA harus berupa pilihan: AKTIF, CUTI, LULUS, atau DO.',
+            'status.required' => 'STATUS MAHASISWA wajib dipilih.',
+            'status.in' => 'STATUS MAHASISWA harus berupa pilihan: AKTIF, CUTI, LULUS, atau DO.',
 
-            'foto.image' => 'FOTO harus berupa file gambar.',
-            'foto.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
-            'foto.max' => 'Ukuran FOTO maksimal 2MB.',
+            'photo.image' => 'FOTO harus berupa file gambar.',
+            'photo.mimes' => 'FOTO harus berformat JPEG, PNG, JPG, atau WEBP.',
+            'photo.max' => 'Ukuran FOTO maksimal 2MB.',
         ];
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            'nama' => $this->nama ? strtoupper($this->nama) : null,
-            'status_mahasiswa' => $this->status_mahasiswa ? strtoupper($this->status_mahasiswa) : null,
+            'name' => $this->name ? strtoupper($this->name) : null,
+            'status' => $this->status ? strtoupper($this->status) : null,
         ]);
     }
 }

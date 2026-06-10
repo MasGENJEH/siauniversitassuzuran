@@ -19,18 +19,18 @@ class ProdiController extends Controller
     public function index()
     {
         $fields = ['*'];
-        $prodis = $this->prodiService->getAll($fields);
+        $study_programs = $this->prodiService->getAll($fields);
 
-        return response()->json(ProdiResource::collection($prodis));
+        return response()->json(ProdiResource::collection($study_programs));
     }
 
     public function show(int $id)
     {
         try {
             $fields = ['*'];
-            $prodis = $this->prodiService->getById($id, $fields);
+            $study_programs = $this->prodiService->getById($id, $fields);
 
-            return response()->json(new ProdiResource($prodis));
+            return response()->json(new ProdiResource($study_programs));
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'prodi tidak ditemukan',

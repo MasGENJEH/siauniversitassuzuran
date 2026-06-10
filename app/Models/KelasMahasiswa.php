@@ -9,20 +9,22 @@ class KelasMahasiswa extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'enrollments';
+
     protected $fillable = [
-        'id_mahasiswa',
-        'id_kelas',
-        'nilai_akhir',
-        'nilai_huruf',
+        'student_id',
+        'course_class_id',
+        'final_score',
+        'letter_grade',
     ];
 
     public function mahasiswa()
     {
-        return $this->belongsTo(Mahasiswa::class, 'id_mahasiswa', 'id');
+        return $this->belongsTo(Mahasiswa::class, 'student_id', 'id');
     }
 
     public function kelasKuliah()
     {
-        return $this->belongsTo(KelasKuliah::class, 'id_kelas', 'id');
+        return $this->belongsTo(KelasKuliah::class, 'course_class_id', 'id');
     }
 }

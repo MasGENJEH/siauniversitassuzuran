@@ -13,11 +13,11 @@ class TahunAkademikSeeder extends Seeder
     public function run(): void
     {
         $ta = [
-            ['kode_ta' => '20231', 'nama_ta' => 'GANJIL 2023/2024', 'status' => false],
-            ['kode_ta' => '20232', 'nama_ta' => 'GENAP 2023/2024', 'status' => false],
-            ['kode_ta' => '20241', 'nama_ta' => 'GANJIL 2024/2025', 'status' => true],
+            ['code' => '20231', 'name' => 'GANJIL 2023/2024', 'status' => false],
+            ['code' => '20232', 'name' => 'GENAP 2023/2024', 'status' => false],
+            ['code' => '20241', 'name' => 'GANJIL 2024/2025', 'status' => true],
         ];
 
-        DB::table('tahun_akademiks')->insert($ta);
+        DB::table('academic_years')->insert($ta);
     }
 }

@@ -112,10 +112,10 @@ class SiakadSeeder extends Seeder
             [
                 'id' => 13,
                 'name' => 'DR. HARI KUSUMA, M.ED.',
-                'email' => 'hari.dosen@kampus.ac.id',
+                'email' => 'day.dosen@kampus.ac.id',
                 'password' => Hash::make('password123'),
                 'phone' => '081234567813',
-                'photo' => 'hari.jpg',
+                'photo' => 'day.jpg',
             ],
             [
                 'id' => 14,
@@ -208,102 +208,102 @@ class SiakadSeeder extends Seeder
         ]);
 
         // 2. SEEDER TABEL FAKULTAS
-        DB::table('fakultas')->insert([
-            ['id' => 1, 'kode_fakultas' => 'FTI', 'nama_fakultas' => 'FAKULTAS TEKNOLOGI INFORMASI'],
-            ['id' => 2, 'kode_fakultas' => 'FEB', 'nama_fakultas' => 'FAKULTAS EKONOMI DAN BISNIS'],
-            ['id' => 3, 'kode_fakultas' => 'FTS', 'nama_fakultas' => 'FAKULTAS TEKNIK DAN SIPIL'],
-            ['id' => 4, 'kode_fakultas' => 'FIKOM', 'nama_fakultas' => 'FAKULTAS ILMU KOMUNIKASI'],
-            ['id' => 5, 'kode_fakultas' => 'FH', 'nama_fakultas' => 'FAKULTAS HUKUM'],
-            ['id' => 6, 'kode_fakultas' => 'FPSI', 'nama_fakultas' => 'FAKULTAS PSIKOLOGI'],
-            ['id' => 7, 'kode_fakultas' => 'FK', 'nama_fakultas' => 'FAKULTAS KEDOKTERAN'],
-            ['id' => 8, 'kode_fakultas' => 'FKG', 'nama_fakultas' => 'FAKULTAS KEDOKTERAN GIGI'],
-            ['id' => 9, 'kode_fakultas' => 'FKM', 'nama_fakultas' => 'FAKULTAS KESEHATAN MASYARAKAT'],
-            ['id' => 10, 'kode_fakultas' => 'FF', 'nama_fakultas' => 'FAKULTAS FARMASI'],
-            ['id' => 11, 'kode_fakultas' => 'FAD', 'nama_fakultas' => 'FAKULTAS ARSITEKTUR DAN DESAIN'],
-            ['id' => 12, 'kode_fakultas' => 'FISIP', 'nama_fakultas' => 'FAKULTAS ILMU SOSIAL DAN ILMU POLITIK'],
-            ['id' => 13, 'kode_fakultas' => 'FIB', 'nama_fakultas' => 'FAKULTAS ILMU BUDAYA'],
-            ['id' => 14, 'kode_fakultas' => 'FMIPA', 'nama_fakultas' => 'FAKULTAS MATEMATIKA DAN ILMU PENGETAHUAN ALAM'],
-            ['id' => 15, 'kode_fakultas' => 'FAPERTA', 'nama_fakultas' => 'FAKULTAS PERTANIAN'],
-            ['id' => 16, 'kode_fakultas' => 'FKIP', 'nama_fakultas' => 'FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN'],
+        DB::table('faculties')->insert([
+            ['id' => 1, 'code' => 'FTI', 'name' => 'FAKULTAS TEKNOLOGI INFORMASI'],
+            ['id' => 2, 'code' => 'FEB', 'name' => 'FAKULTAS EKONOMI DAN BISNIS'],
+            ['id' => 3, 'code' => 'FTS', 'name' => 'FAKULTAS TEKNIK DAN SIPIL'],
+            ['id' => 4, 'code' => 'FIKOM', 'name' => 'FAKULTAS ILMU KOMUNIKASI'],
+            ['id' => 5, 'code' => 'FH', 'name' => 'FAKULTAS HUKUM'],
+            ['id' => 6, 'code' => 'FPSI', 'name' => 'FAKULTAS PSIKOLOGI'],
+            ['id' => 7, 'code' => 'FK', 'name' => 'FAKULTAS KEDOKTERAN'],
+            ['id' => 8, 'code' => 'FKG', 'name' => 'FAKULTAS KEDOKTERAN GIGI'],
+            ['id' => 9, 'code' => 'FKM', 'name' => 'FAKULTAS KESEHATAN MASYARAKAT'],
+            ['id' => 10, 'code' => 'FF', 'name' => 'FAKULTAS FARMASI'],
+            ['id' => 11, 'code' => 'FAD', 'name' => 'FAKULTAS ARSITEKTUR DAN DESAIN'],
+            ['id' => 12, 'code' => 'FISIP', 'name' => 'FAKULTAS ILMU SOSIAL DAN ILMU POLITIK'],
+            ['id' => 13, 'code' => 'FIB', 'name' => 'FAKULTAS ILMU BUDAYA'],
+            ['id' => 14, 'code' => 'FMIPA', 'name' => 'FAKULTAS MATEMATIKA DAN ILMU PENGETAHUAN ALAM'],
+            ['id' => 15, 'code' => 'FAPERTA', 'name' => 'FAKULTAS PERTANIAN'],
+            ['id' => 16, 'code' => 'FKIP', 'name' => 'FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN'],
         ]);
 
         // 3. SEEDER TABEL TAHUN AKADEMIK
-        DB::table('tahun_akademiks')->insert([
-            ['id' => 1, 'kode_ta' => '20241', 'nama_ta' => 'GANJIL 2024/2025', 'status' => false],
-            ['id' => 2, 'kode_ta' => '20242', 'nama_ta' => 'GENAP 2024/2025', 'status' => false],
-            ['id' => 3, 'kode_ta' => '20251', 'nama_ta' => 'GANJIL 2025/2026', 'status' => true], // Semester Aktif saat ini
+        DB::table('academic_years')->insert([
+            ['id' => 1, 'code' => '20241', 'name' => 'GANJIL 2024/2025', 'status' => false],
+            ['id' => 2, 'code' => '20242', 'name' => 'GENAP 2024/2025', 'status' => false],
+            ['id' => 3, 'code' => '20251', 'name' => 'GANJIL 2025/2026', 'status' => true], // Semester Aktif saat ini
         ]);
 
         // 4. SEEDER TABEL DOSEN
-        DB::table('dosens')->insert([
-            ['id' => 1, 'id_user' => 5, 'nidn' => '0402058101', 'nama' => 'PROF. DR. ENG. HENDRA WIJAYA, S.T., M.T.'],
-            ['id' => 2, 'id_user' => 6, 'nidn' => '0415098302', 'nama' => 'DR. RINA LESTARI, S.SI., M.IT.'],
-            ['id' => 3, 'id_user' => 7, 'nidn' => '0422118703', 'nama' => 'DIAN PRATIWI, S.KOM., M.KOM.'],
-            ['id' => 4, 'id_user' => 8, 'nidn' => '0408047601', 'nama' => 'IR. AGUS SUPRIATNA, M.SC., PH.D.'],
-            ['id' => 5, 'id_user' => 9, 'nidn' => '0419018804', 'nama' => 'MEGAWATI PUTRI, S.E., M.ACC.'],
-            ['id' => 6, 'id_user' => 10, 'nidn' => '0430078202', 'nama' => 'DR. BAMBANG UTOMO, S.H., M.H.'],
-            ['id' => 10, 'id_user' => 11, 'nidn' => '0414068901', 'nama' => 'EKO PRASETYO, S.T., M.ENG.'],
-            ['id' => 11, 'id_user' => 12, 'nidn' => '0427128403', 'nama' => 'FITRIANI NINGRUM, S.PSI., M.PSI.'],
-            ['id' => 12, 'id_user' => 13, 'nidn' => '0405037905', 'nama' => 'DR. HARI KUSUMA, M.ED.'],
-            ['id' => 13, 'id_user' => 14, 'nidn' => '0418108602', 'nama' => 'NURUL HIDAYAH, S.SI., M.STAT.'],
-            ['id' => 14, 'id_user' => 15, 'nidn' => '0423028001', 'nama' => 'PROF. DR. ANWAR JUNAEDI, S.E., M.SI.'],
-            ['id' => 15, 'id_user' => 16, 'nidn' => '0409088503', 'nama' => 'ANDIKA WIJAYA, S.SOS., M.A.'],
-            ['id' => 16, 'id_user' => 17, 'nidn' => '0412127702', 'nama' => 'DR. DRA. SRI REJEKI, M.HUM.'],
-            ['id' => 17, 'id_user' => 18, 'nidn' => '0426059101', 'nama' => 'REZA ALFIAN, S.FARM., M.SC., APT.'],
-            ['id' => 18, 'id_user' => 19, 'nidn' => '0401108304', 'nama' => 'DR. ENG. RYAN HIDAYAT, S.T., M.T.'],
-            ['id' => 19, 'id_user' => 20, 'nidn' => '0416048802', 'nama' => 'DEWI LESTARI, S.KG., M.D.SC.'],
-            ['id' => 20, 'id_user' => 21, 'nidn' => '0428098201', 'nama' => 'DR. ADITYA NUGRAHA, S.KED., M.KES.'],
-            ['id' => 21, 'id_user' => 22, 'nidn' => '0407077503', 'nama' => 'IR. ISKANDAR ZULKARNAEN, M.P.'],
-            ['id' => 22, 'id_user' => 23, 'nidn' => '0420038904', 'nama' => 'CHINTYA BELLA, S.I.KOM., M.I.KOM.'],
-            ['id' => 23, 'id_user' => 24, 'nidn' => '0411068601', 'nama' => 'TAUFIK HIDAYAT, S.PD., M.PD.'],
+        DB::table('lecturers')->insert([
+            ['id' => 1, 'user_id' => 5, 'nidn' => '0402058101', 'name' => 'PROF. DR. ENG. HENDRA WIJAYA, S.T., M.T.'],
+            ['id' => 2, 'user_id' => 6, 'nidn' => '0415098302', 'name' => 'DR. RINA LESTARI, S.SI., M.IT.'],
+            ['id' => 3, 'user_id' => 7, 'nidn' => '0422118703', 'name' => 'DIAN PRATIWI, S.KOM., M.KOM.'],
+            ['id' => 4, 'user_id' => 8, 'nidn' => '0408047601', 'name' => 'IR. AGUS SUPRIATNA, M.SC., PH.D.'],
+            ['id' => 5, 'user_id' => 9, 'nidn' => '0419018804', 'name' => 'MEGAWATI PUTRI, S.E., M.ACC.'],
+            ['id' => 6, 'user_id' => 10, 'nidn' => '0430078202', 'name' => 'DR. BAMBANG UTOMO, S.H., M.H.'],
+            ['id' => 10, 'user_id' => 11, 'nidn' => '0414068901', 'name' => 'EKO PRASETYO, S.T., M.ENG.'],
+            ['id' => 11, 'user_id' => 12, 'nidn' => '0427128403', 'name' => 'FITRIANI NINGRUM, S.PSI., M.PSI.'],
+            ['id' => 12, 'user_id' => 13, 'nidn' => '0405037905', 'name' => 'DR. HARI KUSUMA, M.ED.'],
+            ['id' => 13, 'user_id' => 14, 'nidn' => '0418108602', 'name' => 'NURUL HIDAYAH, S.SI., M.STAT.'],
+            ['id' => 14, 'user_id' => 15, 'nidn' => '0423028001', 'name' => 'PROF. DR. ANWAR JUNAEDI, S.E., M.SI.'],
+            ['id' => 15, 'user_id' => 16, 'nidn' => '0409088503', 'name' => 'ANDIKA WIJAYA, S.SOS., M.A.'],
+            ['id' => 16, 'user_id' => 17, 'nidn' => '0412127702', 'name' => 'DR. DRA. SRI REJEKI, M.HUM.'],
+            ['id' => 17, 'user_id' => 18, 'nidn' => '0426059101', 'name' => 'REZA ALFIAN, S.FARM., M.SC., APT.'],
+            ['id' => 18, 'user_id' => 19, 'nidn' => '0401108304', 'name' => 'DR. ENG. RYAN HIDAYAT, S.T., M.T.'],
+            ['id' => 19, 'user_id' => 20, 'nidn' => '0416048802', 'name' => 'DEWI LESTARI, S.KG., M.D.SC.'],
+            ['id' => 20, 'user_id' => 21, 'nidn' => '0428098201', 'name' => 'DR. ADITYA NUGRAHA, S.KED., M.KES.'],
+            ['id' => 21, 'user_id' => 22, 'nidn' => '0407077503', 'name' => 'IR. ISKANDAR ZULKARNAEN, M.P.'],
+            ['id' => 22, 'user_id' => 23, 'nidn' => '0420038904', 'name' => 'CHINTYA BELLA, S.I.KOM., M.I.KOM.'],
+            ['id' => 23, 'user_id' => 24, 'nidn' => '0411068601', 'name' => 'TAUFIK HIDAYAT, S.PD., M.PD.'],
         ]);
 
         // 5. SEEDER TABEL PRODI
-        DB::table('prodis')->insert([
-            ['id' => 1, 'id_fakultas' => 1, 'kode_prodi' => 'TI', 'prefix_nim' => '415',  'nama_prodi' => 'TEKNIK INFORMATIKA', 'jenjang' => 'S1'],
-            ['id' => 2, 'id_fakultas' => 1, 'kode_prodi' => 'SI', 'prefix_nim' => '418', 'nama_prodi' => 'SISTEM INFORMASI', 'jenjang' => 'S1'],
-            ['id' => 3, 'id_fakultas' => 2, 'kode_prodi' => 'AKT', 'prefix_nim' => '411', 'nama_prodi' => 'AKUNTANSI', 'jenjang' => 'S1'],
+        DB::table('study_programs')->insert([
+            ['id' => 1, 'faculty_id' => 1, 'code' => 'TI', 'nim_prefix' => '415',  'name' => 'TEKNIK INFORMATIKA', 'jenjang' => 'S1'],
+            ['id' => 2, 'faculty_id' => 1, 'code' => 'SI', 'nim_prefix' => '418', 'name' => 'SISTEM INFORMASI', 'jenjang' => 'S1'],
+            ['id' => 3, 'faculty_id' => 2, 'code' => 'AKT', 'nim_prefix' => '411', 'name' => 'AKUNTANSI', 'jenjang' => 'S1'],
         ]);
 
         // 6. SEEDER TABEL MAHASISWA
-        DB::table('mahasiswas')->insert([
+        DB::table('students')->insert([
             [
                 'id' => 1,
-                'id_user' => 3,
+                'user_id' => 3,
                 'nim' => MahasiswaHelper::generateUniqueNim('SI'),
-                'nama' => 'RUDI HERMAWAN',
-                'id_prodi' => 2, // Sistem Informasi
-                'id_dosen_pa' => 1,
-                'tahun_masuk' => 2022,
-                'status_mahasiswa' => 'AKTIF',
+                'name' => 'RUDI HERMAWAN',
+                'study_program_id' => 2, // Sistem Informasi
+                'academic_advisor_id' => 1,
+                'enrollment_year' => 2022,
+                'status' => 'AKTIF',
             ],
             [
                 'id' => 2,
-                'id_user' => 3,
+                'user_id' => 3,
                 'nim' => MahasiswaHelper::generateUniqueNim('SI'),
-                'nama' => 'ANISA RAHMAWATI',
-                'id_prodi' => 2,
-                'id_dosen_pa' => 1,
-                'tahun_masuk' => 2022,
-                'status_mahasiswa' => 'AKTIF',
+                'name' => 'ANISA RAHMAWATI',
+                'study_program_id' => 2,
+                'academic_advisor_id' => 1,
+                'enrollment_year' => 2022,
+                'status' => 'AKTIF',
             ],
             [
                 'id' => 3,
-                'id_user' => 3,
+                'user_id' => 3,
                 'nim' => MahasiswaHelper::generateUniqueNim('TI'),
-                'nama' => 'GUNTUR WIBOWO',
-                'id_prodi' => 1, // Teknik Informatika
-                'id_dosen_pa' => 2,
-                'tahun_masuk' => 2023,
-                'status_mahasiswa' => 'AKTIF',
+                'name' => 'GUNTUR WIBOWO',
+                'study_program_id' => 1, // Teknik Informatika
+                'academic_advisor_id' => 2,
+                'enrollment_year' => 2023,
+                'status' => 'AKTIF',
             ],
         ]);
 
         // 7. SEEDER TABEL MATA KULIAH
-        DB::table('mata_kuliahs')->insert([
-            ['id' => 1, 'id_prodi' => 2, 'kode_mk' => 'SI301', 'nama_mk' => 'DESAIN BASIS DATA', 'sks' => 3, 'semester_plot' => 3],
-            ['id' => 2, 'id_prodi' => 2, 'kode_mk' => 'SI402', 'nama_mk' => 'PEMROGRAMAN WEB LANJUT', 'sks' => 4, 'semester_plot' => 4],
-            ['id' => 3, 'id_prodi' => 1, 'kode_mk' => 'IF202', 'nama_mk' => 'ALGORITMA & STRUKTUR DATA', 'sks' => 3, 'semester_plot' => 2],
+        DB::table('courses')->insert([
+            ['id' => 1, 'study_program_id' => 2, 'code' => 'SI301', 'name' => 'DESAIN BASIS DATA', 'sks' => 3, 'recommended_semester' => 3],
+            ['id' => 2, 'study_program_id' => 2, 'code' => 'SI402', 'name' => 'PEMROGRAMAN WEB LANJUT', 'sks' => 4, 'recommended_semester' => 4],
+            ['id' => 3, 'study_program_id' => 1, 'code' => 'IF202', 'name' => 'ALGORITMA & STRUKTUR DATA', 'sks' => 3, 'recommended_semester' => 2],
         ]);
 
         // 8. SEEDER TABEL KELAS KULIAH
@@ -314,8 +314,8 @@ class SiakadSeeder extends Seeder
             $startTime = \Carbon\Carbon::createFromFormat('H:i', $startStr);
             $endTime = (clone $startTime)->addMinutes($durationMinutes);
             return [
-                'jam_mulai' => $startTime->format('H:i:00'),
-                'jam_selesai' => $endTime->format('H:i:00')
+                'start_time' => $startTime->format('H:i:00'),
+                'end_time' => $endTime->format('H:i:00')
             ];
         };
 
@@ -323,71 +323,71 @@ class SiakadSeeder extends Seeder
         $t2 = $getTime(4); // Pemrograman Web Lanjut (4 SKS)
         $t3 = $getTime(3); // Algoritma (3 SKS)
 
-        DB::table('kelas_kuliahs')->insert([
+        DB::table('course_classes')->insert([
             [
                 'id' => 1,
-                'id_mk' => 1, // Desain Basis Data
-                'id_ta' => 3, // Ganjil 2025/2026
-                'kode_kelas' => 'adsf3223r',
-                'nama_kelas' => 'SI-45-A',
-                'hari' => 'SENIN',
-                'jam_mulai' => $t1['jam_mulai'],
-                'jam_selesai' => $t1['jam_selesai'],
-                'ruangan' => 'LAB KOMPUTER 3',
+                'course_id' => 1, // Desain Basis Data
+                'academic_year_id' => 3, // Ganjil 2025/2026
+                'class_code' => 'adsf3223r',
+                'class_name' => 'SI-45-A',
+                'day' => 'SENIN',
+                'start_time' => $t1['start_time'],
+                'end_time' => $t1['end_time'],
+                'room' => 'LAB KOMPUTER 3',
             ],
             [
                 'id' => 2,
-                'id_mk' => 2, // Pemrograman Web Lanjut
-                'id_ta' => 3,
-                'kode_kelas' => '34dfrg34efr',
-                'nama_kelas' => 'SI-44-B',
-                'hari' => 'RABU',
-                'jam_mulai' => $t2['jam_mulai'],
-                'jam_selesai' => $t2['jam_selesai'],
-                'ruangan' => 'RUANG GEDUNG H.2',
+                'course_id' => 2, // Pemrograman Web Lanjut
+                'academic_year_id' => 3,
+                'class_code' => '34dfrg34efr',
+                'class_name' => 'SI-44-B',
+                'day' => 'RABU',
+                'start_time' => $t2['start_time'],
+                'end_time' => $t2['end_time'],
+                'room' => 'RUANG GEDUNG H.2',
             ],
             [
                 'id' => 3,
-                'id_mk' => 3, // Algoritma
-                'id_ta' => 3,
-                'kode_kelas' => '3456grtg4',
-                'nama_kelas' => 'IF-46-A',
-                'hari' => 'KAMIS',
-                'jam_mulai' => $t3['jam_mulai'],
-                'jam_selesai' => $t3['jam_selesai'],
-                'ruangan' => 'RUANG GEDUNG E.4',
+                'course_id' => 3, // Algoritma
+                'academic_year_id' => 3,
+                'class_code' => '3456grtg4',
+                'class_name' => 'IF-46-A',
+                'day' => 'KAMIS',
+                'start_time' => $t3['start_time'],
+                'end_time' => $t3['end_time'],
+                'room' => 'RUANG GEDUNG E.4',
             ],
         ]);
 
         // 9. SEEDER TABEL PIVOT DOSEN PENGAMPU
-        DB::table('dosen_pengampus')->insert([
-            ['id' => 1, 'id_kelas' => 1, 'id_dosen' => 11], // Pak Budi mengajar kelas Desain Basis Data
-            ['id' => 2, 'id_kelas' => 2, 'id_dosen' => 15], // Pak Zaki mengajar kelas Web Lanjut
-            ['id' => 3, 'id_kelas' => 3, 'id_dosen' => 17], // Bu Siti mengajar kelas Algoritma
+        DB::table('class_instructors')->insert([
+            ['id' => 1, 'course_class_id' => 1, 'lecturer_id' => 11], // Pak Budi mengajar kelas Desain Basis Data
+            ['id' => 2, 'course_class_id' => 2, 'lecturer_id' => 15], // Pak Zaki mengajar kelas Web Lanjut
+            ['id' => 3, 'course_class_id' => 3, 'lecturer_id' => 17], // Bu Siti mengajar kelas Algoritma
         ]);
 
         // 10. SEEDER TABEL PIVOT KELAS MAHASISWA (KRS / KHS)
-        DB::table('kelas_mahasiswas')->insert([
+        DB::table('enrollments')->insert([
             [
                 'id' => 1,
-                'id_mahasiswa' => 1, // Rudi
-                'id_kelas' => 1, // Ambil kelas Desain Basis Data
-                'nilai_akhir' => 85.5,
-                'nilai_huruf' => 'A',
+                'student_id' => 1, // Rudi
+                'course_class_id' => 1, // Ambil kelas Desain Basis Data
+                'final_score' => 85.5,
+                'letter_grade' => 'A',
             ],
             [
                 'id' => 2,
-                'id_mahasiswa' => 2, // Anisa
-                'id_kelas' => 1, // Ambil kelas Desain Basis Data
-                'nilai_akhir' => 78.0,
-                'nilai_huruf' => 'B',
+                'student_id' => 2, // Anisa
+                'course_class_id' => 1, // Ambil kelas Desain Basis Data
+                'final_score' => 78.0,
+                'letter_grade' => 'B',
             ],
             [
                 'id' => 3,
-                'id_mahasiswa' => 3, // Guntur
-                'id_kelas' => 3, // Ambil kelas Algoritma
-                'nilai_akhir' => 90.0,
-                'nilai_huruf' => 'A',
+                'student_id' => 3, // Guntur
+                'course_class_id' => 3, // Ambil kelas Algoritma
+                'final_score' => 90.0,
+                'letter_grade' => 'A',
             ],
         ]);
     }

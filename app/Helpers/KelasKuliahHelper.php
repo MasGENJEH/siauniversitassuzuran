@@ -9,12 +9,12 @@ class KelasKuliahHelper
 {
     public static function generateUniqueKodeKelas(string $kodeMk): string
     {
-        $mataKuliah = MataKuliah::query()->where('kode_mk', $kodeMk)->first();
-        $prefix = $mataKuliah->kode_mk ?? 'KLS';
+        $mataKuliah = MataKuliah::query()->where('code', $kodeMk)->first();
+        $prefix = $mataKuliah->code ?? 'KLS';
 
         do {
             $randomString = $prefix . mt_rand(100, 999);
-        } while (KelasKuliah::query()->where('kode_kelas', $randomString)->exists());
+        } while (KelasKuliah::query()->where('class_code', $randomString)->exists());
 
         return $randomString;
     }

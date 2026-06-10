@@ -9,40 +9,42 @@ class KelasKuliah extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'course_classes';
+
     protected $fillable = [
-        'kode_kelas',
-        'id_mk',
-        'id_ta',
-        'nama_kelas',
-        'hari',
-        'jam_mulai',
-        'jam_selesai',
-        'ruangan',
+        'class_code',
+        'course_id',
+        'academic_year_id',
+        'class_name',
+        'day',
+        'start_time',
+        'end_time',
+        'room',
     ];
 
     public function dosen()
     {
-        return $this->belongsToMany(Dosen::class, 'dosen_pengampus', 'id_kelas', 'id_dosen');
+        return $this->belongsToMany(Dosen::class, 'class_instructors', 'course_class_id', 'lecturer_id');
     }
 
     public function mataKuliah()
     {
-        return $this->belongsTo(MataKuliah::class, 'id_mk', 'id');
+        return $this->belongsTo(MataKuliah::class, 'course_id', 'id');
     }
 
     public function tahunAkademik()
     {
-        return $this->belongsTo(TahunAkademik::class, 'id_ta', 'id');
+        return $this->belongsTo(TahunAkademik::class, 'academic_year_id', 'id');
     }
 
     public function kelasMahasiswa()
     {
-        return $this->hasMany(KelasMahasiswa::class, 'id_kelas', 'id');
+        return $this->hasMany(KelasMahasiswa::class, 'course_class_id', 'id');
     }
 
     public function mahasiswa()
     {
-        return $this->belongsToMany(Mahasiswa::class, 'kelas_mahasiswas', 'id_kelas', 'id_mahasiswa')
-                    ->withPivot('nilai_akhir', 'nilai_huruf');
+        return $this->belongsToMany(Mahasiswa::class, 'enrollments', 'course_class_id', 'student_id')
+                    ->withPivot('final_score', 'letter_grade');
     }
 }

@@ -12,14 +12,14 @@ class FakultasSeeder extends Seeder
      */
     public function run(): void
     {
-        $fakultas = [
-            ['kode_fakultas' => 'FT', 'nama_fakultas' => 'FAKULTAS TEKNIK'],
-            ['kode_fakultas' => 'FEB', 'nama_fakultas' => 'FAKULTAS EKONOMI DAN BISNIS'],
-            ['kode_fakultas' => 'FH', 'nama_fakultas' => 'FAKULTAS HUKUM'],
-            ['kode_fakultas' => 'FIB', 'nama_fakultas' => 'FAKULTAS ILMU BUDAYA'],
-            ['kode_fakultas' => 'FK', 'nama_fakultas' => 'FAKULTAS KEDOKTERAN'],
+        $faculties = [
+            ['code' => 'FT', 'name' => 'FAKULTAS TEKNIK'],
+            ['code' => 'FEB', 'name' => 'FAKULTAS EKONOMI DAN BISNIS'],
+            ['code' => 'FH', 'name' => 'FAKULTAS HUKUM'],
+            ['code' => 'FIB', 'name' => 'FAKULTAS ILMU BUDAYA'],
+            ['code' => 'FK', 'name' => 'FAKULTAS KEDOKTERAN'],
         ];
 
-        DB::table('fakultas')->insert($fakultas);
+        DB::table('faculties')->insert($faculties);
     }
 }

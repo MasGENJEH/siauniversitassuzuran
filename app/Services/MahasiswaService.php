@@ -27,9 +27,9 @@ class MahasiswaService
 
     public function create(array $data)
     {
-        $prodi = Prodi::findOrFail($data['id_prodi']);
+        $prodi = Prodi::findOrFail($data['study_program_id']);
 
-        $nimOtomatis = MahasiswaHelper::generateUniqueNim($prodi->kode_prodi);
+        $nimOtomatis = MahasiswaHelper::generateUniqueNim($prodi->code);
 
         $data['nim'] = $nimOtomatis;
 

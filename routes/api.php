@@ -21,84 +21,84 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
-    Route::get('dosens/{dosen}/kelas-kuliah-aktif', [DosenController::class, 'kelasKuliahAktif']);
-    Route::get('dosens/{dosen}/mahasiswa-bimbingan', [DosenController::class, 'mahasiswaBimbingan']);
+    Route::get('lecturers/{lecturer}/kelas-kuliah-aktif', [DosenController::class, 'kelasKuliahAktif']);
+    Route::get('lecturers/{lecturer}/mahasiswa-bimbingan', [DosenController::class, 'mahasiswaBimbingan']);
 
     // --- Read operations (accessible to all authenticated users: admin, dosen, mahasiswa) ---
-    Route::get('fakultas', [FakultasController::class, 'index']);
-    Route::get('fakultas/{fakultas}', [FakultasController::class, 'show']);
+    Route::get('faculties', [FakultasController::class, 'index']);
+    Route::get('faculties/{faculties}', [FakultasController::class, 'show']);
 
     Route::get('users', [UserController::class, 'index']);
     Route::get('users/{user}', [UserController::class, 'show']);
 
-    Route::get('dosens', [DosenController::class, 'index']);
-    Route::get('dosens/{dosen}', [DosenController::class, 'show']);
+    Route::get('lecturers', [DosenController::class, 'index']);
+    Route::get('lecturers/{lecturer}', [DosenController::class, 'show']);
 
-    Route::get('mahasiswas', [MahasiswaController::class, 'index']);
-    Route::get('mahasiswas/{mahasiswa}', [MahasiswaController::class, 'show']);
+    Route::get('students', [MahasiswaController::class, 'index']);
+    Route::get('students/{student}', [MahasiswaController::class, 'show']);
 
-    Route::get('prodis', [ProdiController::class, 'index']);
-    Route::get('prodis/{prodi}', [ProdiController::class, 'show']);
+    Route::get('study-programs', [ProdiController::class, 'index']);
+    Route::get('study-programs/{study_program}', [ProdiController::class, 'show']);
 
-    Route::get('mata-kuliahs', [MataKuliahController::class, 'index']);
-    Route::get('mata-kuliahs/{mata_kuliah}', [MataKuliahController::class, 'show']);
+    Route::get('courses', [MataKuliahController::class, 'index']);
+    Route::get('courses/{course}', [MataKuliahController::class, 'show']);
 
-    Route::get('tahun-akademiks', [TahunAkademikController::class, 'index']);
-    Route::get('tahun-akademiks/{tahun_akademik}', [TahunAkademikController::class, 'show']);
+    Route::get('academic-years', [TahunAkademikController::class, 'index']);
+    Route::get('academic-years/{academic_year}', [TahunAkademikController::class, 'show']);
 
-    Route::get('kelas-kuliahs', [KelasKuliahController::class, 'index']);
-    Route::get('kelas-kuliahs/{kelas_kuliah}', [KelasKuliahController::class, 'show']);
+    Route::get('course-classes', [KelasKuliahController::class, 'index']);
+    Route::get('course-classes/{course_class}', [KelasKuliahController::class, 'show']);
 
-    Route::get('dosen-pengampus', [DosenPengampuController::class, 'index']);
-    Route::get('dosen-pengampus/{dosen_pengampu}', [DosenPengampuController::class, 'show']);
+    Route::get('class-instructors', [DosenPengampuController::class, 'index']);
+    Route::get('class-instructors/{class_instructor}', [DosenPengampuController::class, 'show']);
 
-    Route::get('kelas-mahasiswas', [KelasMahasiswaController::class, 'index']);
-    Route::get('kelas-mahasiswas/{kelas_mahasiswa}', [KelasMahasiswaController::class, 'show']);
-    Route::post('kelas-mahasiswas', [KelasMahasiswaController::class, 'store']);
+    Route::get('enrollments', [KelasMahasiswaController::class, 'index']);
+    Route::get('enrollments/{enrollment}', [KelasMahasiswaController::class, 'show']);
+    Route::post('enrollments', [KelasMahasiswaController::class, 'store']);
 
     // --- Admin-only CRUD Write operations ---
     Route::middleware(['role:admin'])->group(function () {
-        Route::post('fakultas', [FakultasController::class, 'store']);
-        Route::put('fakultas/{fakulta}', [FakultasController::class, 'update']);
-        Route::delete('fakultas/{fakulta}', [FakultasController::class, 'destroy']);
+        Route::post('faculties', [FakultasController::class, 'store']);
+        Route::put('faculties/{faculty}', [FakultasController::class, 'update']);
+        Route::delete('faculties/{faculty}', [FakultasController::class, 'destroy']);
 
         Route::post('users', [UserController::class, 'store']);
         Route::put('users/{user}', [UserController::class, 'update']);
         Route::delete('users/{user}', [UserController::class, 'destroy']);
 
-        Route::post('dosens', [DosenController::class, 'store']);
-        Route::put('dosens/{dosen}', [DosenController::class, 'update']);
-        Route::delete('dosens/{dosen}', [DosenController::class, 'destroy']);
+        Route::post('lecturers', [DosenController::class, 'store']);
+        Route::put('lecturers/{lecturer}', [DosenController::class, 'update']);
+        Route::delete('lecturers/{lecturer}', [DosenController::class, 'destroy']);
 
-        Route::post('mahasiswas', [MahasiswaController::class, 'store']);
-        Route::put('mahasiswas/{mahasiswa}', [MahasiswaController::class, 'update']);
-        Route::delete('mahasiswas/{mahasiswa}', [MahasiswaController::class, 'destroy']);
+        Route::post('students', [MahasiswaController::class, 'store']);
+        Route::put('students/{student}', [MahasiswaController::class, 'update']);
+        Route::delete('students/{student}', [MahasiswaController::class, 'destroy']);
 
-        Route::post('prodis', [ProdiController::class, 'store']);
-        Route::put('prodis/{prodi}', [ProdiController::class, 'update']);
-        Route::delete('prodis/{prodi}', [ProdiController::class, 'destroy']);
+        Route::post('study-programs', [ProdiController::class, 'store']);
+        Route::put('study-programs/{study_program}', [ProdiController::class, 'update']);
+        Route::delete('study-programs/{study_program}', [ProdiController::class, 'destroy']);
 
-        Route::post('mata-kuliahs', [MataKuliahController::class, 'store']);
-        Route::put('mata-kuliahs/{mata_kuliah}', [MataKuliahController::class, 'update']);
-        Route::delete('mata-kuliahs/{mata_kuliah}', [MataKuliahController::class, 'destroy']);
+        Route::post('courses', [MataKuliahController::class, 'store']);
+        Route::put('courses/{course}', [MataKuliahController::class, 'update']);
+        Route::delete('courses/{course}', [MataKuliahController::class, 'destroy']);
 
-        Route::post('tahun-akademiks', [TahunAkademikController::class, 'store']);
-        Route::put('tahun-akademiks/{tahun_akademik}', [TahunAkademikController::class, 'update']);
-        Route::delete('tahun-akademiks/{tahun_akademik}', [TahunAkademikController::class, 'destroy']);
+        Route::post('academic-years', [TahunAkademikController::class, 'store']);
+        Route::put('academic-years/{academic_year}', [TahunAkademikController::class, 'update']);
+        Route::delete('academic-years/{academic_year}', [TahunAkademikController::class, 'destroy']);
 
-        Route::post('kelas-kuliahs', [KelasKuliahController::class, 'store']);
-        Route::put('kelas-kuliahs/{kelas_kuliah}', [KelasKuliahController::class, 'update']);
-        Route::delete('kelas-kuliahs/{kelas_kuliah}', [KelasKuliahController::class, 'destroy']);
+        Route::post('course-classes', [KelasKuliahController::class, 'store']);
+        Route::put('course-classes/{course_class}', [KelasKuliahController::class, 'update']);
+        Route::delete('course-classes/{course_class}', [KelasKuliahController::class, 'destroy']);
 
-        Route::post('dosen-pengampus', [DosenPengampuController::class, 'store']);
-        Route::put('dosen-pengampus/{dosen_pengampu}', [DosenPengampuController::class, 'update']);
-        Route::delete('dosen-pengampus/{dosen_pengampu}', [DosenPengampuController::class, 'destroy']);
+        Route::post('class-instructors', [DosenPengampuController::class, 'store']);
+        Route::put('class-instructors/{class_instructor}', [DosenPengampuController::class, 'update']);
+        Route::delete('class-instructors/{class_instructor}', [DosenPengampuController::class, 'destroy']);
 
-        Route::delete('kelas-mahasiswas/{kelas_mahasiswa}', [KelasMahasiswaController::class, 'destroy']);
+        Route::delete('enrollments/{enrollment}', [KelasMahasiswaController::class, 'destroy']);
     });
 
     // --- Admin OR Dosen Write operations (specifically updating grades) ---
     Route::middleware(['role:admin|dosen'])->group(function () {
-        Route::put('kelas-mahasiswas/{kelas_mahasiswa}', [KelasMahasiswaController::class, 'update']);
+        Route::put('enrollments/{enrollment}', [KelasMahasiswaController::class, 'update']);
     });
 });

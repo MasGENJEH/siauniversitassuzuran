@@ -14,13 +14,13 @@ class KelasMahasiswaSeeder extends Seeder
      */
     public function run(): void
     {
-        $mahasiswas = Mahasiswa::all();
+        $students = Mahasiswa::all();
         $kelasKuliahs = KelasKuliah::all();
         $gradeLetters = ['A', 'B', 'C', 'D', 'E'];
 
-        foreach ($mahasiswas as $mahasiswa) {
-            // Group all available classes by their course ID (id_mk)
-            $groupedByCourse = $kelasKuliahs->groupBy('id_mk');
+        foreach ($students as $mahasiswa) {
+            // Group all available classes by their course ID (course_id)
+            $groupedByCourse = $kelasKuliahs->groupBy('course_id');
 
             // Randomly decide to enroll in 4 or 5 courses
             $count = mt_rand(15, 20);
@@ -50,10 +50,10 @@ class KelasMahasiswaSeeder extends Seeder
                 }
 
                 KelasMahasiswa::create([
-                    'id_mahasiswa' => $mahasiswa->id,
-                    'id_kelas' => $kelas->id,
-                    'nilai_akhir' => $nilaiAkhir,
-                    'nilai_huruf' => $nilaiHuruf,
+                    'student_id' => $mahasiswa->id,
+                    'course_class_id' => $kelas->id,
+                    'final_score' => $nilaiAkhir,
+                    'letter_grade' => $nilaiHuruf,
                 ]);
             }
         }

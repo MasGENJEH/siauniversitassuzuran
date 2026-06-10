@@ -25,13 +25,13 @@ class TahunAkademikRequest extends FormRequest
         $tahunAkademikId = $this->route('tahun_akademik');
 
         return [
-            'kode_ta' => [
+            'code' => [
                 'required',
                 'string',
                 'max:50',
-                'unique:tahun_akademiks,kode_ta,' . $tahunAkademikId,
+                'unique:tahun_akademiks,code,' . $tahunAkademikId,
             ],
-            'nama_ta' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
@@ -46,14 +46,14 @@ class TahunAkademikRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'kode_ta.required' => 'KODE TAHUN AKADEMIK wajib diisi.',
-            'kode_ta.string' => 'KODE TAHUN AKADEMIK harus berupa teks.',
-            'kode_ta.max' => 'KODE TAHUN AKADEMIK maksimal berjumlah 50 karakter.',
-            'kode_ta.unique' => 'KODE TAHUN AKADEMIK sudah terdaftar di dalam sistem.',
+            'code.required' => 'KODE TAHUN AKADEMIK wajib diisi.',
+            'code.string' => 'KODE TAHUN AKADEMIK harus berupa teks.',
+            'code.max' => 'KODE TAHUN AKADEMIK maksimal berjumlah 50 karakter.',
+            'code.unique' => 'KODE TAHUN AKADEMIK sudah terdaftar di dalam sistem.',
 
-            'nama_ta.required' => 'NAMA TAHUN AKADEMIK wajib diisi.',
-            'nama_ta.string' => 'NAMA TAHUN AKADEMIK harus berupa teks.',
-            'nama_ta.max' => 'NAMA TAHUN AKADEMIK maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA TAHUN AKADEMIK wajib diisi.',
+            'name.string' => 'NAMA TAHUN AKADEMIK harus berupa teks.',
+            'name.max' => 'NAMA TAHUN AKADEMIK maksimal berjumlah 255 karakter.',
 
             'status.boolean' => 'STATUS harus bernilai true atau false (1 atau 0).',
         ];
@@ -61,14 +61,14 @@ class TahunAkademikRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        if ($this->has('nama_ta')) {
+        if ($this->has('name')) {
             $this->merge([
-                'nama_ta' => strtoupper($this->nama_ta),
+                'name' => strtoupper($this->name),
             ]);
         }
-        if ($this->has('kode_ta')) {
+        if ($this->has('code')) {
             $this->merge([
-                'kode_ta' => strtoupper($this->kode_ta),
+                'code' => strtoupper($this->code),
             ]);
         }
     }

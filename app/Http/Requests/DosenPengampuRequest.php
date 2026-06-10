@@ -23,15 +23,15 @@ class DosenPengampuRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_kelas' => [
+            'course_class_id' => [
                 'required',
                 'integer',
                 'exists:kelas_kuliahs,id',
             ],
-            'id_dosen' => [
+            'lecturer_id' => [
                 'required',
                 'integer',
-                'exists:dosens,id',
+                'exists:lecturers,id',
             ],
         ];
     }
@@ -39,13 +39,13 @@ class DosenPengampuRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_kelas.required' => 'KELAS KULIAH wajib dipilih.',
-            'id_kelas.integer' => 'KELAS KULIAH tidak valid.',
-            'id_kelas.exists' => 'KELAS KULIAH tidak terdaftar di dalam sistem.',
+            'course_class_id.required' => 'KELAS KULIAH wajib dipilih.',
+            'course_class_id.integer' => 'KELAS KULIAH tidak valid.',
+            'course_class_id.exists' => 'KELAS KULIAH tidak terdaftar di dalam sistem.',
 
-            'id_dosen.required' => 'DOSEN wajib dipilih.',
-            'id_dosen.integer' => 'DOSEN tidak valid.',
-            'id_dosen.exists' => 'DOSEN tidak terdaftar di dalam sistem.',
+            'lecturer_id.required' => 'DOSEN wajib dipilih.',
+            'lecturer_id.integer' => 'DOSEN tidak valid.',
+            'lecturer_id.exists' => 'DOSEN tidak terdaftar di dalam sistem.',
         ];
     }
 }

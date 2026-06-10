@@ -3,8 +3,8 @@ import { User, Mail, Phone, Lock, Camera, CheckCircle2, AlertCircle, Eye, EyeOff
 
 export default function ProfilDosenTab({
   user,
-  dosens,
-  mahasiswas = [],
+  lecturers,
+  students = [],
   dosenPengampus = [],
   kelasKuliahs = [],
   mataKuliahs = [],
@@ -16,32 +16,32 @@ export default function ProfilDosenTab({
   // Find the dosen record associated with this user
   const myDosen = useMemo(() => {
     if (!user) return null;
-    return dosens.find(d => d.id_user === user.id) || null;
-  }, [user, dosens]);
+    return lecturers.find(d => d.user_id === user.id) || null;
+  }, [user, lecturers]);
 
   // Compute teaching stats
   const stats = useMemo(() => {
     if (!myDosen) return { totalClasses: 0, totalTeachingSks: 0, totalAdvisees: 0 };
 
-    const teachingLinks = dosenPengampus.filter(dp => dp.id_dosen === myDosen.id);
+    const teachingLinks = dosenPengampus.filter(dp => dp.lecturer_id === myDosen.id);
     let totalTeachingSks = 0;
     let totalClasses = 0;
 
     teachingLinks.forEach(dp => {
-      const kk = kelasKuliahs.find(k => k.id === dp.id_kelas);
+      const kk = kelasKuliahs.find(k => k.id === dp.course_class_id);
       if (kk) {
         totalClasses++;
-        const mk = mataKuliahs.find(m => m.id === kk.id_mk);
+        const mk = mataKuliahs.find(m => m.id === kk.course_id);
         if (mk && mk.sks) {
           totalTeachingSks += Number(mk.sks);
         }
       }
     });
 
-    const totalAdvisees = mahasiswas.filter(m => m.id_dosen_pa === myDosen.id).length;
+    const totalAdvisees = students.filter(m => m.academic_advisor_id === myDosen.id).length;
 
     return { totalClasses, totalTeachingSks, totalAdvisees };
-  }, [myDosen, dosenPengampus, kelasKuliahs, mataKuliahs, mahasiswas]);
+  }, [myDosen, dosenPengampus, kelasKuliahs, mataKuliahs, students]);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -50,8 +50,8 @@ export default function ProfilDosenTab({
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
   // File upload states
-  const [fotoFile, setFotoFile] = useState(null);
-  const [fotoPreview, setFotoPreview] = useState(null);
+  const [photoFile, setFotoFile] = useState(null);
+  const [photoPreview, setFotoPreview] = useState(null);
 
   // UI state
   const [showPassword, setShowPassword] = useState(false);
@@ -71,11 +71,11 @@ export default function ProfilDosenTab({
   // Cleanup preview URL on unmount
   useEffect(() => {
     return () => {
-      if (fotoPreview) {
-        URL.revokeObjectURL(fotoPreview);
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
       }
     };
-  }, [fotoPreview]);
+  }, [photoPreview]);
 
   if (!myDosen) {
     return (
@@ -100,7 +100,7 @@ export default function ProfilDosenTab({
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, foto: ['Ukuran foto maksimal 2MB.'] }));
+        setErrors(prev => ({ ...prev, photo: ['Ukuran photo maksimal 2MB.'] }));
         return;
       }
       setFotoFile(file);
@@ -108,7 +108,7 @@ export default function ProfilDosenTab({
       setFotoPreview(previewUrl);
       setErrors(prev => {
         const copy = { ...prev };
-        delete copy.foto;
+        delete copy.photo;
         return copy;
       });
     }
@@ -138,8 +138,8 @@ export default function ProfilDosenTab({
       fd.append('password_confirmation', passwordConfirmation);
     }
 
-    if (fotoFile) {
-      fd.append('foto', fotoFile);
+    if (photoFile) {
+      fd.append('photo', photoFile);
     }
 
     try {
@@ -179,10 +179,10 @@ export default function ProfilDosenTab({
 
   // Profile Image URL Helper
   const displayPhoto = useMemo(() => {
-    if (fotoPreview) return fotoPreview;
-    if (myDosen.foto) return `/storage/${myDosen.foto}`;
+    if (photoPreview) return photoPreview;
+    if (myDosen.photo) return `/storage/${myDosen.photo}`;
     return null;
-  }, [fotoPreview, myDosen.foto]);
+  }, [photoPreview, myDosen.photo]);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
@@ -217,7 +217,7 @@ export default function ProfilDosenTab({
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
               ) : (
-                myDosen.nama.charAt(0).toUpperCase()
+                myDosen.name.charAt(0).toUpperCase()
               )}
             </div>
 
@@ -238,15 +238,15 @@ export default function ProfilDosenTab({
             />
           </div>
 
-          <h3 className="font-extrabold text-xl text-monday-black mt-5 leading-tight drop-shadow-sm">{myDosen.nama}</h3>
+          <h3 className="font-extrabold text-xl text-monday-black mt-5 leading-tight drop-shadow-sm">{myDosen.name}</h3>
           <p className="font-bold text-sm text-emerald-600 mt-1">{myDosen.nidn}</p>
 
           <span className="mt-4 px-4 py-1 bg-emerald-500/15 text-emerald-700 border border-emerald-500/20 rounded-full font-bold text-xs uppercase tracking-wider border-2 border-white shadow-sm">
             Dosen Aktif
           </span>
 
-          {errors.foto && (
-            <p className="text-xs text-monday-red font-semibold mt-2">{errors.foto[0]}</p>
+          {errors.photo && (
+            <p className="text-xs text-monday-red font-semibold mt-2">{errors.photo[0]}</p>
           )}
 
           <div className="w-full border-t border-monday-border my-5" />
@@ -415,7 +415,7 @@ export default function ProfilDosenTab({
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-monday-gray uppercase tracking-wider">Nama Lengkap</span>
-                <span className="text-monday-black font-extrabold">{myDosen.nama}</span>
+                <span className="text-monday-black font-extrabold">{myDosen.name}</span>
               </div>
 
               <div className="flex flex-col gap-1">
@@ -442,7 +442,7 @@ export default function ProfilDosenTab({
             <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl mt-2 flex items-start gap-3 text-xs text-monday-gray font-semibold leading-relaxed">
               <Shield size={18} className="text-emerald-600 shrink-0 mt-0.5" />
               <p>
-                Informasi biodata di atas bersumber dari database administrasi akademik resmi universitas. Jika terdapat kesalahan data NIDN atau nama, silakan hubungi bagian Administrasi Akademik (BAAK) di gedung Rektorat.
+                Informasi biodata di atas bersumber dari database administrasi akademik resmi universitas. Jika terdapat kesalahan data NIDN atau name, silakan hubungi bagian Administrasi Akademik (BAAK) di gedung Rektorat.
               </p>
             </div>
           </div>

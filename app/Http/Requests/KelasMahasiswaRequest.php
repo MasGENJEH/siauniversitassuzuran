@@ -45,15 +45,15 @@ class KelasMahasiswaRequest extends FormRequest
                     return false;
                 }
 
-                $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+                $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
                 if (!$dosen) {
                     return false;
                 }
 
                 // Check if the Dosen is assigned to the class section of the enrollment
-                return \DB::table('dosen_pengampus')
-                    ->where('id_dosen', $dosen->id)
-                    ->where('id_kelas', $kelasMahasiswa->id_kelas)
+                return \DB::table('class_instructors')
+                    ->where('lecturer_id', $dosen->id)
+                    ->where('course_class_id', $kelasMahasiswa->course_class_id)
                     ->whereNull('deleted_at')
                     ->exists();
             }
@@ -61,14 +61,14 @@ class KelasMahasiswaRequest extends FormRequest
 
         // Mahasiswa can only create/update their own KRS
         if ($user->hasRole('mahasiswa')) {
-            $mahasiswa = \App\Models\Mahasiswa::where('id_user', $user->id)->first();
+            $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
             if (!$mahasiswa) {
                 return false;
             }
 
             // For POST (store) - Mahasiswa can only register classes for themselves
             if ($this->isMethod('post')) {
-                return (int)$this->input('id_mahasiswa') === $mahasiswa->id;
+                return (int)$this->input('student_id') === $mahasiswa->id;
             }
 
             // For PUT/PATCH (update) - Mahasiswa is NOT allowed to update KRS records
@@ -86,23 +86,23 @@ class KelasMahasiswaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_mahasiswa' => [
+            'student_id' => [
                 'required',
                 'integer',
-                'exists:mahasiswas,id',
+                'exists:students,id',
             ],
-            'id_kelas' => [
+            'course_class_id' => [
                 'required',
                 'integer',
                 'exists:kelas_kuliahs,id',
             ],
-            'nilai_akhir' => [
+            'final_score' => [
                 'nullable',
                 'numeric',
                 'min:0',
                 'max:100',
             ],
-            'nilai_huruf' => [
+            'letter_grade' => [
                 'nullable',
                 'string',
                 'max:1',
@@ -113,26 +113,26 @@ class KelasMahasiswaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_mahasiswa.required' => 'MAHASISWA wajib dipilih.',
-            'id_mahasiswa.integer' => 'MAHASISWA tidak valid.',
-            'id_mahasiswa.exists' => 'MAHASISWA tidak terdaftar di dalam sistem.',
+            'student_id.required' => 'MAHASISWA wajib dipilih.',
+            'student_id.integer' => 'MAHASISWA tidak valid.',
+            'student_id.exists' => 'MAHASISWA tidak terdaftar di dalam sistem.',
 
-            'id_kelas.required' => 'KELAS KULIAH wajib dipilih.',
-            'id_kelas.integer' => 'KELAS KULIAH tidak valid.',
-            'id_kelas.exists' => 'KELAS KULIAH tidak terdaftar di dalam sistem.',
+            'course_class_id.required' => 'KELAS KULIAH wajib dipilih.',
+            'course_class_id.integer' => 'KELAS KULIAH tidak valid.',
+            'course_class_id.exists' => 'KELAS KULIAH tidak terdaftar di dalam sistem.',
 
-            'nilai_akhir.numeric' => 'NILAI AKHIR harus berupa angka.',
-            'nilai_akhir.min' => 'NILAI AKHIR minimal adalah 0.',
-            'nilai_akhir.max' => 'NILAI AKHIR maksimal adalah 100.',
+            'final_score.numeric' => 'NILAI AKHIR harus berupa angka.',
+            'final_score.min' => 'NILAI AKHIR minimal adalah 0.',
+            'final_score.max' => 'NILAI AKHIR maksimal adalah 100.',
 
-            'nilai_huruf.max' => 'NILAI HURUF maksimal berjumlah 1 karakter.',
+            'letter_grade.max' => 'NILAI HURUF maksimal berjumlah 1 karakter.',
         ];
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            'nilai_huruf' => $this->nilai_huruf ? strtoupper($this->nilai_huruf) : null,
+            'letter_grade' => $this->letter_grade ? strtoupper($this->letter_grade) : null,
         ]);
     }
 }

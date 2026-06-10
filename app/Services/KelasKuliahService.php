@@ -27,8 +27,8 @@ class KelasKuliahService
 
     public function create(array $data)
     {
-        $mataKuliah = MataKuliah::findOrFail($data['id_mk']);
-        $data['kode_kelas'] = KelasKuliahHelper::generateUniqueKodeKelas($mataKuliah->kode_mk);
+        $mataKuliah = MataKuliah::findOrFail($data['course_id']);
+        $data['class_code'] = KelasKuliahHelper::generateUniqueKodeKelas($mataKuliah->code);
 
         $dosenIds = $data['dosen_ids'] ?? [];
         unset($data['dosen_ids']);

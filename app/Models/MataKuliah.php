@@ -9,15 +9,17 @@ class MataKuliah extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['id_prodi', 'semester_plot', 'kode_mk', 'nama_mk', 'sks'];
+    protected $table = 'courses';
+
+    protected $fillable = ['study_program_id', 'recommended_semester', 'code', 'name', 'sks'];
 
     public function prodi()
     {
-        return $this->belongsTo(Prodi::class, 'id_prodi', 'id');
+        return $this->belongsTo(Prodi::class, 'study_program_id', 'id');
     }
 
     public function kelasKuliah()
     {
-        return $this->hasMany(KelasKuliah::class, 'id_mk', 'id');
+        return $this->hasMany(KelasKuliah::class, 'course_id', 'id');
     }
 }

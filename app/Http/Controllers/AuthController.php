@@ -66,7 +66,7 @@ class AuthController extends Controller
             ],
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6|confirmed',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
 
         $validated = $request->validate($rules);
@@ -80,28 +80,28 @@ class AuthController extends Controller
         }
 
         // Handle photo upload
-        if ($request->hasFile('foto')) {
-            $mahasiswa = \App\Models\Mahasiswa::where('id_user', $user->id)->first();
-            $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+        if ($request->hasFile('photo')) {
+            $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+            $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
 
             if ($mahasiswa) {
                 // Delete old photo if exists
-                if ($mahasiswa->foto) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($mahasiswa->foto);
+                if ($mahasiswa->photo) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($mahasiswa->photo);
                 }
-                $path = $request->file('foto')->store('foto-mahasiswa', 'public');
-                $mahasiswa->foto = $path;
+                $path = $request->file('photo')->store('photo-student', 'public');
+                $mahasiswa->photo = $path;
                 $mahasiswa->save();
                 
                 // Keep users.photo in sync
                 $user->photo = $path;
             } elseif ($dosen) {
                 // Delete old photo if exists
-                if ($dosen->foto) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($dosen->foto);
+                if ($dosen->photo) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($dosen->photo);
                 }
-                $path = $request->file('foto')->store('foto-dosen', 'public');
-                $dosen->foto = $path;
+                $path = $request->file('photo')->store('photo-lecturer', 'public');
+                $dosen->photo = $path;
                 $dosen->save();
                 
                 // Keep users.photo in sync
@@ -111,7 +111,7 @@ class AuthController extends Controller
                 if ($user->photo) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($user->photo);
                 }
-                $path = $request->file('foto')->store('foto-user', 'public');
+                $path = $request->file('photo')->store('photo-user', 'public');
                 $user->photo = $path;
             }
         }

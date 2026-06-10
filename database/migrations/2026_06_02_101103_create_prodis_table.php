@@ -10,12 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('prodis', function (Blueprint $table) {
+        Schema::create('study_programs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_fakultas')->constrained('fakultas')->cascadeOnDelete();
-            $table->string('kode_prodi')->unique();
-            $table->string('prefix_nim', 3)->nullable();
-            $table->string('nama_prodi');
+            $table->foreignId('faculty_id')->constrained('faculties')->cascadeOnDelete();
+            $table->string('code')->unique();
+            $table->string('nim_prefix', 3)->nullable();
+            $table->string('name');
             $table->enum('jenjang', ['D3', 'S1', 'S2', 'S3']);
             $table->softDeletes();
 
@@ -28,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('prodis');
+        Schema::dropIfExists('study_programs');
     }
 };

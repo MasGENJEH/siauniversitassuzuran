@@ -6,35 +6,35 @@ use App\Repositories\FakultasRepository;
 
 class FakultasService
 {
-    private FakultasRepository $fakultasRepository;
+    private FakultasRepository $facultiesRepository;
 
-    public function __construct(FakultasRepository $fakultasRepository)
+    public function __construct(FakultasRepository $facultiesRepository)
     {
-        $this->fakultasRepository = $fakultasRepository;
+        $this->facultiesRepository = $facultiesRepository;
     }
 
     public function getAll(array $fields)
     {
-        return $this->fakultasRepository->getAll($fields);
+        return $this->facultiesRepository->getAll($fields);
     }
 
     public function getById(int $id, array $fields)
     {
-        return $this->fakultasRepository->getById($id, $fields);
+        return $this->facultiesRepository->getById($id, $fields);
     }
 
     public function create(array $data)
     {
-        return $this->fakultasRepository->create($data);
+        return $this->facultiesRepository->create($data);
     }
 
     public function update(int $id, array $data)
     {
-        return $this->fakultasRepository->update($id, $data);
+        return $this->facultiesRepository->update($id, $data);
     }
 
     public function delete(int $id)
     {
-        return $this->fakultasRepository->delete($id);
+        return $this->facultiesRepository->delete($id);
     }
 }

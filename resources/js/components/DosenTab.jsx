@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Users, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, MapPin, Mail, Lock } from 'lucide-react';
 
 export default function DosenTab({
-  dosens,
+  lecturers,
   users,
-  mahasiswas = [],
+  students = [],
   dosenPengampus = [],
   kelasKuliahs = [],
   mataKuliahs = [],
@@ -30,8 +30,8 @@ export default function DosenTab({
   }, [selectedDosen]);
 
   // Filter items based on search query
-  const filteredItems = dosens.filter(d =>
-    d.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredItems = lecturers.filter(d =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.nidn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -42,26 +42,40 @@ export default function DosenTab({
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
+  // Helper for pagination window
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
   // Compute detail data for selected dosen
   const detailData = useMemo(() => {
     if (!selectedDosen) return null;
 
     const dsn = selectedDosen;
-    const userObj = users.find(u => u.id === dsn.id_user);
+    const userObj = users.find(u => u.id === dsn.user_id);
 
     // Get all advisee students (mahasiswa bimbingan PA)
-    const advisees = mahasiswas.filter(m => m.id_dosen_pa === dsn.id);
+    const advisees = students.filter(m => m.academic_advisor_id === dsn.id);
 
     // Get all classes taught by this dosen (dosen_pengampus)
-    const teachingLinks = dosenPengampus.filter(dp => dp.id_dosen === dsn.id);
+    const teachingLinks = dosenPengampus.filter(dp => dp.lecturer_id === dsn.id);
     const classesTaught = [];
     let totalTeachingSks = 0;
 
     teachingLinks.forEach(dp => {
-      const kk = kelasKuliahs.find(k => k.id === dp.id_kelas);
+      const kk = kelasKuliahs.find(k => k.id === dp.course_class_id);
       if (kk) {
-        const mk = mataKuliahs.find(m => m.id === kk.id_mk);
-        const ta = tahunAkademiks.find(t => t.id === kk.id_ta);
+        const mk = mataKuliahs.find(m => m.id === kk.course_id);
+        const ta = tahunAkademiks.find(t => t.id === kk.academic_year_id);
         if (mk && mk.sks) {
           totalTeachingSks += Number(mk.sks);
         }
@@ -78,7 +92,7 @@ export default function DosenTab({
       totalAdvisees: advisees.length,
       totalTeachingSks
     };
-  }, [selectedDosen, users, mahasiswas, dosenPengampus, kelasKuliahs, mataKuliahs, tahunAkademiks]);
+  }, [selectedDosen, users, students, dosenPengampus, kelasKuliahs, mataKuliahs, tahunAkademiks]);
 
   // Photo component with fallback
   const DosenPhoto = ({ dosen, size = 'lg' }) => {
@@ -86,14 +100,14 @@ export default function DosenTab({
     const sizeClasses = size === 'lg' ? 'w-28 h-28' : size === 'md' ? 'w-16 h-16' : 'w-10 h-10';
     const iconSize = size === 'lg' ? 48 : size === 'md' ? 24 : 16;
 
-    const fotoUrl = dosen.foto ? `/storage/${dosen.foto}` : null;
+    const photoUrl = dosen.photo ? `/storage/${dosen.photo}` : null;
 
-    if (fotoUrl && !imgError) {
+    if (photoUrl && !imgError) {
       return (
         <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0 ${size === 'lg' ? 'border-4 border-white bg-white relative z-20 shadow-xl' : ''}`}>
           <img
-            src={fotoUrl}
-            alt={dosen.nama}
+            src={photoUrl}
+            alt={dosen.name}
             className="w-full h-full object-cover"
             onError={() => setImgError(true)}
           />
@@ -159,7 +173,7 @@ export default function DosenTab({
               <DosenPhoto dosen={detailData.dosen} size="lg" />
               <div className="flex-1 pb-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.dosen.nama}</h2>
+                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.dosen.name}</h2>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                   <span className="px-3 py-1.5 bg-monday-blue/10 rounded-xl flex items-center gap-1.5 border border-monday-blue/20">
@@ -278,25 +292,25 @@ export default function DosenTab({
                       <td className="py-3 px-5">
                         {ct.mk ? (
                           <div>
-                            <span className="font-bold text-monday-black">{ct.mk.nama_mk}</span>
-                            <span className="ml-2 text-xs text-monday-gray font-semibold">{ct.mk.kode_mk}</span>
+                            <span className="font-bold text-monday-black">{ct.mk.name}</span>
+                            <span className="ml-2 text-xs text-monday-gray font-semibold">{ct.mk.code}</span>
                           </div>
                         ) : <span className="italic text-monday-gray">-</span>}
                       </td>
                       <td className="py-3 px-5">
                         {ct.kk ? (
                           <span className="px-2 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                            {ct.kk.nama_kelas}
+                            {ct.kk.class_name}
                           </span>
                         ) : '-'}
                       </td>
                       <td className="py-3 px-5">
                         {ct.ta ? (
-                          <span className="text-xs font-semibold text-monday-gray">{ct.ta.nama_ta}</span>
+                          <span className="text-xs font-semibold text-monday-gray">{ct.ta.name}</span>
                         ) : '-'}
                       </td>
                       <td className="py-3 px-5 text-xs text-monday-gray font-semibold">
-                        {ct.kk ? `${ct.kk.hari}, ${ct.kk.jam_mulai.substring(0, 5)} - ${ct.kk.jam_selesai.substring(0, 5)} (${ct.kk.ruangan})` : '-'}
+                        {ct.kk ? `${ct.kk.day}, ${ct.kk.start_time.substring(0, 5)} - ${ct.kk.end_time.substring(0, 5)} (${ct.kk.room})` : '-'}
                       </td>
                       <td className="py-3 px-5 text-center font-bold">{ct.mk?.sks || '-'}</td>
                     </tr>
@@ -335,15 +349,15 @@ export default function DosenTab({
                     <tr key={mhs.id} className="hover:bg-monday-gray-background/30 transition-colors">
                       <td className="py-3 px-5 text-monday-gray font-mono font-semibold text-xs">{index + 1}</td>
                       <td className="py-3 px-5 font-bold text-monday-blue font-mono">{mhs.nim}</td>
-                      <td className="py-3 px-5 font-semibold">{mhs.nama}</td>
-                      <td className="py-3 px-5 text-xs text-monday-gray font-semibold">{mhs.tahun_masuk}</td>
+                      <td className="py-3 px-5 font-semibold">{mhs.name}</td>
+                      <td className="py-3 px-5 text-xs text-monday-gray font-semibold">{mhs.enrollment_year}</td>
                       <td className="py-3 px-5 text-center">
-                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${mhs.status_mahasiswa === 'AKTIF' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
-                            mhs.status_mahasiswa === 'CUTI' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
-                              mhs.status_mahasiswa === 'LULUS' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
+                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${mhs.status === 'AKTIF' ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20' :
+                            mhs.status === 'CUTI' ? 'bg-amber-500/15 text-amber-700 border-amber-500/20' :
+                              mhs.status === 'LULUS' ? 'bg-monday-blue/15 text-monday-blue border-monday-blue/20' :
                                 'bg-monday-red/15 text-monday-red border-monday-red/20'
                           }`}>
-                          {mhs.status_mahasiswa}
+                          {mhs.status}
                         </span>
                       </td>
                     </tr>
@@ -374,7 +388,7 @@ export default function DosenTab({
             </span>
           </p>
           <p className="font-semibold text-sm text-monday-gray">
-            Kelola data staf pengajar/dosen dan bimbingan akademik. Total: {dosens.length} dosen terdaftar.
+            Kelola data staf pengajar/dosen dan bimbingan akademik. Total: {lecturers.length} dosen terdaftar.
           </p>
         </div>
         <button
@@ -412,9 +426,9 @@ export default function DosenTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {paginatedItems.map((d, index) => {
-              const uObj = users.find(u => u.id === d.id_user);
-              const classCount = dosenPengampus.filter(dp => dp.id_dosen === d.id).length;
-              const adviseeCount = mahasiswas.filter(m => m.id_dosen_pa === d.id).length;
+              const uObj = users.find(u => u.id === d.user_id);
+              const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
+              const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
 
               return (
                 <tr key={d.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -423,7 +437,7 @@ export default function DosenTab({
                     <div className="flex items-center gap-3">
                       <DosenPhoto dosen={d} size="sm" />
                       <div>
-                        <p className="font-bold text-monday-black">{d.nama}</p>
+                        <p className="font-bold text-monday-black">{d.name}</p>
                         <p className="text-xs font-bold text-monday-blue">{d.nidn}</p>
                       </div>
                     </div>
@@ -487,17 +501,21 @@ export default function DosenTab({
             </button>
 
             <div className="flex items-center gap-1.5">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${currentPage === page
-                      ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
-                      : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
-                    }`}
-                >
-                  {page}
-                </button>
+              {getPageNumbers().map((page, index) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${index}`} className="px-2 text-monday-gray font-bold text-xs">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${currentPage === page
+                        ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
+                        : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                )
               ))}
             </div>
 

@@ -12,29 +12,29 @@ class ProdiSeeder extends Seeder
      */
     public function run(): void
     {
-        $prodis = [
-            // FT (id_fakultas: 1)
-            ['id_fakultas' => 1, 'kode_prodi' => 'IF', 'prefix_nim' => '411', 'nama_prodi' => 'TEKNIK INFORMATIKA', 'jenjang' => 'S1'],
-            ['id_fakultas' => 1, 'kode_prodi' => 'EL', 'prefix_nim' => '412', 'nama_prodi' => 'TEKNIK ELEKTRO', 'jenjang' => 'S1'],
-            ['id_fakultas' => 1, 'kode_prodi' => 'SI', 'prefix_nim' => '413', 'nama_prodi' => 'TEKNIK SIPIL', 'jenjang' => 'S1'],
+        $study_programs = [
+            // FT (faculty_id: 1)
+            ['faculty_id' => 1, 'code' => 'IF', 'nim_prefix' => '411', 'name' => 'TEKNIK INFORMATIKA', 'jenjang' => 'S1'],
+            ['faculty_id' => 1, 'code' => 'EL', 'nim_prefix' => '412', 'name' => 'TEKNIK ELEKTRO', 'jenjang' => 'S1'],
+            ['faculty_id' => 1, 'code' => 'SI', 'nim_prefix' => '413', 'name' => 'TEKNIK SIPIL', 'jenjang' => 'S1'],
 
-            // FEB (id_fakultas: 2)
-            ['id_fakultas' => 2, 'kode_prodi' => 'AKT', 'prefix_nim' => '421', 'nama_prodi' => 'AKUNTANSI', 'jenjang' => 'S1'],
-            ['id_fakultas' => 2, 'kode_prodi' => 'MNJ', 'prefix_nim' => '422', 'nama_prodi' => 'MANAJEMEN', 'jenjang' => 'S1'],
+            // FEB (faculty_id: 2)
+            ['faculty_id' => 2, 'code' => 'AKT', 'nim_prefix' => '421', 'name' => 'AKUNTANSI', 'jenjang' => 'S1'],
+            ['faculty_id' => 2, 'code' => 'MNJ', 'nim_prefix' => '422', 'name' => 'MANAJEMEN', 'jenjang' => 'S1'],
 
-            // FH (id_fakultas: 3)
-            ['id_fakultas' => 3, 'kode_prodi' => 'IH', 'prefix_nim' => '431', 'nama_prodi' => 'ILMU HUKUM', 'jenjang' => 'S1'],
-            ['id_fakultas' => 3, 'kode_prodi' => 'HK', 'prefix_nim' => '432', 'nama_prodi' => 'HUKUM KELUARGA', 'jenjang' => 'S1'],
+            // FH (faculty_id: 3)
+            ['faculty_id' => 3, 'code' => 'IH', 'nim_prefix' => '431', 'name' => 'ILMU HUKUM', 'jenjang' => 'S1'],
+            ['faculty_id' => 3, 'code' => 'HK', 'nim_prefix' => '432', 'name' => 'HUKUM KELUARGA', 'jenjang' => 'S1'],
 
-            // FIB (id_fakultas: 4)
-            ['id_fakultas' => 4, 'kode_prodi' => 'SIND', 'prefix_nim' => '441', 'nama_prodi' => 'SASTRA INDONESIA', 'jenjang' => 'S1'],
-            ['id_fakultas' => 4, 'kode_prodi' => 'SING', 'prefix_nim' => '442', 'nama_prodi' => 'SASTRA INGGRIS', 'jenjang' => 'S1'],
+            // FIB (faculty_id: 4)
+            ['faculty_id' => 4, 'code' => 'SIND', 'nim_prefix' => '441', 'name' => 'SASTRA INDONESIA', 'jenjang' => 'S1'],
+            ['faculty_id' => 4, 'code' => 'SING', 'nim_prefix' => '442', 'name' => 'SASTRA INGGRIS', 'jenjang' => 'S1'],
 
-            // FK (id_fakultas: 5)
-            ['id_fakultas' => 5, 'kode_prodi' => 'PD', 'prefix_nim' => '451', 'nama_prodi' => 'PENDIDIKAN DOKTER', 'jenjang' => 'S1'],
-            ['id_fakultas' => 5, 'kode_prodi' => 'FAR', 'prefix_nim' => '452', 'nama_prodi' => 'FARMASI', 'jenjang' => 'S1'],
+            // FK (faculty_id: 5)
+            ['faculty_id' => 5, 'code' => 'PD', 'nim_prefix' => '451', 'name' => 'PENDIDIKAN DOKTER', 'jenjang' => 'S1'],
+            ['faculty_id' => 5, 'code' => 'FAR', 'nim_prefix' => '452', 'name' => 'FARMASI', 'jenjang' => 'S1'],
         ];
 
-        DB::table('prodis')->insert($prodis);
+        DB::table('study_programs')->insert($study_programs);
     }
 }

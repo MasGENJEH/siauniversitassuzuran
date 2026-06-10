@@ -10,13 +10,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('mata_kuliahs', function (Blueprint $table) {
+        Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_prodi')->constrained('prodis')->cascadeOnDelete();
-            $table->string('kode_mk')->unique();
-            $table->string('nama_mk');
+            $table->foreignId('study_program_id')->constrained('study_programs')->cascadeOnDelete();
+            $table->string('code')->unique();
+            $table->string('name');
             $table->integer('sks');
-            $table->integer('semester_plot'); // Angka murni, bukan foreign key
+            $table->integer('recommended_semester');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('mata_kuliahs');
+        Schema::dropIfExists('courses');
     }
 };

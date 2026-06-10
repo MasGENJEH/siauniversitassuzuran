@@ -43,9 +43,9 @@ class DosenController extends Controller
     {
         $data = $request->validated();
 
-        // Handle foto upload
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('foto-dosen', 'public');
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('photo-lecturer', 'public');
         }
 
         $dosen = $this->dosenService->create($data);
@@ -58,14 +58,14 @@ class DosenController extends Controller
         try {
             $data = $request->validated();
 
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                // Delete old foto if exists
+            // Handle photo upload
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
                 $oldDosen = $this->dosenService->getById($id, ['*']);
-                if ($oldDosen->foto) {
-                    Storage::disk('public')->delete($oldDosen->foto);
+                if ($oldDosen->photo) {
+                    Storage::disk('public')->delete($oldDosen->photo);
                 }
-                $data['foto'] = $request->file('foto')->store('foto-dosen', 'public');
+                $data['photo'] = $request->file('photo')->store('photo-lecturer', 'public');
             }
 
             $dosen = $this->dosenService->update($id, $data);
@@ -81,10 +81,10 @@ class DosenController extends Controller
     public function destroy(int $id)
     {
         try {
-            // Delete foto file if exists
+            // Delete photo file if exists
             $dosen = $this->dosenService->getById($id, ['*']);
-            if ($dosen->foto) {
-                Storage::disk('public')->delete($dosen->foto);
+            if ($dosen->photo) {
+                Storage::disk('public')->delete($dosen->photo);
             }
 
             $this->dosenService->delete($id);
@@ -103,7 +103,7 @@ class DosenController extends Controller
     {
         $user = auth()->user();
         if ($user && $user->hasRole('dosen')) {
-            $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+            $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
             if (!$dosen || $dosen->id !== $id) {
                 return response()->json([
                     'message' => 'Anda tidak memiliki akses ke kelas dosen lain.'
@@ -126,7 +126,7 @@ class DosenController extends Controller
     {
         $user = auth()->user();
         if ($user && $user->hasRole('dosen')) {
-            $dosen = \App\Models\Dosen::where('id_user', $user->id)->first();
+            $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
             if (!$dosen || $dosen->id !== $id) {
                 return response()->json([
                     'message' => 'Anda tidak memiliki akses ke data bimbingan dosen lain.'
@@ -136,9 +136,9 @@ class DosenController extends Controller
 
         try {
             $dosen = \App\Models\Dosen::findOrFail($id);
-            $mahasiswas = \App\Models\Mahasiswa::where('id_dosen_pa', $dosen->id)->get();
+            $students = \App\Models\Mahasiswa::where('academic_advisor_id', $dosen->id)->get();
 
-            return response()->json(\App\Http\Resources\MahasiswaResource::collection($mahasiswas));
+            return response()->json(\App\Http\Resources\MahasiswaResource::collection($students));
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'dosen tidak ditemukan',

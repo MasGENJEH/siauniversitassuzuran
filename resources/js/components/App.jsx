@@ -31,15 +31,15 @@ export default function App() {
   const [checkingAuth, setCheckingAuth] = useState(!!token);
 
   // Database Data States
-  const [fakultas, setFakultas] = useState([]);
-  const [prodis, setProdis] = useState([]);
-  const [tahunAkademiks, setTahunAkademiks] = useState([]);
-  const [dosens, setDosens] = useState([]);
-  const [mahasiswas, setMahasiswas] = useState([]);
-  const [mataKuliahs, setMataKuliahs] = useState([]);
-  const [kelasKuliahs, setKelasKuliahs] = useState([]);
-  const [kelasMahasiswas, setKelasMahasiswas] = useState([]);
-  const [dosenPengampus, setDosenPengampus] = useState([]);
+  const [faculties, setFaculties] = useState([]);
+  const [studyPrograms, setStudyPrograms] = useState([]);
+  const [academicYears, setAcademicYears] = useState([]);
+  const [lecturers, setLecturers] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [mataKuliahs, setCourses] = useState([]);
+  const [kelasKuliahs, setCourseClasses] = useState([]);
+  const [kelasMahasiswas, setEnrollments] = useState([]);
+  const [dosenPengampus, setClassInstructors] = useState([]);
   const [users, setUsers] = useState([]);
 
   // Active Semester Dosen View State
@@ -53,7 +53,7 @@ export default function App() {
 
   // Modal / Form States
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); // e.g., 'fakultas', 'prodi', etc.
+  const [modalType, setModalType] = useState(''); // e.g., 'faculties', 'prodi', etc.
   const [modalAction, setModalAction] = useState('create'); // 'create' | 'edit'
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({});
@@ -64,7 +64,7 @@ export default function App() {
   const [deleteTarget, setDeleteTarget] = useState({ type: null, id: null });
 
   // Active Semester Indicator Helper
-  const activeSemester = tahunAkademiks.find(ta => ta.status) || null;
+  const activeSemester = academicYears.find(ta => ta.status) || null;
 
   // Search filter query
   const [searchQuery, setSearchQuery] = useState('');
@@ -203,27 +203,27 @@ export default function App() {
       const [
         fakList, prodList, taList, dosList, mhsList, mkList, kkList, kmList, dpList, userList
       ] = await Promise.all([
-        fetchJson('/api/fakultas'),
-        fetchJson('/api/prodis'),
-        fetchJson('/api/tahun-akademiks'),
-        fetchJson('/api/dosens'),
-        fetchJson('/api/mahasiswas'),
-        fetchJson('/api/mata-kuliahs'),
-        fetchJson('/api/kelas-kuliahs'),
-        fetchJson('/api/kelas-mahasiswas'),
-        fetchJson('/api/dosen-pengampus'),
+        fetchJson('/api/faculties'),
+        fetchJson('/api/study-programs'),
+        fetchJson('/api/academic-years'),
+        fetchJson('/api/lecturers'),
+        fetchJson('/api/students'),
+        fetchJson('/api/courses'),
+        fetchJson('/api/course-classes'),
+        fetchJson('/api/enrollments'),
+        fetchJson('/api/class-instructors'),
         fetchJson('/api/users')
       ]);
 
-      setFakultas(fakList);
-      setProdis(prodList);
-      setTahunAkademiks(taList);
-      setDosens(dosList);
-      setMahasiswas(mhsList);
-      setMataKuliahs(mkList);
-      setKelasKuliahs(kkList);
-      setKelasMahasiswas(kmList);
-      setDosenPengampus(dpList);
+      setFaculties(fakList);
+      setStudyPrograms(prodList);
+      setAcademicYears(taList);
+      setLecturers(dosList);
+      setStudents(mhsList);
+      setCourses(mkList);
+      setCourseClasses(kkList);
+      setEnrollments(kmList);
+      setClassInstructors(dpList);
       setUsers(userList);
     } catch (error) {
       console.error("Error fetching SIAKAD data:", error);
@@ -240,16 +240,16 @@ export default function App() {
 
   // Auto-select Dosen for lecturer portal if logged in as dosen
   useEffect(() => {
-    if (user && dosens.length > 0) {
+    if (user && lecturers.length > 0) {
       const isDosen = (user.roles || []).some(r => r.name === 'dosen');
       if (isDosen) {
-        const myDosen = dosens.find(d => d.id_user === user.id);
+        const myDosen = lecturers.find(d => d.user_id === user.id);
         if (myDosen && String(selectedDosenForPortal) !== String(myDosen.id)) {
           setSelectedDosenForPortal(String(myDosen.id));
         }
       }
     }
-  }, [user, dosens]);
+  }, [user, lecturers]);
 
 
   // Fetch active classes and advisees for a selected Lecturer in the Lecturer Portal
@@ -262,21 +262,21 @@ export default function App() {
       setSelectedClassForGrades(null);
       setEnrolledStudentsInClass([]);
     }
-  }, [selectedDosenForPortal, kelasKuliahs, tahunAkademiks]);
+  }, [selectedDosenForPortal, kelasKuliahs, academicYears]);
 
   const fetchLecturerPortalData = async (dosenId) => {
     setLoadingPortal(true);
     try {
       const [resClasses, resAdvisees] = await Promise.all([
-        apiFetch(`/api/dosens/${dosenId}/kelas-kuliah-aktif`),
-        apiFetch(`/api/dosens/${dosenId}/mahasiswa-bimbingan`)
+        apiFetch(`/api/lecturers/${dosenId}/kelas-kuliah-aktif`),
+        apiFetch(`/api/lecturers/${dosenId}/mahasiswa-bimbingan`)
       ]);
-      
+
       if (resClasses.ok) {
         const data = await resClasses.json();
         setDosenActiveClasses(data);
       }
-      
+
       if (resAdvisees.ok) {
         const data = await resAdvisees.json();
         setDosenAdviseeStudents(data.data ? data.data : data);
@@ -291,14 +291,14 @@ export default function App() {
   // Fetch enrolled students for a specific class in the portal
   const selectClassForPortalGrades = (kelas) => {
     setSelectedClassForGrades(kelas);
-    const enrollments = kelasMahasiswas.filter(km => km.id_kelas === kelas.id);
+    const enrollments = kelasMahasiswas.filter(km => km.course_class_id === kelas.id);
     setEnrolledStudentsInClass(enrollments);
 
     const gradesMap = {};
     enrollments.forEach(enroll => {
       gradesMap[enroll.id] = {
-        nilai_akhir: enroll.nilai_akhir !== null ? enroll.nilai_akhir : '',
-        nilai_huruf: enroll.nilai_huruf || ''
+        final_score: enroll.final_score !== null ? enroll.final_score : '',
+        letter_grade: enroll.letter_grade || ''
       };
     });
     setUpdatingGrades(gradesMap);
@@ -311,19 +311,19 @@ export default function App() {
       const originalEnrollment = kelasMahasiswas.find(km => km.id === enrollId);
       if (!originalEnrollment) return;
 
-      const res = await apiFetch(`/api/kelas-mahasiswas/${enrollId}`, {
+      const res = await apiFetch(`/api/enrollments/${enrollId}`, {
         method: 'PUT',
         body: JSON.stringify({
-          id_mahasiswa: originalEnrollment.id_mahasiswa,
-          id_kelas: originalEnrollment.id_kelas,
-          nilai_akhir: gradeData.nilai_akhir === '' ? null : Number(gradeData.nilai_akhir),
-          nilai_huruf: gradeData.nilai_huruf || null
+          student_id: originalEnrollment.student_id,
+          course_class_id: originalEnrollment.course_class_id,
+          final_score: gradeData.final_score === '' ? null : Number(gradeData.final_score),
+          letter_grade: gradeData.letter_grade || null
         })
       });
 
       if (res.ok) {
         const updated = await res.json();
-        setKelasMahasiswas(prev => prev.map(km => km.id === enrollId ? updated : km));
+        setEnrollments(prev => prev.map(km => km.id === enrollId ? updated : km));
         alert("Nilai mahasiswa berhasil diperbarui!");
         fetchData();
       } else {
@@ -338,18 +338,18 @@ export default function App() {
   // Get correct API endpoint URL based on model type
   const getEndpointUrl = (type, id = null) => {
     let segment = `${type}s`;
-    if (type === 'fakultas') {
-      segment = 'fakultas';
+    if (type === 'faculties') {
+      segment = 'faculties';
     } else if (type === 'tahunAkademik') {
-      segment = 'tahun-akademiks';
+      segment = 'academic-years';
     } else if (type === 'mataKuliah') {
-      segment = 'mata-kuliahs';
+      segment = 'courses';
     } else if (type === 'kelasKuliah') {
-      segment = 'kelas-kuliahs';
+      segment = 'course-classes';
     } else if (type === 'dosenPengampu') {
-      segment = 'dosen-pengampus';
+      segment = 'class-instructors';
     } else if (type === 'kelasMahasiswa') {
-      segment = 'kelas-mahasiswas';
+      segment = 'enrollments';
     }
     return `/api/${segment}${id ? `/${id}` : ''}`;
   };
@@ -371,16 +371,16 @@ export default function App() {
 
         Object.entries(formData).forEach(([key, val]) => {
           // Skip internal preview/file keys and null values
-          if (key === '_fotoPreview' || key === '_fotoFile') return;
-          if (key === 'foto' && typeof val !== 'string') return; // Skip non-string foto
+          if (key === '_photoPreview' || key === '_photoFile') return;
+          if (key === 'photo' && typeof val !== 'string') return; // Skip non-string photo
           if (val !== null && val !== undefined && val !== '') {
             fd.append(key, val);
           }
         });
 
         // Append the actual file if selected
-        if (formData._fotoFile) {
-          fd.append('foto', formData._fotoFile);
+        if (formData._photoFile) {
+          fd.append('photo', formData._photoFile);
         }
 
         // Laravel requires POST + _method for FormData PUT
@@ -405,8 +405,8 @@ export default function App() {
 
       if (res.ok) {
         // Cleanup preview URL
-        if (formData._fotoPreview) {
-          URL.revokeObjectURL(formData._fotoPreview);
+        if (formData._photoPreview) {
+          URL.revokeObjectURL(formData._photoPreview);
         }
         setShowModal(false);
         setFormData({});
@@ -469,22 +469,22 @@ export default function App() {
     setFormErrors({});
 
     const isUserMhs = (user?.roles || []).some(r => r.name === 'mahasiswa');
-    const myMhsObj = isUserMhs ? mahasiswas.find(m => m.id_user === user.id) : null;
+    const myMhsObj = isUserMhs ? students.find(m => m.user_id === user.id) : null;
 
     if (action === 'edit' && item) {
       if (type === 'kelasKuliah') {
         const linkedDosenIds = dosenPengampus
-          .filter(dp => dp.id_kelas === item.id)
-          .map(dp => dp.id_dosen);
+          .filter(dp => dp.course_class_id === item.id)
+          .map(dp => dp.lecturer_id);
         setFormData({ ...item, dosen_ids: linkedDosenIds });
       } else {
         setFormData({ ...item });
       }
     } else if (type === 'dosenPengampu' && item) {
-      setFormData({ id_kelas: item.id }); // Use correct property 'id' from kelasKuliah item
+      setFormData({ course_class_id: item.id }); // Use correct property 'id' from kelasKuliah item
     } else {
       if (type === 'kelasMahasiswa' && myMhsObj) {
-        setFormData({ id_mahasiswa: myMhsObj.id });
+        setFormData({ student_id: myMhsObj.id });
       } else if (item) {
         setFormData({ ...item });
       } else {
@@ -498,11 +498,11 @@ export default function App() {
   // Switch academic year active status
   const toggleTahunAkademikStatus = async (ta) => {
     try {
-      const res = await apiFetch(`/api/tahun-akademiks/${ta.id}`, {
+      const res = await apiFetch(`/api/academic-years/${ta.id}`, {
         method: 'PUT',
         body: JSON.stringify({
-          kode_ta: ta.kode_ta,
-          nama_ta: ta.nama_ta,
+          code: ta.code,
+          name: ta.name,
           status: true
         })
       });
@@ -569,10 +569,10 @@ export default function App() {
               {activeTab === 'dashboard' && (
                 <DashboardTab
                   user={user}
-                  fakultas={fakultas}
-                  prodis={prodis}
-                  dosens={dosens}
-                  mahasiswas={mahasiswas}
+                  faculties={faculties}
+                  studyPrograms={studyPrograms}
+                  lecturers={lecturers}
+                  students={students}
                   activeSemester={activeSemester}
                   kelasKuliahs={kelasKuliahs}
                   dosenPengampus={dosenPengampus}
@@ -583,9 +583,9 @@ export default function App() {
               )}
 
               {/* FAKULTAS TAB */}
-              {activeTab === 'fakultas' && (
+              {activeTab === 'faculties' && (
                 <FakultasTab
-                  fakultas={fakultas}
+                  faculties={faculties}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -596,8 +596,8 @@ export default function App() {
               {/* PROGRAM STUDI TAB */}
               {activeTab === 'prodi' && (
                 <ProdiTab
-                  prodis={prodis}
-                  fakultas={fakultas}
+                  studyPrograms={studyPrograms}
+                  faculties={faculties}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -608,7 +608,7 @@ export default function App() {
               {/* TAHUN AKADEMIK TAB */}
               {activeTab === 'tahun-akademik' && (
                 <TahunAkademikTab
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -620,13 +620,13 @@ export default function App() {
               {/* DATA DOSEN TAB */}
               {activeTab === 'dosen' && (
                 <DosenTab
-                  dosens={dosens}
+                  lecturers={lecturers}
                   users={users}
-                  mahasiswas={mahasiswas}
+                  students={students}
                   dosenPengampus={dosenPengampus}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -637,14 +637,14 @@ export default function App() {
               {/* DATA MAHASISWA TAB */}
               {activeTab === 'mahasiswa' && (
                 <MahasiswaTab
-                  mahasiswas={mahasiswas}
-                  prodis={prodis}
-                  dosens={dosens}
-                  fakultas={fakultas}
+                  students={students}
+                  studyPrograms={studyPrograms}
+                  lecturers={lecturers}
+                  faculties={faculties}
                   kelasMahasiswas={kelasMahasiswas}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   users={users}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
@@ -657,7 +657,7 @@ export default function App() {
               {activeTab === 'mata-kuliah' && (
                 <MataKuliahTab
                   mataKuliahs={mataKuliahs}
-                  prodis={prodis}
+                  studyPrograms={studyPrograms}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -670,11 +670,11 @@ export default function App() {
                 <KelasKuliahTab
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   dosenPengampus={dosenPengampus}
-                  dosens={dosens}
+                  lecturers={lecturers}
                   kelasMahasiswas={kelasMahasiswas}
-                  mahasiswas={mahasiswas}
+                  students={students}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -686,14 +686,14 @@ export default function App() {
               {activeTab === 'lecturer-portal' && (
                 <LecturerPortalTab
                   user={user}
-                  dosens={dosens}
+                  lecturers={lecturers}
                   mataKuliahs={mataKuliahs}
-                  mahasiswas={mahasiswas}
+                  students={students}
                   kelasKuliahs={kelasKuliahs}
                   kelasMahasiswas={kelasMahasiswas}
                   dosenActiveClasses={dosenActiveClasses}
                   dosenAdviseeStudents={dosenAdviseeStudents}
-                  prodis={prodis}
+                  studyPrograms={studyPrograms}
                   loadingPortal={loadingPortal}
                   selectedDosenForPortal={selectedDosenForPortal}
                   setSelectedDosenForPortal={setSelectedDosenForPortal}
@@ -713,12 +713,12 @@ export default function App() {
                 <KelasMahasiswaTab
                   user={user}
                   kelasMahasiswas={kelasMahasiswas}
-                  mahasiswas={mahasiswas}
+                  students={students}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  dosens={dosens}
+                  lecturers={lecturers}
                   dosenPengampus={dosenPengampus}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   openModal={openModal}
@@ -729,23 +729,23 @@ export default function App() {
               {activeTab === 'jadwal-kuliah' && (
                 <JadwalKuliahTab
                   user={user}
-                  mahasiswas={mahasiswas}
+                  students={students}
                   kelasMahasiswas={kelasMahasiswas}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  dosens={dosens}
+                  lecturers={lecturers}
                   dosenPengampus={dosenPengampus}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                 />
               )}
 
               {activeTab === 'profil-mahasiswa' && (
                 <ProfilMahasiswaTab
                   user={user}
-                  mahasiswas={mahasiswas}
-                  prodis={prodis}
-                  fakultas={fakultas}
-                  dosens={dosens}
+                  students={students}
+                  studyPrograms={studyPrograms}
+                  faculties={faculties}
+                  lecturers={lecturers}
                   refreshUser={refreshUser}
                 />
               )}
@@ -753,12 +753,12 @@ export default function App() {
               {activeTab === 'profil-dosen' && (
                 <ProfilDosenTab
                   user={user}
-                  dosens={dosens}
-                  mahasiswas={mahasiswas}
+                  lecturers={lecturers}
+                  students={students}
                   dosenPengampus={dosenPengampus}
                   kelasKuliahs={kelasKuliahs}
                   mataKuliahs={mataKuliahs}
-                  tahunAkademiks={tahunAkademiks}
+                  tahunAkademiks={academicYears}
                   refreshUser={refreshUser}
                 />
               )}
@@ -766,10 +766,10 @@ export default function App() {
               {activeTab === 'profil-admin' && (
                 <ProfilAdminTab
                   user={user}
-                  fakultas={fakultas}
-                  prodis={prodis}
-                  dosens={dosens}
-                  mahasiswas={mahasiswas}
+                  faculties={faculties}
+                  studyPrograms={studyPrograms}
+                  lecturers={lecturers}
+                  students={students}
                   mataKuliahs={mataKuliahs}
                   kelasKuliahs={kelasKuliahs}
                   users={users}
@@ -792,11 +792,11 @@ export default function App() {
         formData={formData}
         setFormData={setFormData}
         formErrors={formErrors}
-        fakultas={fakultas}
-        prodis={prodis}
-        tahunAkademiks={tahunAkademiks}
-        dosens={dosens}
-        mahasiswas={mahasiswas}
+        faculties={faculties}
+        studyPrograms={studyPrograms}
+        tahunAkademiks={academicYears}
+        lecturers={lecturers}
+        students={students}
         mataKuliahs={mataKuliahs}
         kelasKuliahs={kelasKuliahs}
         users={users}

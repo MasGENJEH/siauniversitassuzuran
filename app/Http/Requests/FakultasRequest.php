@@ -22,17 +22,17 @@ class FakultasRequest extends FormRequest
      */
     public function rules(): array
     {
-        $fakultasId = $this->route('fakultas');
+        $facultiesId = $this->route('faculties');
 
         return [
-            'kode_fakultas' => [
+            'code' => [
                 'required',
                 'string',
                 'max:10',
-                // Jika create: harus unik di tabel fakultas. Jika update: abaikan unik untuk ID diri sendiri.
-                'unique:fakultas,kode_fakultas,'.$fakultasId,
+                // Jika create: harus unik di tabel faculties. Jika update: abaikan unik untuk ID diri sendiri.
+                'unique:faculties,code,'.$facultiesId,
             ],
-            'nama_fakultas' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
@@ -43,14 +43,14 @@ class FakultasRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'kode_fakultas.required' => 'KODE FAKULTAS wajib diisi.',
-            'kode_fakultas.string' => 'KODE FAKULTAS harus berupa teks.',
-            'kode_fakultas.max' => 'KODE FAKULTAS maksimal berjumlah 10 karakter.',
-            'kode_fakultas.unique' => 'KODE FAKULTAS sudah terdaftar di sistem.',
+            'code.required' => 'KODE FAKULTAS wajib diisi.',
+            'code.string' => 'KODE FAKULTAS harus berupa teks.',
+            'code.max' => 'KODE FAKULTAS maksimal berjumlah 10 karakter.',
+            'code.unique' => 'KODE FAKULTAS sudah terdaftar di sistem.',
 
-            'nama_fakultas.required' => 'NAMA FAKULTAS wajib diisi.',
-            'nama_fakultas.string' => 'NAMA FAKULTAS harus berupa teks.',
-            'nama_fakultas.max' => 'NAMA FAKULTAS maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA FAKULTAS wajib diisi.',
+            'name.string' => 'NAMA FAKULTAS harus berupa teks.',
+            'name.max' => 'NAMA FAKULTAS maksimal berjumlah 255 karakter.',
         ];
     }
 }

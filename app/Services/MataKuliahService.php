@@ -29,9 +29,9 @@ class MataKuliahService
 
     public function create(array $data)
     {
-        $prodi = $this->prodiRepository->getById($data['id_prodi']);
+        $prodi = $this->prodiRepository->getById($data['study_program_id']);
 
-        $data['kode_mk'] = MataKuliahHelper::generateUniqueKodeKelas($prodi->kode_prodi);
+        $data['code'] = MataKuliahHelper::generateUniqueKodeKelas($prodi->code);
 
         return $this->mataKuliahRepository->create($data);
     }

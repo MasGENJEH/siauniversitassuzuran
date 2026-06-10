@@ -57,13 +57,13 @@ export default function TahunAkademikTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {tahunAkademiks.filter(ta => 
-              ta.nama_ta.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              ta.kode_ta.toLowerCase().includes(searchQuery.toLowerCase())
+              ta.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              ta.code.toLowerCase().includes(searchQuery.toLowerCase())
             ).map((ta, index) => (
               <tr key={ta.id} className="hover:bg-monday-gray-background/30 transition-colors">
                 <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
-                <td className="py-3.5 px-6 font-bold text-monday-blue">{ta.kode_ta}</td>
-                <td className="py-3.5 px-6 font-semibold">{ta.nama_ta}</td>
+                <td className="py-3.5 px-6 font-bold text-monday-blue">{ta.code}</td>
+                <td className="py-3.5 px-6 font-semibold">{ta.name}</td>
                 <td className="py-3.5 px-6 text-center">
                   {ta.status ? (
                     <span className="px-3 py-1 bg-monday-lime-green/20 border border-monday-lime-green/30 text-monday-black text-xs font-bold rounded-full">

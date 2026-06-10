@@ -138,14 +138,17 @@ class UserSeeder extends Seeder
         }
 
         // Mahasiswa Users
-        for ($i = 1; $i <= 50; $i++) {
-            $name = $mahasiswaNames[$i - 1];
+        for ($i = 1; $i <= 250; $i++) {
+            $baseName = $mahasiswaNames[($i - 1) % 50];
+            $nameSuffix = ceil($i / 50) > 1 ? ' ' . ceil($i / 50) : '';
+            $name = $baseName . $nameSuffix;
+            
             $users[] = [
                 'name' => $name,
                 'email' => 'mhs.' . $i . '@kampus.ac.id',
                 'password' => Hash::make('password123'),
                 'phone' => '0857' . str_pad($i, 8, '0', STR_PAD_LEFT),
-                'photo' => 'mhs_' . $i . '.jpg',
+                'photo' => 'mhs_' . (($i - 1) % 50 + 1) . '.jpg',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

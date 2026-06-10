@@ -11,11 +11,11 @@ export default function DynamicFormModal({
   formData,
   setFormData,
   formErrors,
-  fakultas,
-  prodis,
+  faculties,
+  studyPrograms,
   tahunAkademiks,
-  dosens,
-  mahasiswas,
+  lecturers,
+  students,
   mataKuliahs,
   kelasKuliahs,
   users,
@@ -50,8 +50,8 @@ export default function DynamicFormModal({
     setFormData(prev => {
       const updated = { ...prev, [field]: val };
       
-      // Auto-compute letter grade if updating numerical grade (nilai_akhir)
-      if (field === 'nilai_akhir') {
+      // Auto-compute letter grade if updating numerical grade (final_score)
+      if (field === 'final_score') {
         let letterGrade = null;
         if (val !== null && val !== '') {
           const score = Number(val);
@@ -63,7 +63,7 @@ export default function DynamicFormModal({
             else if (score >= 0 && score < 40) letterGrade = 'E';
           }
         }
-        updated.nilai_huruf = letterGrade;
+        updated.letter_grade = letterGrade;
       }
       
       return updated;
@@ -72,30 +72,30 @@ export default function DynamicFormModal({
 
   const renderFormFields = () => {
     switch (modalType) {
-      case 'fakultas':
+      case 'faculties':
         return (
           <>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kode Fakultas</label>
               <input 
                 type="text" 
-                value={formData.kode_fakultas || ''} 
-                onChange={(e) => handleInputChange('kode_fakultas', e.target.value.toUpperCase())}
+                value={formData.code || ''} 
+                onChange={(e) => handleInputChange('code', e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: FT"
               />
-              {formErrors.kode_fakultas && <p className="text-xs text-monday-red font-bold">{formErrors.kode_fakultas[0]}</p>}
+              {formErrors.code && <p className="text-xs text-monday-red font-bold">{formErrors.code[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Fakultas</label>
               <input 
                 type="text" 
-                value={formData.nama_fakultas || ''} 
-                onChange={(e) => handleInputChange('nama_fakultas', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: FAKULTAS TEKNIK"
               />
-              {formErrors.nama_fakultas && <p className="text-xs text-monday-red font-bold">{formErrors.nama_fakultas[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
           </>
         );
@@ -106,38 +106,38 @@ export default function DynamicFormModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Fakultas Induk</label>
               <select 
-                value={formData.id_fakultas || ''} 
-                onChange={(e) => handleInputChange('id_fakultas', e.target.value)}
+                value={formData.faculty_id || ''} 
+                onChange={(e) => handleInputChange('faculty_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Fakultas --</option>
-                {fakultas.map(f => (
-                  <option key={f.id} value={f.id}>{f.nama_fakultas}</option>
+                {faculties.map(f => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </select>
-              {formErrors.id_fakultas && <p className="text-xs text-monday-red font-bold">{formErrors.id_fakultas[0]}</p>}
+              {formErrors.faculty_id && <p className="text-xs text-monday-red font-bold">{formErrors.faculty_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kode Prodi</label>
               <input 
                 type="text" 
-                value={formData.kode_prodi || ''} 
-                onChange={(e) => handleInputChange('kode_prodi', e.target.value.toUpperCase())}
+                value={formData.code || ''} 
+                onChange={(e) => handleInputChange('code', e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: IF"
               />
-              {formErrors.kode_prodi && <p className="text-xs text-monday-red font-bold">{formErrors.kode_prodi[0]}</p>}
+              {formErrors.code && <p className="text-xs text-monday-red font-bold">{formErrors.code[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Program Studi</label>
               <input 
                 type="text" 
-                value={formData.nama_prodi || ''} 
-                onChange={(e) => handleInputChange('nama_prodi', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: TEKNIK INFORMATIKA"
               />
-              {formErrors.nama_prodi && <p className="text-xs text-monday-red font-bold">{formErrors.nama_prodi[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
           </>
         );
@@ -149,23 +149,23 @@ export default function DynamicFormModal({
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kode TA (Semester)</label>
               <input 
                 type="text" 
-                value={formData.kode_ta || ''} 
-                onChange={(e) => handleInputChange('kode_ta', e.target.value)}
+                value={formData.code || ''} 
+                onChange={(e) => handleInputChange('code', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: 20241"
               />
-              {formErrors.kode_ta && <p className="text-xs text-monday-red font-bold">{formErrors.kode_ta[0]}</p>}
+              {formErrors.code && <p className="text-xs text-monday-red font-bold">{formErrors.code[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama TA / Label</label>
               <input 
                 type="text" 
-                value={formData.nama_ta || ''} 
-                onChange={(e) => handleInputChange('nama_ta', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: GANJIL 2024/2025"
               />
-              {formErrors.nama_ta && <p className="text-xs text-monday-red font-bold">{formErrors.nama_ta[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
             {modalAction === 'edit' && (
               <div className="flex items-center gap-3">
@@ -202,18 +202,18 @@ export default function DynamicFormModal({
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Lengkap Dosen</label>
               <input 
                 type="text" 
-                value={formData.nama || ''} 
-                onChange={(e) => handleInputChange('nama', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: Dr. Fachri, M.T."
               />
-              {formErrors.nama && <p className="text-xs text-monday-red font-bold">{formErrors.nama[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tautkan Akun User</label>
               <select 
-                value={formData.id_user || ''} 
-                onChange={(e) => handleInputChange('id_user', e.target.value)}
+                value={formData.user_id || ''} 
+                onChange={(e) => handleInputChange('user_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Akun User --</option>
@@ -221,19 +221,19 @@ export default function DynamicFormModal({
                   <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
                 ))}
               </select>
-              {formErrors.id_user && <p className="text-xs text-monday-red font-bold">{formErrors.id_user[0]}</p>}
+              {formErrors.user_id && <p className="text-xs text-monday-red font-bold">{formErrors.user_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Foto Dosen</label>
               <div className="flex items-center gap-4">
                 {/* Preview */}
-                {formData._fotoPreview ? (
+                {formData._photoPreview ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={formData._fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={formData._photoPreview} alt="Preview" className="w-full h-full object-cover" />
                   </div>
-                ) : formData.foto && typeof formData.foto === 'string' ? (
+                ) : formData.photo && typeof formData.photo === 'string' ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={`/storage/${formData.foto}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img src={`/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                   </div>
                 ) : null}
                 <div className="flex-1">
@@ -243,9 +243,9 @@ export default function DynamicFormModal({
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
-                        handleInputChange('_fotoFile', file);
+                        handleInputChange('_photoFile', file);
                         const previewUrl = URL.createObjectURL(file);
-                        handleInputChange('_fotoPreview', previewUrl);
+                        handleInputChange('_photoPreview', previewUrl);
                       }
                     }}
                     className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-monday-blue/10 file:text-monday-blue hover:file:bg-monday-blue/20 file:cursor-pointer"
@@ -253,7 +253,7 @@ export default function DynamicFormModal({
                   <p className="text-[11px] text-monday-gray font-medium mt-1">Format: JPEG, PNG, WEBP. Maks: 2MB.</p>
                 </div>
               </div>
-              {formErrors.foto && <p className="text-xs text-monday-red font-bold">{formErrors.foto[0]}</p>}
+              {formErrors.photo && <p className="text-xs text-monday-red font-bold">{formErrors.photo[0]}</p>}
             </div>
           </>
         );
@@ -276,46 +276,46 @@ export default function DynamicFormModal({
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Lengkap Mahasiswa</label>
               <input 
                 type="text" 
-                value={formData.nama || ''} 
-                onChange={(e) => handleInputChange('nama', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: Fachri Hanz"
               />
-              {formErrors.nama && <p className="text-xs text-monday-red font-bold">{formErrors.nama[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Program Studi</label>
               <select 
-                value={formData.id_prodi || ''} 
-                onChange={(e) => handleInputChange('id_prodi', e.target.value)}
+                value={formData.study_program_id || ''} 
+                onChange={(e) => handleInputChange('study_program_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Program Studi --</option>
-                {prodis.map(p => (
-                  <option key={p.id} value={p.id}>{p.nama_prodi}</option>
+                {studyPrograms.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
-              {formErrors.id_prodi && <p className="text-xs text-monday-red font-bold">{formErrors.id_prodi[0]}</p>}
+              {formErrors.study_program_id && <p className="text-xs text-monday-red font-bold">{formErrors.study_program_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Dosen Wali Akademik</label>
               <select 
-                value={formData.id_dosen_pa || ''} 
-                onChange={(e) => handleInputChange('id_dosen_pa', e.target.value)}
+                value={formData.academic_advisor_id || ''} 
+                onChange={(e) => handleInputChange('academic_advisor_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Dosen Wali --</option>
-                {dosens.map(d => (
-                  <option key={d.id} value={d.id}>{d.nama}</option>
+                {lecturers.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>
-              {formErrors.id_dosen_pa && <p className="text-xs text-monday-red font-bold">{formErrors.id_dosen_pa[0]}</p>}
+              {formErrors.academic_advisor_id && <p className="text-xs text-monday-red font-bold">{formErrors.academic_advisor_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tautkan Akun User</label>
               <select 
-                value={formData.id_user || ''} 
-                onChange={(e) => handleInputChange('id_user', e.target.value)}
+                value={formData.user_id || ''} 
+                onChange={(e) => handleInputChange('user_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Akun User --</option>
@@ -323,7 +323,7 @@ export default function DynamicFormModal({
                   <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
                 ))}
               </select>
-              {formErrors.id_user && <p className="text-xs text-monday-red font-bold">{formErrors.id_user[0]}</p>}
+              {formErrors.user_id && <p className="text-xs text-monday-red font-bold">{formErrors.user_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tahun Masuk</label>
@@ -331,18 +331,18 @@ export default function DynamicFormModal({
                 type="number" 
                 min="1900"
                 max="2100"
-                value={formData.tahun_masuk || ''} 
-                onChange={(e) => handleInputChange('tahun_masuk', e.target.value === '' ? '' : Number(e.target.value))}
+                value={formData.enrollment_year || ''} 
+                onChange={(e) => handleInputChange('enrollment_year', e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: 2026"
               />
-              {formErrors.tahun_masuk && <p className="text-xs text-monday-red font-bold">{formErrors.tahun_masuk[0]}</p>}
+              {formErrors.enrollment_year && <p className="text-xs text-monday-red font-bold">{formErrors.enrollment_year[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Status Mahasiswa</label>
               <select 
-                value={formData.status_mahasiswa || ''} 
-                onChange={(e) => handleInputChange('status_mahasiswa', e.target.value)}
+                value={formData.status || ''} 
+                onChange={(e) => handleInputChange('status', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Status --</option>
@@ -351,19 +351,19 @@ export default function DynamicFormModal({
                 <option value="LULUS">LULUS</option>
                 <option value="DO">DO</option>
               </select>
-              {formErrors.status_mahasiswa && <p className="text-xs text-monday-red font-bold">{formErrors.status_mahasiswa[0]}</p>}
+              {formErrors.status && <p className="text-xs text-monday-red font-bold">{formErrors.status[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Foto Mahasiswa</label>
               <div className="flex items-center gap-4">
                 {/* Preview */}
-                {formData._fotoPreview ? (
+                {formData._photoPreview ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={formData._fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={formData._photoPreview} alt="Preview" className="w-full h-full object-cover" />
                   </div>
-                ) : formData.foto && typeof formData.foto === 'string' ? (
+                ) : formData.photo && typeof formData.photo === 'string' ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={`/storage/${formData.foto}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img src={`/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                   </div>
                 ) : null}
                 <div className="flex-1">
@@ -373,10 +373,10 @@ export default function DynamicFormModal({
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
-                        handleInputChange('_fotoFile', file);
+                        handleInputChange('_photoFile', file);
                         // Create preview URL
                         const previewUrl = URL.createObjectURL(file);
-                        handleInputChange('_fotoPreview', previewUrl);
+                        handleInputChange('_photoPreview', previewUrl);
                       }
                     }}
                     className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-monday-blue/10 file:text-monday-blue hover:file:bg-monday-blue/20 file:cursor-pointer"
@@ -384,7 +384,7 @@ export default function DynamicFormModal({
                   <p className="text-[11px] text-monday-gray font-medium mt-1">Format: JPEG, PNG, WEBP. Maks: 2MB.</p>
                 </div>
               </div>
-              {formErrors.foto && <p className="text-xs text-monday-red font-bold">{formErrors.foto[0]}</p>}
+              {formErrors.photo && <p className="text-xs text-monday-red font-bold">{formErrors.photo[0]}</p>}
             </div>
           </>
         );
@@ -395,38 +395,38 @@ export default function DynamicFormModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Program Studi</label>
               <select 
-                value={formData.id_prodi || ''} 
-                onChange={(e) => handleInputChange('id_prodi', e.target.value)}
+                value={formData.study_program_id || ''} 
+                onChange={(e) => handleInputChange('study_program_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Program Studi --</option>
-                {prodis.map(p => (
-                  <option key={p.id} value={p.id}>{p.nama_prodi}</option>
+                {studyPrograms.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
-              {formErrors.id_prodi && <p className="text-xs text-monday-red font-bold">{formErrors.id_prodi[0]}</p>}
+              {formErrors.study_program_id && <p className="text-xs text-monday-red font-bold">{formErrors.study_program_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kode Mata Kuliah</label>
               <input 
                 type="text" 
-                value={formData.kode_mk || ''} 
-                onChange={(e) => handleInputChange('kode_mk', e.target.value.toUpperCase())}
+                value={formData.code || ''} 
+                onChange={(e) => handleInputChange('code', e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: MK001"
               />
-              {formErrors.kode_mk && <p className="text-xs text-monday-red font-bold">{formErrors.kode_mk[0]}</p>}
+              {formErrors.code && <p className="text-xs text-monday-red font-bold">{formErrors.code[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Mata Kuliah</label>
               <input 
                 type="text" 
-                value={formData.nama_mk || ''} 
-                onChange={(e) => handleInputChange('nama_mk', e.target.value)}
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: ALGORITMA & PEMROGRAMAN"
               />
-              {formErrors.nama_mk && <p className="text-xs text-monday-red font-bold">{formErrors.nama_mk[0]}</p>}
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Bobot SKS</label>
@@ -450,55 +450,55 @@ export default function DynamicFormModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mata Kuliah</label>
               <select 
-                value={formData.id_mk || ''} 
+                value={formData.course_id || ''} 
                 onChange={(e) => {
                   const val = e.target.value;
-                  const calculatedSelesai = calculateJamSelesai(formData.jam_mulai, val);
+                  const calculatedSelesai = calculateJamSelesai(formData.start_time, val);
                   setFormData(prev => ({
                     ...prev,
-                    id_mk: val,
-                    jam_selesai: calculatedSelesai
+                    course_id: val,
+                    end_time: calculatedSelesai
                   }));
                 }}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Mata Kuliah --</option>
                 {mataKuliahs.map(m => (
-                  <option key={m.id} value={m.id}>{m.kode_mk} - {m.nama_mk} ({m.sks} SKS)</option>
+                  <option key={m.id} value={m.id}>{m.code} - {m.name} ({m.sks} SKS)</option>
                 ))}
               </select>
-              {formErrors.id_mk && <p className="text-xs text-monday-red font-bold">{formErrors.id_mk[0]}</p>}
+              {formErrors.course_id && <p className="text-xs text-monday-red font-bold">{formErrors.course_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Tahun Akademik</label>
               <select 
-                value={formData.id_ta || ''} 
-                onChange={(e) => handleInputChange('id_ta', e.target.value)}
+                value={formData.academic_year_id || ''} 
+                onChange={(e) => handleInputChange('academic_year_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih TA --</option>
                 {tahunAkademiks.map(t => (
-                  <option key={t.id} value={t.id}>{t.nama_ta}</option>
+                  <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
-              {formErrors.id_ta && <p className="text-xs text-monday-red font-bold">{formErrors.id_ta[0]}</p>}
+              {formErrors.academic_year_id && <p className="text-xs text-monday-red font-bold">{formErrors.academic_year_id[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Kelas</label>
               <input 
                 type="text" 
-                value={formData.nama_kelas || ''} 
-                onChange={(e) => handleInputChange('nama_kelas', e.target.value.toUpperCase())}
+                value={formData.class_name || ''} 
+                onChange={(e) => handleInputChange('class_name', e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: A, B, ATAU REGULER"
               />
-              {formErrors.nama_kelas && <p className="text-xs text-monday-red font-bold">{formErrors.nama_kelas[0]}</p>}
+              {formErrors.class_name && <p className="text-xs text-monday-red font-bold">{formErrors.class_name[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Hari</label>
               <select
-                value={formData.hari || ''}
-                onChange={(e) => handleInputChange('hari', e.target.value)}
+                value={formData.day || ''}
+                onChange={(e) => handleInputChange('day', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Hari --</option>
@@ -508,52 +508,52 @@ export default function DynamicFormModal({
                 <option value="KAMIS">KAMIS</option>
                 <option value="JUMAT">JUMAT</option>
               </select>
-              {formErrors.hari && <p className="text-xs text-monday-red font-bold">{formErrors.hari[0]}</p>}
+              {formErrors.day && <p className="text-xs text-monday-red font-bold">{formErrors.day[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Jam Mulai</label>
               <input
                 type="time"
-                value={formData.jam_mulai ? formData.jam_mulai.substring(0, 5) : ''}
+                value={formData.start_time ? formData.start_time.substring(0, 5) : ''}
                 onChange={(e) => {
                   const val = e.target.value;
-                  const calculatedSelesai = calculateJamSelesai(val, formData.id_mk);
+                  const calculatedSelesai = calculateJamSelesai(val, formData.course_id);
                   setFormData(prev => ({
                     ...prev,
-                    jam_mulai: val ? `${val}:00` : '',
-                    jam_selesai: calculatedSelesai
+                    start_time: val ? `${val}:00` : '',
+                    end_time: calculatedSelesai
                   }));
                 }}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               />
-              {formErrors.jam_mulai && <p className="text-xs text-monday-red font-bold">{formErrors.jam_mulai[0]}</p>}
+              {formErrors.start_time && <p className="text-xs text-monday-red font-bold">{formErrors.start_time[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Jam Selesai (Otomatis)</label>
               <input
                 type="time"
-                value={formData.jam_selesai ? formData.jam_selesai.substring(0, 5) : ''}
+                value={formData.end_time ? formData.end_time.substring(0, 5) : ''}
                 disabled
                 className="w-full px-4 py-2.5 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold text-monday-gray cursor-not-allowed"
                 placeholder="Akan terisi otomatis"
               />
-              {formErrors.jam_selesai && <p className="text-xs text-monday-red font-bold">{formErrors.jam_selesai[0]}</p>}
+              {formErrors.end_time && <p className="text-xs text-monday-red font-bold">{formErrors.end_time[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Ruangan</label>
               <input
                 type="text"
-                value={formData.ruangan || ''}
-                onChange={(e) => handleInputChange('ruangan', e.target.value.toUpperCase())}
+                value={formData.room || ''}
+                onChange={(e) => handleInputChange('room', e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 placeholder="Contoh: LAB KOMPUTER 3 ATAU H.2"
               />
-              {formErrors.ruangan && <p className="text-xs text-monday-red font-bold">{formErrors.ruangan[0]}</p>}
+              {formErrors.room && <p className="text-xs text-monday-red font-bold">{formErrors.room[0]}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Dosen Pengampu (Team Teaching)</label>
               <div className="grid grid-cols-1 gap-2 max-h-[140px] overflow-y-auto border border-monday-border rounded-xl p-3 bg-monday-background/50">
-                {dosens.map(d => {
+                {lecturers.map(d => {
                   const isChecked = (formData.dosen_ids || []).includes(d.id);
                   return (
                     <label key={d.id} className="flex items-center gap-2.5 text-sm font-semibold text-monday-black cursor-pointer hover:bg-monday-gray-background/20 p-1 rounded-lg transition-colors">
@@ -572,7 +572,7 @@ export default function DynamicFormModal({
                         }}
                         className="rounded text-monday-blue focus:ring-monday-blue border-monday-border"
                       />
-                      <span>{d.nama}</span>
+                      <span>{d.name}</span>
                     </label>
                   );
                 })}
@@ -589,9 +589,9 @@ export default function DynamicFormModal({
               <input 
                 type="text" 
                 value={(() => {
-                  const k = kelasKuliahs.find(cls => cls.id === formData.id_kelas);
-                  const mk = k ? mataKuliahs.find(m => m.id === k.id_mk) : null;
-                  return k && mk ? `${mk.nama_mk} (Kelas ${k.nama_kelas})` : '';
+                  const k = kelasKuliahs.find(cls => cls.id === formData.course_class_id);
+                  const mk = k ? mataKuliahs.find(m => m.id === k.course_id) : null;
+                  return k && mk ? `${mk.name} (Kelas ${k.class_name})` : '';
                 })()} 
                 disabled
                 className="w-full px-4 py-2.5 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold text-monday-gray cursor-not-allowed"
@@ -600,23 +600,23 @@ export default function DynamicFormModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Pilih Dosen Pengampu</label>
               <select 
-                value={formData.id_dosen || ''} 
-                onChange={(e) => handleInputChange('id_dosen', e.target.value)}
+                value={formData.lecturer_id || ''} 
+                onChange={(e) => handleInputChange('lecturer_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
               >
                 <option value="">-- Pilih Dosen --</option>
-                {dosens.map(d => (
-                  <option key={d.id} value={d.id}>{d.nama} (NIDN: {d.nidn})</option>
+                {lecturers.map(d => (
+                  <option key={d.id} value={d.id}>{d.name} (NIDN: {d.nidn})</option>
                 ))}
               </select>
-              {formErrors.id_dosen && <p className="text-xs text-monday-red font-bold">{formErrors.id_dosen[0]}</p>}
+              {formErrors.lecturer_id && <p className="text-xs text-monday-red font-bold">{formErrors.lecturer_id[0]}</p>}
             </div>
           </>
         );
 
       case 'kelasMahasiswa': {
         const isMahasiswa = (currentUser?.roles || []).some(r => r.name === 'mahasiswa');
-        const myMahasiswa = isMahasiswa ? mahasiswas.find(m => m.id_user === currentUser?.id) : null;
+        const myMahasiswa = isMahasiswa ? students.find(m => m.user_id === currentUser?.id) : null;
 
         return (
           <>
@@ -625,7 +625,7 @@ export default function DynamicFormModal({
                 <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mahasiswa</label>
                 <input 
                   type="text" 
-                  value={myMahasiswa ? `${myMahasiswa.nim} - ${myMahasiswa.nama}` : ''} 
+                  value={myMahasiswa ? `${myMahasiswa.nim} - ${myMahasiswa.name}` : ''} 
                   disabled
                   className="w-full px-4 py-2.5 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold text-monday-gray cursor-not-allowed"
                 />
@@ -634,39 +634,39 @@ export default function DynamicFormModal({
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Mahasiswa</label>
                 <select 
-                  value={formData.id_mahasiswa || ''} 
-                  onChange={(e) => handleInputChange('id_mahasiswa', e.target.value)}
+                  value={formData.student_id || ''} 
+                  onChange={(e) => handleInputChange('student_id', e.target.value)}
                   className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                   disabled={modalAction === 'edit'}
                 >
                   <option value="">-- Pilih Mahasiswa --</option>
-                  {mahasiswas.map(m => (
-                    <option key={m.id} value={m.id}>{m.nim} - {m.nama}</option>
+                  {students.map(m => (
+                    <option key={m.id} value={m.id}>{m.nim} - {m.name}</option>
                   ))}
                 </select>
-                {formErrors.id_mahasiswa && <p className="text-xs text-monday-red font-bold">{formErrors.id_mahasiswa[0]}</p>}
+                {formErrors.student_id && <p className="text-xs text-monday-red font-bold">{formErrors.student_id[0]}</p>}
               </div>
             )}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Kelas Kuliah</label>
               <select 
-                value={formData.id_kelas || ''} 
-                onChange={(e) => handleInputChange('id_kelas', e.target.value)}
+                value={formData.course_class_id || ''} 
+                onChange={(e) => handleInputChange('course_class_id', e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                 disabled={modalAction === 'edit'}
               >
                 <option value="">-- Pilih Kelas Kuliah --</option>
                 {kelasKuliahs.map(k => {
-                  const mk = mataKuliahs.find(m => m.id === k.id_mk);
-                  const ta = tahunAkademiks.find(t => t.id === k.id_ta);
+                  const mk = mataKuliahs.find(m => m.id === k.course_id);
+                  const ta = tahunAkademiks.find(t => t.id === k.academic_year_id);
                   return (
                     <option key={k.id} value={k.id}>
-                      {mk ? mk.nama_mk : 'N/A'} (Kelas {k.nama_kelas}) - {ta ? ta.nama_ta : 'N/A'}
+                      {mk ? mk.name : 'N/A'} (Kelas {k.class_name}) - {ta ? ta.name : 'N/A'}
                     </option>
                   );
                 })}
               </select>
-              {formErrors.id_kelas && <p className="text-xs text-monday-red font-bold">{formErrors.id_kelas[0]}</p>}
+              {formErrors.course_class_id && <p className="text-xs text-monday-red font-bold">{formErrors.course_class_id[0]}</p>}
             </div>
             {modalAction === 'edit' && (
               <div className="space-y-1.5">
@@ -675,12 +675,12 @@ export default function DynamicFormModal({
                   type="number" 
                   min="0"
                   max="100"
-                  value={formData.nilai_akhir === null || formData.nilai_akhir === undefined ? '' : formData.nilai_akhir} 
-                  onChange={(e) => handleInputChange('nilai_akhir', e.target.value === '' ? null : Number(e.target.value))}
+                  value={formData.final_score === null || formData.final_score === undefined ? '' : formData.final_score} 
+                  onChange={(e) => handleInputChange('final_score', e.target.value === '' ? null : Number(e.target.value))}
                   className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
                   placeholder="Nilai Angka (0 - 100)"
                 />
-                {formErrors.nilai_akhir && <p className="text-xs text-monday-red font-bold">{formErrors.nilai_akhir[0]}</p>}
+                {formErrors.final_score && <p className="text-xs text-monday-red font-bold">{formErrors.final_score[0]}</p>}
               </div>
             )}
           </>

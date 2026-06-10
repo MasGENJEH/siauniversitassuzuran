@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp, Mail, Lock } from 'lucide-react';
 
 export default function MahasiswaTab({
-  mahasiswas,
-  prodis,
-  dosens,
-  fakultas,
+  students,
+  studyPrograms,
+  lecturers,
+  faculties,
   kelasMahasiswas,
   kelasKuliahs,
   mataKuliahs,
@@ -32,8 +32,8 @@ export default function MahasiswaTab({
   }, [selectedMahasiswa]);
 
   // Filter items based on search query
-  const filteredItems = mahasiswas.filter(m =>
-    m.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredItems = students.filter(m =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.nim.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -44,18 +44,32 @@ export default function MahasiswaTab({
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
+  // Helper for pagination window
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
   // Compute detail data for selected mahasiswa
   const detailData = useMemo(() => {
     if (!selectedMahasiswa) return null;
 
     const mhs = selectedMahasiswa;
-    const prodiObj = prodis.find(p => p.id === mhs.id_prodi);
-    const dosenObj = dosens.find(d => d.id === mhs.id_dosen_pa);
-    const fakObj = prodiObj ? (fakultas || []).find(f => f.id === prodiObj.id_fakultas) : null;
-    const userObj = users.find(u => u.id === mhs.id_user);
+    const prodiObj = studyPrograms.find(p => p.id === mhs.study_program_id);
+    const dosenObj = lecturers.find(d => d.id === mhs.academic_advisor_id);
+    const fakObj = prodiObj ? (faculties || []).find(f => f.id === prodiObj.faculty_id) : null;
+    const userObj = users.find(u => u.id === mhs.user_id);
 
     // Get all enrollments for this student
-    const enrollments = kelasMahasiswas.filter(km => km.id_mahasiswa === mhs.id);
+    const enrollments = kelasMahasiswas.filter(km => km.student_id === mhs.id);
 
     // Calculate total SKS & unique semesters
     let totalSks = 0;
@@ -65,14 +79,14 @@ export default function MahasiswaTab({
     const courseDetails = [];
 
     enrollments.forEach(km => {
-      const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
-      const mk = kk ? mataKuliahs.find(m => m.id === kk.id_mk) : null;
-      const ta = kk ? tahunAkademiks.find(t => t.id === kk.id_ta) : null;
+      const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
+      const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
+      const ta = kk ? tahunAkademiks.find(t => t.id === kk.academic_year_id) : null;
 
       if (mk && mk.sks) totalSks += Number(mk.sks);
       if (ta) semesterSet.add(ta.id);
-      if (km.nilai_akhir !== null && km.nilai_akhir !== undefined) {
-        totalNilai += Number(km.nilai_akhir);
+      if (km.final_score !== null && km.final_score !== undefined) {
+        totalNilai += Number(km.final_score);
         gradedCount++;
       }
 
@@ -85,11 +99,11 @@ export default function MahasiswaTab({
     let totalBobot = 0;
     let totalSksBerbobot = 0;
     enrollments.forEach(km => {
-      const kk = kelasKuliahs.find(k => k.id === km.id_kelas);
-      const mk = kk ? mataKuliahs.find(m => m.id === kk.id_mk) : null;
-      if (mk && mk.sks && km.nilai_huruf) {
+      const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
+      const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
+      if (mk && mk.sks && km.letter_grade) {
         const bobotMap = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'E': 0 };
-        const bobot = bobotMap[km.nilai_huruf] ?? 0;
+        const bobot = bobotMap[km.letter_grade] ?? 0;
         totalBobot += bobot * Number(mk.sks);
         totalSksBerbobot += Number(mk.sks);
       }
@@ -100,7 +114,7 @@ export default function MahasiswaTab({
       mahasiswa: mhs,
       prodi: prodiObj,
       dosen: dosenObj,
-      fakultas: fakObj,
+      faculties: fakObj,
       user: userObj,
       totalSks,
       totalMk: enrollments.length,
@@ -109,7 +123,7 @@ export default function MahasiswaTab({
       ipk,
       courseDetails,
     };
-  }, [selectedMahasiswa, prodis, dosens, fakultas, kelasMahasiswas, kelasKuliahs, mataKuliahs, tahunAkademiks, users]);
+  }, [selectedMahasiswa, studyPrograms, lecturers, faculties, kelasMahasiswas, kelasKuliahs, mataKuliahs, tahunAkademiks, users]);
 
   // Status badge color helper
   const getStatusBadge = (status) => {
@@ -141,14 +155,14 @@ export default function MahasiswaTab({
     const iconSize = size === 'lg' ? 48 : size === 'md' ? 24 : 16;
     const textSize = size === 'lg' ? 'text-4xl' : size === 'md' ? 'text-xl' : 'text-sm';
 
-    const fotoUrl = mahasiswa.foto ? `/storage/${mahasiswa.foto}` : null;
+    const photoUrl = mahasiswa.photo ? `/storage/${mahasiswa.photo}` : null;
 
-    if (fotoUrl && !imgError) {
+    if (photoUrl && !imgError) {
       return (
         <div className={`${sizeClasses} rounded-2xl overflow-hidden border-2 border-monday-blue/20 shadow-lg shadow-monday-blue/10 flex-shrink-0 ${size === 'lg' ? 'border-4 border-white bg-white relative z-20 shadow-xl' : ''}`}>
           <img
-            src={fotoUrl}
-            alt={mahasiswa.nama}
+            src={photoUrl}
+            alt={mahasiswa.name}
             className="w-full h-full object-cover"
             onError={() => setImgError(true)}
           />
@@ -214,9 +228,9 @@ export default function MahasiswaTab({
               <StudentPhoto mahasiswa={detailData.mahasiswa} size="lg" />
               <div className="flex-1 pb-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.mahasiswa.nama}</h2>
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full border-2 border-white shadow-sm ${getStatusBadge(detailData.mahasiswa.status_mahasiswa).replace(/border-[^\s]+/g, '')}`}>
-                    {detailData.mahasiswa.status_mahasiswa}
+                  <h2 className="font-extrabold text-2xl text-monday-black drop-shadow-sm">{detailData.mahasiswa.name}</h2>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full border-2 border-white shadow-sm ${getStatusBadge(detailData.mahasiswa.status).replace(/border-[^\s]+/g, '')}`}>
+                    {detailData.mahasiswa.status}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -257,7 +271,7 @@ export default function MahasiswaTab({
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Program Studi</p>
-                  <p className="font-bold text-sm text-monday-black truncate">{detailData.prodi?.nama_prodi || '-'}</p>
+                  <p className="font-bold text-sm text-monday-black truncate">{detailData.prodi?.name || '-'}</p>
                   {detailData.prodi?.jenjang && (
                     <p className="text-xs text-monday-gray font-semibold">{detailData.prodi.jenjang}</p>
                   )}
@@ -271,7 +285,7 @@ export default function MahasiswaTab({
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Fakultas</p>
-                  <p className="font-bold text-sm text-monday-black truncate">{detailData.fakultas?.nama_fakultas || '-'}</p>
+                  <p className="font-bold text-sm text-monday-black truncate">{detailData.faculties?.name || '-'}</p>
                 </div>
               </div>
 
@@ -282,7 +296,7 @@ export default function MahasiswaTab({
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Tahun Masuk</p>
-                  <p className="font-bold text-sm text-monday-black">{detailData.mahasiswa.tahun_masuk}</p>
+                  <p className="font-bold text-sm text-monday-black">{detailData.mahasiswa.enrollment_year}</p>
                 </div>
               </div>
 
@@ -293,7 +307,7 @@ export default function MahasiswaTab({
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold text-monday-gray uppercase tracking-wider mb-0.5">Dosen Wali (PA)</p>
-                  <p className="font-bold text-sm text-monday-black truncate">{detailData.dosen?.nama || '-'}</p>
+                  <p className="font-bold text-sm text-monday-black truncate">{detailData.dosen?.name || '-'}</p>
                   {detailData.dosen?.nidn && (
                     <p className="text-xs text-monday-gray font-semibold">NIDN: {detailData.dosen.nidn}</p>
                   )}
@@ -373,33 +387,33 @@ export default function MahasiswaTab({
                       <td className="py-3 px-5">
                         {cd.mk ? (
                           <div>
-                            <span className="font-bold text-monday-black">{cd.mk.nama_mk}</span>
-                            <span className="ml-2 text-xs text-monday-gray font-semibold">{cd.mk.kode_mk}</span>
+                            <span className="font-bold text-monday-black">{cd.mk.name}</span>
+                            <span className="ml-2 text-xs text-monday-gray font-semibold">{cd.mk.code}</span>
                           </div>
                         ) : <span className="italic text-monday-gray">-</span>}
                       </td>
                       <td className="py-3 px-5">
                         {cd.kk ? (
                           <span className="px-2 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                            {cd.kk.nama_kelas}
+                            {cd.kk.class_name}
                           </span>
                         ) : '-'}
                       </td>
                       <td className="py-3 px-5">
                         {cd.ta ? (
-                          <span className="text-xs font-semibold text-monday-gray">{cd.ta.nama_ta}</span>
+                          <span className="text-xs font-semibold text-monday-gray">{cd.ta.name}</span>
                         ) : '-'}
                       </td>
                       <td className="py-3 px-5 text-center font-bold">{cd.mk?.sks || '-'}</td>
                       <td className="py-3 px-5 text-center font-bold">
-                        {cd.km.nilai_akhir !== null && cd.km.nilai_akhir !== undefined
-                          ? cd.km.nilai_akhir
+                        {cd.km.final_score !== null && cd.km.final_score !== undefined
+                          ? cd.km.final_score
                           : <span className="text-monday-gray font-normal italic text-xs">N/A</span>}
                       </td>
                       <td className="py-3 px-5 text-center">
-                        {cd.km.nilai_huruf ? (
-                          <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getGradeBadgeClass(cd.km.nilai_huruf)}`}>
-                            {cd.km.nilai_huruf}
+                        {cd.km.letter_grade ? (
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getGradeBadgeClass(cd.km.letter_grade)}`}>
+                            {cd.km.letter_grade}
                           </span>
                         ) : (
                           <span className="text-monday-gray text-xs italic">N/A</span>
@@ -435,7 +449,7 @@ export default function MahasiswaTab({
             </span>
           </p>
           <p className="font-semibold text-sm text-monday-gray">
-            Kelola data mahasiswa, program studi, dan dosen wali akademik mereka. Total: {mahasiswas.length} mahasiswa terdaftar.
+            Kelola data mahasiswa, program studi, dan dosen wali akademik mereka. Total: {students.length} mahasiswa terdaftar.
           </p>
         </div>
         <button
@@ -474,9 +488,9 @@ export default function MahasiswaTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {paginatedItems.map((m, index) => {
-              const prObj = prodis.find(p => p.id === m.id_prodi);
-              const dosObj = dosens.find(d => d.id === m.id_dosen_pa);
-              const uObj = users.find(u => u.id === m.id_user);
+              const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+              const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
+              const uObj = users.find(u => u.id === m.user_id);
 
               return (
                 <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -485,7 +499,7 @@ export default function MahasiswaTab({
                     <div className="flex items-center gap-3">
                       <StudentPhoto mahasiswa={m} size="sm" />
                       <div>
-                        <p className="font-bold text-monday-black">{m.nama}</p>
+                        <p className="font-bold text-monday-black">{m.name}</p>
                         <p className="text-xs font-bold text-monday-blue">{m.nim}</p>
                       </div>
                     </div>
@@ -496,16 +510,16 @@ export default function MahasiswaTab({
                   <td className="py-3.5 px-6">
                     {prObj ? (
                       <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
-                        {prObj.nama_prodi}
+                        {prObj.name}
                       </span>
                     ) : '-'}
                   </td>
                   <td className="py-3.5 px-6 font-medium text-monday-gray">
-                    {dosObj ? dosObj.nama : '-'}
+                    {dosObj ? dosObj.name : '-'}
                   </td>
                   <td className="py-3.5 px-6 text-center">
-                    <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusBadge(m.status_mahasiswa)}`}>
-                      {m.status_mahasiswa}
+                    <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusBadge(m.status)}`}>
+                      {m.status}
                     </span>
                   </td>
                   <td className="py-3.5 px-6 text-right">
@@ -554,17 +568,21 @@ export default function MahasiswaTab({
             </button>
 
             <div className="flex items-center gap-1.5">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${currentPage === page
-                    ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
-                    : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
-                    }`}
-                >
-                  {page}
-                </button>
+              {getPageNumbers().map((page, index) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${index}`} className="px-2 text-monday-gray font-bold text-xs">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${currentPage === page
+                      ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
+                      : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                )
               ))}
             </div>
 

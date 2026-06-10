@@ -25,21 +25,21 @@ class MataKuliahRequest extends FormRequest
         $mataKuliahId = $this->route('mata_kuliah');
 
         return [
-            'id_prodi' => [
+            'study_program_id' => [
                 'required',
                 'integer',
-                'exists:prodis,id', // Memastikan prodi pengampu wajib terdaftar di tabel prodi
+                'exists:study-programs,id', // Memastikan prodi pengampu wajib terdaftar di tabel prodi
             ],
-            'nama_mk' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'kode_mk' => [
+            'code' => [
                 'nullable', // Di-set nullable jika Anda ingin memanfaatkan auto-generate kode dari sistem
                 'string',
                 'max:20',
-                'unique:mata_kuliahs,kode_mk,'.$mataKuliahId,
+                'unique:mata_kuliahs,code,'.$mataKuliahId,
             ],
             'sks' => [
                 'required',
@@ -47,7 +47,7 @@ class MataKuliahRequest extends FormRequest
                 'min:1',
                 'max:6', // Batasan standar bobot SKS perkuliahan (biasanya 1 s.d 6 SKS)
             ],
-            'semester_plot' => [
+            'recommended_semester' => [
                 'required',
                 'integer',
                 'min:1',
@@ -59,32 +59,32 @@ class MataKuliahRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_prodi.required' => 'PROGRAM STUDI pengampu mata kuliah wajib dipilih.',
-            'id_prodi.exists' => 'PROGRAM STUDI yang dipilih tidak valid.',
+            'study_program_id.required' => 'PROGRAM STUDI pengampu mata kuliah wajib dipilih.',
+            'study_program_id.exists' => 'PROGRAM STUDI yang dipilih tidak valid.',
 
-            'kode_mk.max' => 'KODE MATA KULIAH maksimal berjumlah 20 karakter.',
-            'kode_mk.unique' => 'KODE MATA KULIAH sudah terdaftar di dalam sistem.',
+            'code.max' => 'KODE MATA KULIAH maksimal berjumlah 20 karakter.',
+            'code.unique' => 'KODE MATA KULIAH sudah terdaftar di dalam sistem.',
 
-            'nama_mk.required' => 'NAMA MATA KULIAH wajib diisi.',
-            'nama_mk.max' => 'NAMA MATA KULIAH maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA MATA KULIAH wajib diisi.',
+            'name.max' => 'NAMA MATA KULIAH maksimal berjumlah 255 karakter.',
 
             'sks.required' => 'BOBOT SKS wajib diisi.',
             'sks.integer' => 'BOBOT SKS harus berupa angka.',
             'sks.min' => 'BOBOT SKS minimal adalah 1 SKS.',
             'sks.max' => 'BOBOT SKS maksimal adalah 6 SKS.',
 
-            'semester_plot.required' => 'PLOTTING SEMESTER wajib diisi.',
-            'semester_plot.integer' => 'PLOTTING SEMESTER harus berupa angka.',
-            'semester_plot.min' => 'PLOTTING SEMESTER paling rendah adalah semester 1.',
-            'semester_plot.max' => 'PLOTTING SEMESTER paling tinggi adalah semester 8.',
+            'recommended_semester.required' => 'PLOTTING SEMESTER wajib diisi.',
+            'recommended_semester.integer' => 'PLOTTING SEMESTER harus berupa angka.',
+            'recommended_semester.min' => 'PLOTTING SEMESTER paling rendah adalah semester 1.',
+            'recommended_semester.max' => 'PLOTTING SEMESTER paling tinggi adalah semester 8.',
         ];
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            'kode_mk' => $this->kode_mk ? strtoupper($this->kode_mk) : null,
-            'nama_mk' => $this->nama_mk ? strtoupper($this->nama_mk) : null,
+            'code' => $this->code ? strtoupper($this->code) : null,
+            'name' => $this->name ? strtoupper($this->name) : null,
         ]);
     }
 }

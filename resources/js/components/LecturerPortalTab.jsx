@@ -3,14 +3,14 @@ import { Briefcase, AlertTriangle, Search, Info, Users, GraduationCap } from 'lu
 
 export default function LecturerPortalTab({
   user,
-  dosens,
+  lecturers,
   mataKuliahs,
-  mahasiswas,
+  students,
   kelasKuliahs,
   kelasMahasiswas,
   dosenActiveClasses,
   dosenAdviseeStudents = [],
-  prodis = [],
+  studyPrograms = [],
   loadingPortal,
   selectedDosenForPortal,
   setSelectedDosenForPortal,
@@ -54,7 +54,7 @@ export default function LecturerPortalTab({
             <div>
               <p className="text-xs font-bold text-monday-gray uppercase tracking-wider">Dosen Pengampu Aktif</p>
               <h3 className="font-extrabold text-lg text-monday-black mt-0.5">
-                {dosens.find(d => d.id_user === user.id)?.nama || user.name}
+                {lecturers.find(d => d.user_id === user.id)?.name || user.name}
               </h3>
             </div>
           </div>
@@ -77,8 +77,8 @@ export default function LecturerPortalTab({
               className="w-80 px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300 mt-1"
             >
               <option value="">-- Pilih Dosen Pengampu --</option>
-              {dosens.map(d => (
-                <option key={d.id} value={d.id}>{d.nama} (NIDN: {d.nidn})</option>
+              {lecturers.map(d => (
+                <option key={d.id} value={d.id}>{d.name} (NIDN: {d.nidn})</option>
               ))}
             </select>
           </div>
@@ -143,7 +143,7 @@ export default function LecturerPortalTab({
                 <div className="space-y-3">
                   {dosenActiveClasses.map((item) => {
                     const isSelected = selectedClassForGrades?.id === item.id;
-                    const mkObj = mataKuliahs.find(mk => mk.id === item.id_mk);
+                    const mkObj = mataKuliahs.find(mk => mk.id === item.course_id);
                     return (
                       <button
                         key={item.id}
@@ -156,14 +156,14 @@ export default function LecturerPortalTab({
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-monday-background border border-monday-border rounded-md text-monday-gray font-mono">
-                            {mkObj?.kode_mk || 'MK'}
+                            {mkObj?.code || 'MK'}
                           </span>
-                          <span className="text-xs font-extrabold">Kelas: {item.nama_kelas}</span>
+                          <span className="text-xs font-extrabold">Kelas: {item.class_name}</span>
                         </div>
-                        <span className="font-bold text-sm block leading-tight">{mkObj?.nama_mk || 'Nama Mata Kuliah'}</span>
+                        <span className="font-bold text-sm block leading-tight">{mkObj?.name || 'Nama Mata Kuliah'}</span>
                         <div className="flex items-center justify-between mt-1 text-[11px] font-semibold text-monday-gray">
                           <span>SKS: {mkObj?.sks || '-'} SKS</span>
-                          <span>Ruangan: {item.ruangan || '-'}</span>
+                          <span>Ruangan: {item.room || '-'}</span>
                         </div>
                       </button>
                     );
@@ -185,7 +185,7 @@ export default function LecturerPortalTab({
                     <div>
                       <span className="text-xs text-monday-gray font-bold uppercase block">Mata Kuliah</span>
                       <h5 className="font-extrabold text-base text-monday-black mt-0.5">
-                        {mataKuliahs.find(mk => mk.id === selectedClassForGrades.id_mk)?.nama_mk} (Kelas {selectedClassForGrades.nama_kelas})
+                        {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.name} (Kelas {selectedClassForGrades.class_name})
                       </h5>
                     </div>
                     <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function LecturerPortalTab({
                         Lihat Absen Kelas
                       </button>
                       <span className="px-2.5 py-1 bg-monday-gray-background border border-monday-border text-monday-black rounded-lg font-bold text-xs">
-                        Ruang: {selectedClassForGrades.ruangan || '-'}
+                        Ruang: {selectedClassForGrades.room || '-'}
                       </span>
                     </div>
                   </div>
@@ -206,12 +206,12 @@ export default function LecturerPortalTab({
                     {enrolledStudentsInClass.length > 0 ? (
                       <div className="divide-y divide-monday-border">
                         {enrolledStudentsInClass.map((enroll) => {
-                          const studentData = mahasiswas.find(m => m.id === enroll.id_mahasiswa);
+                          const studentData = students.find(m => m.id === enroll.student_id);
                           return (
                             <div key={enroll.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                               <div className="space-y-0.5">
                                 <span className="text-xs font-mono text-monday-blue font-bold">{studentData?.nim}</span>
-                                <h5 className="font-bold text-sm text-monday-black">{studentData?.nama}</h5>
+                                <h5 className="font-bold text-sm text-monday-black">{studentData?.name}</h5>
                               </div>
                               
                               <div className="flex items-center gap-3">
@@ -221,7 +221,7 @@ export default function LecturerPortalTab({
                                     type="number"
                                     min="0"
                                     max="100"
-                                    value={updatingGrades[enroll.id]?.nilai_akhir !== undefined ? updatingGrades[enroll.id].nilai_akhir : ''}
+                                    value={updatingGrades[enroll.id]?.final_score !== undefined ? updatingGrades[enroll.id].final_score : ''}
                                     onChange={(e) => {
                                       const val = e.target.value;
                                       let letterGrade = '';
@@ -239,8 +239,8 @@ export default function LecturerPortalTab({
                                         ...prev,
                                         [enroll.id]: { 
                                           ...prev[enroll.id], 
-                                          nilai_akhir: val,
-                                          nilai_huruf: letterGrade
+                                          final_score: val,
+                                          letter_grade: letterGrade
                                         }
                                       }));
                                     }}
@@ -254,7 +254,7 @@ export default function LecturerPortalTab({
                                   <input 
                                     type="text"
                                     maxLength={2}
-                                    value={updatingGrades[enroll.id]?.nilai_huruf || ''}
+                                    value={updatingGrades[enroll.id]?.letter_grade || ''}
                                     disabled
                                     className="w-12 px-2 py-1 bg-monday-gray-background border border-monday-border rounded-lg text-center text-sm font-bold text-monday-gray cursor-not-allowed"
                                     placeholder="-"
@@ -308,7 +308,7 @@ export default function LecturerPortalTab({
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
                 <input 
                   type="text" 
-                  placeholder="Cari nama atau NIM..." 
+                  placeholder="Cari name atau NIM..." 
                   value={adviseeSearchQuery}
                   onChange={(e) => setAdviseeSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-monday-background border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
@@ -320,7 +320,7 @@ export default function LecturerPortalTab({
               (() => {
                 const query = adviseeSearchQuery.toLowerCase();
                 const filtered = dosenAdviseeStudents.filter(m => 
-                  m.nama.toLowerCase().includes(query) ||
+                  m.name.toLowerCase().includes(query) ||
                   m.nim.toLowerCase().includes(query)
                 );
                 
@@ -339,22 +339,22 @@ export default function LecturerPortalTab({
                       </thead>
                       <tbody className="divide-y divide-monday-border text-sm text-monday-black">
                         {filtered.map((m, index) => {
-                          const prObj = prodis.find(p => p.id === m.id_prodi);
-                          const isAktif = m.status_mahasiswa === 'AKTIF';
+                          const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+                          const isAktif = m.status === 'AKTIF';
                           return (
                             <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
                               <td className="py-3.5 px-6 text-center text-monday-gray font-mono font-semibold">{index + 1}</td>
                               <td className="py-3.5 px-6 font-bold text-monday-blue font-mono">{m.nim}</td>
-                              <td className="py-3.5 px-6 font-semibold">{m.nama}</td>
+                              <td className="py-3.5 px-6 font-semibold">{m.name}</td>
                               <td className="py-3.5 px-6">
                                 {prObj ? (
                                   <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
-                                    {prObj.nama_prodi}
+                                    {prObj.name}
                                   </span>
                                 ) : '-'}
                               </td>
                               <td className="py-3.5 px-6 text-center font-semibold text-monday-gray">
-                                {m.tahun_masuk || '-'}
+                                {m.enrollment_year || '-'}
                               </td>
                               <td className="py-3.5 px-6 text-center">
                                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
@@ -362,7 +362,7 @@ export default function LecturerPortalTab({
                                     ? 'bg-monday-lime-green/20 text-monday-black border border-monday-lime-green/30' 
                                     : 'bg-monday-gray-background text-monday-gray border border-monday-border'
                                 }`}>
-                                  {m.status_mahasiswa || '-'}
+                                  {m.status || '-'}
                                 </span>
                               </td>
                             </tr>
@@ -422,13 +422,13 @@ export default function LecturerPortalTab({
               {/* Class Meta Grid */}
               <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-monday-black bg-monday-background p-4 rounded-2xl border border-monday-border print:bg-transparent print:border-none print:p-0">
                 <div className="space-y-1">
-                  <p><span className="text-monday-gray">Mata Kuliah:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.id_mk)?.nama_mk}</p>
-                  <p><span className="text-monday-gray">Kode MK:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.id_mk)?.kode_mk}</p>
-                  <p><span className="text-monday-gray">Kelas:</span> {selectedClassForGrades.nama_kelas}</p>
+                  <p><span className="text-monday-gray">Mata Kuliah:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.name}</p>
+                  <p><span className="text-monday-gray">Kode MK:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.code}</p>
+                  <p><span className="text-monday-gray">Kelas:</span> {selectedClassForGrades.class_name}</p>
                 </div>
                 <div className="space-y-1 text-right print:text-left">
-                  <p><span className="text-monday-gray">Ruangan:</span> {selectedClassForGrades.ruangan || '-'}</p>
-                  <p><span className="text-monday-gray">Dosen Pengampu:</span> {dosens.find(d => d.id == selectedDosenForPortal)?.nama}</p>
+                  <p><span className="text-monday-gray">Ruangan:</span> {selectedClassForGrades.room || '-'}</p>
+                  <p><span className="text-monday-gray">Dosen Pengampu:</span> {lecturers.find(d => d.id == selectedDosenForPortal)?.name}</p>
                   <p><span className="text-monday-gray">Total Mahasiswa:</span> {enrolledStudentsInClass.length} orang</p>
                 </div>
               </div>
@@ -446,13 +446,13 @@ export default function LecturerPortalTab({
                   </thead>
                   <tbody className="divide-y divide-monday-border text-xs text-monday-black">
                     {enrolledStudentsInClass.map((enroll, idx) => {
-                      const studentData = mahasiswas.find(m => m.id === enroll.id_mahasiswa);
+                      const studentData = students.find(m => m.id === enroll.student_id);
                       const isOdd = idx % 2 === 0;
                       return (
                         <tr key={enroll.id} className="hover:bg-monday-gray-background/30 transition-colors">
                           <td className="py-3 px-4 text-center font-mono font-semibold">{idx + 1}</td>
                           <td className="py-3 px-4 font-bold text-monday-blue font-mono">{studentData?.nim}</td>
-                          <td className="py-3 px-4 font-semibold">{studentData?.nama}</td>
+                          <td className="py-3 px-4 font-semibold">{studentData?.name}</td>
                           {isOdd ? (
                             <>
                               <td className="py-3 px-2 w-24 border-r border-monday-border text-left font-mono text-[10px] text-monday-gray">

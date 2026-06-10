@@ -9,20 +9,22 @@ class Prodi extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['id_fakultas', 'kode_prodi', 'nama_prodi', 'jenjang', 'prefix_nim'];
+    protected $table = 'study_programs';
+
+    protected $fillable = ['faculty_id', 'code', 'name', 'jenjang', 'nim_prefix'];
 
     public function fakultas()
     {
-        return $this->belongsTo(Fakultas::class);
+        return $this->belongsTo(Fakultas::class, 'faculty_id');
     }
 
     public function mataKuliah()
     {
-        return $this->hasMany(MataKuliah::class);
+        return $this->hasMany(MataKuliah::class, 'study_program_id');
     }
 
     public function mahasiswa()
     {
-        return $this->hasMany(Mahasiswa::class);
+        return $this->hasMany(Mahasiswa::class, 'study_program_id');
     }
 }

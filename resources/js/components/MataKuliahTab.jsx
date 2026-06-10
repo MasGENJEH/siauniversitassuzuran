@@ -3,7 +3,7 @@ import { BookOpen, Plus, Search, Edit, Trash2, ChevronDown } from 'lucide-react'
 
 export default function MataKuliahTab({
   mataKuliahs,
-  prodis,
+  studyPrograms,
   searchQuery,
   setSearchQuery,
   openModal,
@@ -17,8 +17,8 @@ export default function MataKuliahTab({
   }, [searchQuery]);
 
   const filteredItems = mataKuliahs.filter(mk => 
-    mk.nama_mk.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    mk.kode_mk.toLowerCase().includes(searchQuery.toLowerCase())
+    mk.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    mk.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const itemsToDisplay = filteredItems.slice(0, visibleCount);
@@ -72,17 +72,17 @@ export default function MataKuliahTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {itemsToDisplay.map((mk, index) => {
-              const prObj = prodis.find(p => p.id === mk.id_prodi);
+              const prObj = studyPrograms.find(p => p.id === mk.study_program_id);
               return (
                 <tr key={mk.id} className="hover:bg-monday-gray-background/30 transition-colors">
                   <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
-                  <td className="py-3.5 px-6 font-bold text-monday-blue">{mk.kode_mk}</td>
-                  <td className="py-3.5 px-6 font-semibold">{mk.nama_mk}</td>
+                  <td className="py-3.5 px-6 font-bold text-monday-blue">{mk.code}</td>
+                  <td className="py-3.5 px-6 font-semibold">{mk.name}</td>
                   <td className="py-3.5 px-6 font-bold text-monday-black">{mk.sks} SKS</td>
                   <td className="py-3.5 px-6">
                     {prObj ? (
                       <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
-                        {prObj.nama_prodi}
+                        {prObj.name}
                       </span>
                     ) : '-'}
                   </td>

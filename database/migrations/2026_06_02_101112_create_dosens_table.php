@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dosens', function (Blueprint $table) {
+        Schema::create('lecturers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_user')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('nidn')->unique();
-            $table->string('nama'); // Input KAPITAL
+            $table->string('name');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dosens');
+        Schema::dropIfExists('lecturers');
     }
 };

@@ -15,16 +15,16 @@ class DosenPengampuSeeder extends Seeder
     public function run(): void
     {
         $kelasKuliahs = KelasKuliah::all();
-        $dosens = Dosen::all();
+        $lecturers = Dosen::all();
 
         foreach ($kelasKuliahs as $kelas) {
             $count = 1;
-            $chosenDosens = $dosens->random($count);
+            $chosenDosens = $lecturers->random($count);
  
             foreach ($chosenDosens as $dosen) {
                 DosenPengampu::create([
-                    'id_kelas' => $kelas->id,
-                    'id_dosen' => $dosen->id,
+                    'course_class_id' => $kelas->id,
+                    'lecturer_id' => $dosen->id,
                 ]);
             }
         }

@@ -9,7 +9,9 @@ class TahunAkademik extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['kode_ta', 'nama_ta', 'status'];
+    protected $table = 'academic_years';
+
+    protected $fillable = ['code', 'name', 'status'];
 
     protected $casts = [
         'status' => 'boolean',
@@ -17,6 +19,6 @@ class TahunAkademik extends Model
 
     public function kelasKuliah()
     {
-        return $this->hasMany(KelasKuliah::class, 'id_ta', 'id');
+        return $this->hasMany(KelasKuliah::class, 'academic_year_id');
     }
 }

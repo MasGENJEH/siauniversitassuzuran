@@ -43,9 +43,9 @@ class MahasiswaController extends Controller
     {
         $data = $request->validated();
 
-        // Handle foto upload
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('foto-mahasiswa', 'public');
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('photo-student', 'public');
         }
 
         $mahasiswa = $this->mahasiswaService->create($data);
@@ -58,14 +58,14 @@ class MahasiswaController extends Controller
         try {
             $data = $request->validated();
 
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                // Delete old foto if exists
+            // Handle photo upload
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
                 $oldMahasiswa = $this->mahasiswaService->getById($id, ['*']);
-                if ($oldMahasiswa->foto) {
-                    Storage::disk('public')->delete($oldMahasiswa->foto);
+                if ($oldMahasiswa->photo) {
+                    Storage::disk('public')->delete($oldMahasiswa->photo);
                 }
-                $data['foto'] = $request->file('foto')->store('foto-mahasiswa', 'public');
+                $data['photo'] = $request->file('photo')->store('photo-student', 'public');
             }
 
             $mahasiswa = $this->mahasiswaService->update($id, $data);
@@ -81,10 +81,10 @@ class MahasiswaController extends Controller
     public function destroy(int $id)
     {
         try {
-            // Delete foto file if exists
+            // Delete photo file if exists
             $mahasiswa = $this->mahasiswaService->getById($id, ['*']);
-            if ($mahasiswa->foto) {
-                Storage::disk('public')->delete($mahasiswa->foto);
+            if ($mahasiswa->photo) {
+                Storage::disk('public')->delete($mahasiswa->photo);
             }
 
             $this->mahasiswaService->delete($id);

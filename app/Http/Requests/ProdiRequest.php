@@ -23,49 +23,49 @@ class ProdiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_fakultas' => 'required|integer|exists:fakultas,id',
-            'kode_prodi' => 'required|string|max:4',
-            'nama_prodi' => 'required|string|max:255',
+            'faculty_id' => 'required|integer|exists:faculties,id',
+            'code' => 'required|string|max:4',
+            'name' => 'required|string|max:255',
             'jenjang' => 'required|string|max:2',
-            'prefix_nim' => 'required|string|max:3',
+            'nim_prefix' => 'required|string|max:3',
         ];
     }
 
     public function messages()
     {
         return [
-            'id_fakultas.required' => 'FAKULTAS induk wajib dipilih.',
-            'id_fakultas.integer' => 'FAKULTAS harus berupa format angka.',
-            'id_fakultas.exists' => 'FAKULTAS yang dipilih tidak valid atau tidak terdaftar di sistem.',
+            'faculty_id.required' => 'FAKULTAS induk wajib dipilih.',
+            'faculty_id.integer' => 'FAKULTAS harus berupa format angka.',
+            'faculty_id.exists' => 'FAKULTAS yang dipilih tidak valid atau tidak terdaftar di sistem.',
 
-            'kode_prodi.required' => 'KODE PRODI wajib diisi.',
-            'kode_prodi.string' => 'KODE PRODI harus berupa teks.',
-            'kode_prodi.max' => 'KODE PRODI maksimal berjumlah 4 karakter.',
+            'code.required' => 'KODE PRODI wajib diisi.',
+            'code.string' => 'KODE PRODI harus berupa teks.',
+            'code.max' => 'KODE PRODI maksimal berjumlah 4 karakter.',
 
-            'nama_prodi.required' => 'NAMA PRODI wajib diisi.',
-            'nama_prodi.string' => 'NAMA PRODI harus berupa teks.',
-            'nama_prodi.max' => 'NAMA PRODI maksimal berjumlah 255 karakter.',
+            'name.required' => 'NAMA PRODI wajib diisi.',
+            'name.string' => 'NAMA PRODI harus berupa teks.',
+            'name.max' => 'NAMA PRODI maksimal berjumlah 255 karakter.',
 
             'jenjang.required' => 'JENJANG pendidikan (seperti S1/D3) wajib diisi.',
             'jenjang.string' => 'JENJANG harus berupa teks.',
             'jenjang.max' => 'JENJANG maksimal berjumlah 2 karakter.',
 
-            'prefix_nim.required' => 'PREFIX NIM wajib diisi.',
-            'prefix_nim.string' => 'PREFIX NIM harus berupa teks.',
-            'prefix_nim.max' => 'PREFIX NIM harus tepat berjumlah 3 karakter.',
+            'nim_prefix.required' => 'PREFIX NIM wajib diisi.',
+            'nim_prefix.string' => 'PREFIX NIM harus berupa teks.',
+            'nim_prefix.max' => 'PREFIX NIM harus tepat berjumlah 3 karakter.',
         ];
     }
 
     protected function prepareForValidation()
     {
-        if ($this->has('nama_prodi')) {
+        if ($this->has('name')) {
             $this->merge([
-                'nama_prodi' => strtoupper($this->nama_prodi),
+                'name' => strtoupper($this->name),
             ]);
         }
-        if ($this->has('kode_prodi')) {
+        if ($this->has('code')) {
             $this->merge([
-                'kode_prodi' => strtoupper($this->kode_prodi),
+                'code' => strtoupper($this->code),
             ]);
         }
     }

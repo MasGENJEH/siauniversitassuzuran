@@ -10,14 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('kelas_mahasiswas', function (Blueprint $table) {
+        Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_mahasiswa')->constrained('mahasiswas')->cascadeOnDelete();
-            $table->foreignId('id_kelas')->constrained('kelas_kuliahs')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('course_class_id')->constrained('course_classes')->cascadeOnDelete();
 
             // Kolom opsional tambahan untuk manajemen KHS
-            $table->float('nilai_akhir')->nullable();
-            $table->char('nilai_huruf', 1)->nullable();
+            $table->float('final_score')->nullable();
+            $table->char('letter_grade', 1)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelas_mahasiswas');
+        Schema::dropIfExists('enrollments');
     }
 };

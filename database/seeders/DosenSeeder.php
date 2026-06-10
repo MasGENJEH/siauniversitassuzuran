@@ -14,19 +14,19 @@ class DosenSeeder extends Seeder
     public function run(): void
     {
         $users = User::where('email', 'like', 'dosen.%')->orderBy('id')->get();
-        $dosens = [];
+        $lecturers = [];
 
         foreach ($users as $index => $user) {
             $i = $index + 1;
-            $dosens[] = [
-                'id_user' => $user->id,
+            $lecturers[] = [
+                'user_id' => $user->id,
                 'nidn' => '04' . str_pad($i, 8, '0', STR_PAD_LEFT),
-                'nama' => strtoupper($user->name),
+                'name' => strtoupper($user->name),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
 
-        DB::table('dosens')->insert($dosens);
+        DB::table('lecturers')->insert($lecturers);
     }
 }

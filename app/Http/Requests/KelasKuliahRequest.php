@@ -25,42 +25,42 @@ class KelasKuliahRequest extends FormRequest
         $kelasKuliahId = $this->route('kelas_kuliah');
 
         return [
-            'kode_kelas' => [
+            'class_code' => [
                 'nullable',
                 'string',
                 'max:50',
-                'unique:kelas_kuliahs,kode_kelas,' . $kelasKuliahId,
+                'unique:kelas_kuliahs,class_code,' . $kelasKuliahId,
             ],
-            'id_mk' => [
+            'course_id' => [
                 'required',
                 'integer',
                 'exists:mata_kuliahs,id',
             ],
-            'id_ta' => [
+            'academic_year_id' => [
                 'required',
                 'integer',
                 'exists:tahun_akademiks,id',
             ],
-            'nama_kelas' => [
+            'class_name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'hari' => [
+            'day' => [
                 'required',
                 'string',
                 'max:50',
             ],
-            'jam_mulai' => [
+            'start_time' => [
                 'required',
                 'date_format:H:i:s,H:i',
             ],
-            'jam_selesai' => [
+            'end_time' => [
                 'required',
                 'date_format:H:i:s,H:i',
-                'after:jam_mulai',
+                'after:start_time',
             ],
-            'ruangan' => [
+            'room' => [
                 'required',
                 'string',
                 'max:255',
@@ -71,7 +71,7 @@ class KelasKuliahRequest extends FormRequest
             ],
             'dosen_ids.*' => [
                 'integer',
-                'exists:dosens,id',
+                'exists:lecturers,id',
             ],
         ];
     }
@@ -79,60 +79,60 @@ class KelasKuliahRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'kode_kelas.required' => 'KODE KELAS wajib diisi.',
-            'kode_kelas.string' => 'KODE KELAS harus berupa teks.',
-            'kode_kelas.max' => 'KODE KELAS maksimal berjumlah 50 karakter.',
-            'kode_kelas.unique' => 'KODE KELAS sudah terdaftar di dalam sistem.',
+            'class_code.required' => 'KODE KELAS wajib diisi.',
+            'class_code.string' => 'KODE KELAS harus berupa teks.',
+            'class_code.max' => 'KODE KELAS maksimal berjumlah 50 karakter.',
+            'class_code.unique' => 'KODE KELAS sudah terdaftar di dalam sistem.',
 
-            'id_mk.required' => 'MATA KULIAH wajib dipilih.',
-            'id_mk.integer' => 'MATA KULIAH tidak valid.',
-            'id_mk.exists' => 'MATA KULIAH tidak terdaftar di dalam sistem.',
+            'course_id.required' => 'MATA KULIAH wajib dipilih.',
+            'course_id.integer' => 'MATA KULIAH tidak valid.',
+            'course_id.exists' => 'MATA KULIAH tidak terdaftar di dalam sistem.',
 
-            'id_ta.required' => 'TAHUN AKADEMIK wajib dipilih.',
-            'id_ta.integer' => 'TAHUN AKADEMIK tidak valid.',
-            'id_ta.exists' => 'TAHUN AKADEMIK tidak terdaftar di dalam sistem.',
+            'academic_year_id.required' => 'TAHUN AKADEMIK wajib dipilih.',
+            'academic_year_id.integer' => 'TAHUN AKADEMIK tidak valid.',
+            'academic_year_id.exists' => 'TAHUN AKADEMIK tidak terdaftar di dalam sistem.',
 
-            'nama_kelas.required' => 'NAMA KELAS wajib diisi.',
-            'nama_kelas.string' => 'NAMA KELAS harus berupa teks.',
-            'nama_kelas.max' => 'NAMA KELAS maksimal berjumlah 255 karakter.',
+            'class_name.required' => 'NAMA KELAS wajib diisi.',
+            'class_name.string' => 'NAMA KELAS harus berupa teks.',
+            'class_name.max' => 'NAMA KELAS maksimal berjumlah 255 karakter.',
 
-            'hari.required' => 'HARI wajib diisi.',
-            'hari.string' => 'HARI harus berupa teks.',
-            'hari.max' => 'HARI maksimal berjumlah 50 karakter.',
+            'day.required' => 'HARI wajib diisi.',
+            'day.string' => 'HARI harus berupa teks.',
+            'day.max' => 'HARI maksimal berjumlah 50 karakter.',
 
-            'jam_mulai.required' => 'JAM MULAI wajib diisi.',
-            'jam_mulai.date_format' => 'JAM MULAI harus berformat jam (contoh: 08:00 atau 08:00:00).',
+            'start_time.required' => 'JAM MULAI wajib diisi.',
+            'start_time.date_format' => 'JAM MULAI harus berformat jam (contoh: 08:00 atau 08:00:00).',
 
-            'jam_selesai.required' => 'JAM SELESAI wajib diisi.',
-            'jam_selesai.date_format' => 'JAM SELESAI harus berformat jam (contoh: 09:40 atau 09:40:00).',
-            'jam_selesai.after' => 'JAM SELESAI harus setelah jam mulai.',
+            'end_time.required' => 'JAM SELESAI wajib diisi.',
+            'end_time.date_format' => 'JAM SELESAI harus berformat jam (contoh: 09:40 atau 09:40:00).',
+            'end_time.after' => 'JAM SELESAI harus setelah jam mulai.',
 
-            'ruangan.required' => 'RUANGAN wajib diisi.',
-            'ruangan.string' => 'RUANGAN harus berupa teks.',
-            'ruangan.max' => 'RUANGAN maksimal berjumlah 255 karakter.',
+            'room.required' => 'RUANGAN wajib diisi.',
+            'room.string' => 'RUANGAN harus berupa teks.',
+            'room.max' => 'RUANGAN maksimal berjumlah 255 karakter.',
         ];
     }
 
     protected function prepareForValidation()
     {
-        if ($this->has('hari')) {
+        if ($this->has('day')) {
             $this->merge([
-                'hari' => strtoupper($this->hari),
+                'day' => strtoupper($this->day),
             ]);
         }
-        if ($this->has('kode_kelas')) {
+        if ($this->has('class_code')) {
             $this->merge([
-                'kode_kelas' => strtoupper($this->kode_kelas),
+                'class_code' => strtoupper($this->class_code),
             ]);
         }
-        if ($this->has('nama_kelas')) {
+        if ($this->has('class_name')) {
             $this->merge([
-                'nama_kelas' => strtoupper($this->nama_kelas),
+                'class_name' => strtoupper($this->class_name),
             ]);
         }
-        if ($this->has('ruangan')) {
+        if ($this->has('room')) {
             $this->merge([
-                'ruangan' => strtoupper($this->ruangan),
+                'room' => strtoupper($this->room),
             ]);
         }
     }

@@ -11,9 +11,9 @@ class MahasiswaHelper
     {
         $tahun = substr(date('Y'), -2);
 
-        $prodi = Prodi::query()->where('kode_prodi', $kodeProdi)->first();
+        $prodi = Prodi::query()->where('code', $kodeProdi)->first();
 
-        $prefix = $prodi->prefix_nim ?? '000';
+        $prefix = $prodi->nim_prefix ?? '000';
 
         // 2. Lakukan perulangan sampai NIM benar-benar unik di database
         do {
