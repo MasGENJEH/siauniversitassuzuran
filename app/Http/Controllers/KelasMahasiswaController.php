@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KelasMahasiswaRequest;
 use App\Http\Resources\KelasMahasiswaResource;
+use App\Models\KelasMahasiswa;
+use App\Models\Mahasiswa;
 use App\Services\KelasMahasiswaService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -20,11 +22,13 @@ class KelasMahasiswaController extends Controller
     {
         $user = auth()->user();
         if ($user && $user->hasRole('mahasiswa')) {
-            $mahasiswa = \App\Models\Mahasiswa::where('id_user', $user->id)->first();
+            $mahasiswa = Mahasiswa::where('id_user', $user->id)->first();
             if ($mahasiswa) {
-                $kelasMahasiswa = \App\Models\KelasMahasiswa::where('id_mahasiswa', $mahasiswa->id)->get();
+                $kelasMahasiswa = KelasMahasiswa::where('id_mahasiswa', $mahasiswa->id)->get();
+
                 return response()->json(KelasMahasiswaResource::collection($kelasMahasiswa));
             }
+
             return response()->json([]);
         }
 
@@ -73,7 +77,7 @@ class KelasMahasiswaController extends Controller
         $user = auth()->user();
         if ($user && ($user->hasRole('mahasiswa') || $user->hasRole('dosen'))) {
             return response()->json([
-                'message' => 'Mahasiswa dan Dosen tidak diizinkan menghapus pendaftaran kelas (KRS).'
+                'message' => 'Mahasiswa dan Dosen tidak diizinkan menghapus pendaftaran kelas (KRS).',
             ], 403);
         }
 
