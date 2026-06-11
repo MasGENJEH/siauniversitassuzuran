@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, MapPin, Mail, Lock } from 'lucide-react';
+import { Users, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, MapPin, Mail, Lock, LayoutGrid, Table, ChevronDown } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
@@ -18,13 +18,16 @@ export default function DosenTab({
   handleDeleteItem
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [visibleCountCard, setVisibleCountCard] = useState(12);
   const [selectedDosen, setSelectedDosen] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [viewMode, setViewMode] = useState('table');
   const itemsPerPage = 10;
 
-  // Reset to page 1 when search query changes
+  // Reset states when search query changes
   useEffect(() => {
     setCurrentPage(1);
+    setVisibleCountCard(12);
   }, [searchQuery]);
 
   // Reset showPassword when selectedDosen changes
@@ -38,12 +41,15 @@ export default function DosenTab({
     d.nidn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Pagination bounds & slice
+  // Pagination bounds & slice for Table
   const totalItems = filteredItems.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+  // Bounds & slice for Card Mode
+  const cardItemsToDisplay = filteredItems.slice(0, visibleCountCard);
 
   // Helper for pagination window
   const getPageNumbers = () => {
@@ -391,81 +397,157 @@ export default function DosenTab({
         onActionClick={() => openModal('dosen', 'create')}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <SearchInput 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Cari dosen..."
         />
+        <div className="flex items-center gap-1.5 bg-monday-background p-1.5 rounded-xl border border-monday-border shrink-0">
+          <button 
+            onClick={() => setViewMode('table')} 
+            className={`p-2 rounded-lg transition-all duration-300 flex items-center justify-center ${viewMode === 'table' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Tabel"
+          >
+            <Table size={18} />
+          </button>
+          <button 
+            onClick={() => setViewMode('card')} 
+            className={`p-2 rounded-lg transition-all duration-300 flex items-center justify-center ${viewMode === 'card' ? 'bg-white shadow-sm text-emerald-600 font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Card"
+          >
+            <LayoutGrid size={18} />
+          </button>
+        </div>
       </div>
 
-      <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">No</th>
-              <th className="py-4 px-6">Dosen</th>
-              <th className="py-4 px-6">Email</th>
-              <th className="py-4 px-6 text-center">Kelas Diampu</th>
-              <th className="py-4 px-6 text-center">Mahasiswa Wali</th>
-              <th className="py-4 px-6 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {paginatedItems.map((d, index) => {
-              const uObj = users.find(u => u.id === d.user_id);
-              const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
-              const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
+      {viewMode === 'table' ? (
+        <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
+                <th className="py-4 px-6">No</th>
+                <th className="py-4 px-6">Dosen</th>
+                <th className="py-4 px-6">Email</th>
+                <th className="py-4 px-6 text-center">Kelas Diampu</th>
+                <th className="py-4 px-6 text-center">Mahasiswa Wali</th>
+                <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
+              {paginatedItems.map((d, index) => {
+                const uObj = users.find(u => u.id === d.user_id);
+                const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
+                const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
 
-              return (
-                <tr key={d.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
-                  <td className="py-3.5 px-6">
-                    <div className="flex items-center gap-3">
-                      <DosenPhoto dosen={d} size="sm" />
-                      <div>
-                        <p className="font-bold text-monday-black">{d.name}</p>
-                        <p className="text-xs font-bold text-monday-blue">{d.nidn}</p>
+                return (
+                  <tr key={d.id} className="hover:bg-monday-gray-background/30 transition-colors">
+                    <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
+                    <td className="py-3.5 px-6">
+                      <div className="flex items-center gap-3">
+                        <DosenPhoto dosen={d} size="sm" />
+                        <div>
+                          <p className="font-bold text-monday-black">{d.name}</p>
+                          <p className="text-xs font-bold text-monday-blue">{d.nidn}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-6 font-semibold text-monday-gray font-mono">
-                    {uObj ? uObj.email : '-'}
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <span className="px-2.5 py-1 bg-monday-blue/10 text-monday-blue border border-monday-blue/15 rounded-lg text-xs font-bold font-mono">
-                      {classCount} Kelas
+                    </td>
+                    <td className="py-3.5 px-6 font-semibold text-monday-gray font-mono">
+                      {uObj ? uObj.email : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className="px-2.5 py-1 bg-monday-blue/10 text-monday-blue border border-monday-blue/15 rounded-lg text-xs font-bold font-mono">
+                        {classCount} Kelas
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-700 border border-emerald-500/15 rounded-lg text-xs font-bold font-mono">
+                        {adviseeCount} Mahasiswa
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelectedDosen(d)}
+                          className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
+                        >
+                          <Eye size={13} />
+                          Detail
+                        </button>
+                        <ActionButtons 
+                          onEdit={() => openModal('dosen', 'edit', d)}
+                          onDelete={() => handleDeleteItem('dosen', d.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {cardItemsToDisplay.map((d, index) => {
+            const uObj = users.find(u => u.id === d.user_id);
+            const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
+            const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
+
+            return (
+              <div key={d.id} className="group relative flex flex-col bg-white border border-monday-border rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-600/10 transition-all duration-300">
+                {/* Banner Header */}
+                <div className="h-16 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 relative">
+                  <div className="absolute top-3 right-3 flex flex-col gap-1 z-20 items-end">
+                    <span className="px-2 py-0.5 bg-white border border-emerald-500/20 shadow-sm text-[10px] font-bold text-emerald-700 rounded-full flex items-center gap-1">
+                      <BookOpen size={10} /> {classCount} Kelas
                     </span>
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-700 border border-emerald-500/15 rounded-lg text-xs font-bold font-mono">
-                      {adviseeCount} Mahasiswa
+                    <span className="px-2 py-0.5 bg-white border border-monday-blue/20 shadow-sm text-[10px] font-bold text-monday-blue rounded-full flex items-center gap-1">
+                      <Users size={10} /> {adviseeCount} PA
                     </span>
-                  </td>
-                  <td className="py-3.5 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setSelectedDosen(d)}
-                        className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
-                      >
-                        <Eye size={13} />
-                        Detail
-                      </button>
-                      <ActionButtons 
-                        onEdit={() => openModal('dosen', 'edit', d)}
-                        onDelete={() => handleDeleteItem('dosen', d.id)}
-                      />
+                  </div>
+                </div>
+                
+                {/* Body Card */}
+                <div className="flex flex-col p-5 gap-3 flex-1 relative -mt-10">
+                  <div className="rounded-2xl bg-white p-1 border border-monday-border shadow-sm w-max mb-1 z-10">
+                    <DosenPhoto dosen={d} size="md" />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <h3 className="font-extrabold text-monday-black text-lg line-clamp-2 leading-tight" title={d.name}>{d.name}</h3>
+                    <span className="font-bold text-emerald-600 text-sm mt-0.5">{d.nidn}</span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2.5 mt-2 pt-2 border-t border-monday-border/50">
+                    <div className="flex items-center gap-2.5 text-monday-gray" title={uObj ? uObj.email : '-'}>
+                      <Mail size={14} className="text-monday-gray shrink-0" />
+                      <span className="text-xs font-semibold text-monday-black truncate leading-none">{uObj ? uObj.email : '-'}</span>
                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  </div>
+                </div>
+                
+                {/* Footer Card */}
+                <div className="px-5 py-4 bg-monday-background/50 border-t border-monday-border flex items-center justify-between mt-auto">
+                  <button
+                    onClick={() => setSelectedDosen(d)}
+                    className="px-3.5 py-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
+                  >
+                    <Eye size={13} /> Detail
+                  </button>
+                  <ActionButtons 
+                    onEdit={() => openModal('dosen', 'edit', d)}
+                    onDelete={() => handleDeleteItem('dosen', d.id)}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {/* Pagination Controls (Table Mode Only) */}
+      {viewMode === 'table' && totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
           <p className="text-sm font-semibold text-monday-gray">
             Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> dosen
@@ -506,6 +588,19 @@ export default function DosenTab({
               <ChevronRight size={16} />
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Load More Button (Card Mode Only) */}
+      {viewMode === 'card' && visibleCountCard < filteredItems.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            type="button"
+            onClick={() => setVisibleCountCard(prev => prev + 12)}
+            className="px-6 py-2 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-full font-bold text-xs shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:shadow-emerald-600/30 transition-all duration-300 flex items-center gap-2"
+          >
+            Tampilkan Lebih Banyak <ChevronDown size={14} />
+          </button>
         </div>
       )}
     </div>
