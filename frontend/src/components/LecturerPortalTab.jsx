@@ -258,7 +258,7 @@ export default function LecturerPortalTab({
                                 <div className="pt-5">
                                   <button
                                     onClick={() => saveStudentGrade(enroll.id)}
-                                    className="px-4 py-1.5 bg-monday-blue text-white rounded-full text-xs font-bold transition-300"
+                                    className="px-4 py-1.5 bg-monday-blue text-white hover:-translate-y-0.5 hover:shadow-md hover:shadow-monday-blue/30 rounded-full text-xs font-bold transition-all duration-300"
                                   >
                                     Simpan
                                   </button>

@@ -377,7 +377,7 @@ export default function ProfilMahasiswaTab({
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-3 bg-monday-blue text-white hover:bg-opacity-90 rounded-full font-bold text-sm shadow-md shadow-monday-blue/15 transition-all duration-200 flex items-center gap-2 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-monday-blue text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-monday-blue/30 rounded-full font-bold text-sm shadow-md shadow-monday-blue/15 transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-md"
               >
                 <Save size={16} />
                 {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}

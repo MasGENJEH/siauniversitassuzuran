@@ -730,7 +730,7 @@ export default function DynamicFormModal({
             </button>
             <button 
               type="submit"
-              className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300"
+              className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-monday-blue/30 transition-all duration-300"
             >
               Simpan
             </button>

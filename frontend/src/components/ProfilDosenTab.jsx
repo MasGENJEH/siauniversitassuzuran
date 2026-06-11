@@ -395,7 +395,7 @@ export default function ProfilDosenTab({
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-3 bg-emerald-600 text-white hover:bg-opacity-90 rounded-full font-bold text-sm shadow-md shadow-emerald-600/15 transition-all duration-200 flex items-center gap-2 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-emerald-600 text-white hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 rounded-full font-bold text-sm shadow-md shadow-emerald-600/15 transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-md"
               >
                 <Save size={16} />
                 {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}

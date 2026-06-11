@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp, Mail, Lock } from 'lucide-react';
+import { GraduationCap, Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Eye, EyeOff, ArrowLeft, User, BookOpen, Award, Calendar, Clock, ShieldCheck, MapPin, Users, TrendingUp, Mail, Lock, LayoutGrid, Table } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
@@ -20,13 +20,16 @@ export default function MahasiswaTab({
   handleDeleteItem
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [visibleCountCard, setVisibleCountCard] = useState(12);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [viewMode, setViewMode] = useState('table');
   const itemsPerPage = 10;
 
-  // Reset to page 1 when search query changes
+  // Reset states when search query changes
   useEffect(() => {
     setCurrentPage(1);
+    setVisibleCountCard(12);
   }, [searchQuery]);
 
   // Reset showPassword when selectedMahasiswa changes
@@ -40,12 +43,15 @@ export default function MahasiswaTab({
     m.nim.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Pagination bounds & slice
+  // Pagination bounds & slice for Table
   const totalItems = filteredItems.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+  // Bounds & slice for Card Mode
+  const cardItemsToDisplay = filteredItems.slice(0, visibleCountCard);
 
   // Helper for pagination window
   const getPageNumbers = () => {
@@ -452,87 +458,175 @@ export default function MahasiswaTab({
         onActionClick={() => openModal('mahasiswa', 'create')}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <SearchInput 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Cari mahasiswa..."
         />
+        <div className="flex items-center gap-1.5 bg-monday-background p-1.5 rounded-xl border border-monday-border shrink-0">
+          <button 
+            onClick={() => setViewMode('table')} 
+            className={`p-2 rounded-lg transition-300 flex items-center justify-center ${viewMode === 'table' ? 'bg-white shadow-sm text-monday-blue font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Tabel"
+          >
+            <Table size={18} />
+          </button>
+          <button 
+            onClick={() => setViewMode('card')} 
+            className={`p-2 rounded-lg transition-300 flex items-center justify-center ${viewMode === 'card' ? 'bg-white shadow-sm text-monday-blue font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Card"
+          >
+            <LayoutGrid size={18} />
+          </button>
+        </div>
       </div>
 
-      <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">No</th>
-              <th className="py-4 px-6">Mahasiswa</th>
-              <th className="py-4 px-6">Email</th>
-              <th className="py-4 px-6">Program Studi</th>
-              <th className="py-4 px-6">Dosen Wali</th>
-              <th className="py-4 px-6 text-center">Status</th>
-              <th className="py-4 px-6 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {paginatedItems.map((m, index) => {
-              const prObj = studyPrograms.find(p => p.id === m.study_program_id);
-              const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
-              const uObj = users.find(u => u.id === m.user_id);
+      {viewMode === 'table' ? (
+        <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
+                <th className="py-4 px-6">No</th>
+                <th className="py-4 px-6">Mahasiswa</th>
+                <th className="py-4 px-6">Email</th>
+                <th className="py-4 px-6">Program Studi</th>
+                <th className="py-4 px-6">Dosen Wali</th>
+                <th className="py-4 px-6 text-center">Status</th>
+                <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
+              {paginatedItems.map((m, index) => {
+                const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+                const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
+                const uObj = users.find(u => u.id === m.user_id);
 
-              return (
-                <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
-                  <td className="py-3.5 px-6">
-                    <div className="flex items-center gap-3">
-                      <StudentPhoto mahasiswa={m} size="sm" />
-                      <div>
-                        <p className="font-bold text-monday-black">{m.name}</p>
-                        <p className="text-xs font-bold text-monday-blue">{m.nim}</p>
+                return (
+                  <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
+                    <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
+                    <td className="py-3.5 px-6">
+                      <div className="flex items-center gap-3">
+                        <StudentPhoto mahasiswa={m} size="sm" />
+                        <div>
+                          <p className="font-bold text-monday-black">{m.name}</p>
+                          <p className="text-xs font-bold text-monday-blue">{m.nim}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-6 font-semibold text-monday-gray font-mono">
-                    {uObj ? uObj.email : '-'}
-                  </td>
-                  <td className="py-3.5 px-6">
-                    {prObj ? (
-                      <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
-                        {prObj.name}
+                    </td>
+                    <td className="py-3.5 px-6 font-semibold text-monday-gray font-mono">
+                      {uObj ? uObj.email : '-'}
+                    </td>
+                    <td className="py-3.5 px-6">
+                      {prObj ? (
+                        <span className="px-2.5 py-1 bg-monday-background border border-monday-border rounded-xl text-xs font-bold text-monday-gray">
+                          {prObj.name}
+                        </span>
+                      ) : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 font-medium text-monday-gray">
+                      {dosObj ? dosObj.name : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusBadge(m.status)}`}>
+                        {m.status}
                       </span>
-                    ) : '-'}
-                  </td>
-                  <td className="py-3.5 px-6 font-medium text-monday-gray">
-                    {dosObj ? dosObj.name : '-'}
-                  </td>
-                  <td className="py-3.5 px-6 text-center">
-                    <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusBadge(m.status)}`}>
+                    </td>
+                    <td className="py-3.5 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelectedMahasiswa(m)}
+                          className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
+                        >
+                          <Eye size={13} />
+                          Detail
+                        </button>
+                        <ActionButtons 
+                          onEdit={() => openModal('mahasiswa', 'edit', m)}
+                          onDelete={() => handleDeleteItem('mahasiswa', m.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {cardItemsToDisplay.map((m, index) => {
+            const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+            const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
+            const uObj = users.find(u => u.id === m.user_id);
+
+            return (
+              <div key={m.id} className="group relative flex flex-col bg-white border border-monday-border rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-monday-blue/10 transition-all duration-300">
+                {/* Banner Header */}
+                <div className="h-16 bg-gradient-to-r from-monday-blue/10 to-violet-500/10 relative">
+                  <div className="absolute top-4 right-4 z-20">
+                    <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full border shadow-sm ${getStatusBadge(m.status).replace(/border-[^\s]+/g, '')} border-white`}>
                       {m.status}
                     </span>
-                  </td>
-                  <td className="py-3.5 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setSelectedMahasiswa(m)}
-                        className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
-                      >
-                        <Eye size={13} />
-                        Detail
-                      </button>
-                      <ActionButtons 
-                        onEdit={() => openModal('mahasiswa', 'edit', m)}
-                        onDelete={() => handleDeleteItem('mahasiswa', m.id)}
-                      />
+                  </div>
+                </div>
+                
+                {/* Body Card */}
+                <div className="flex flex-col p-5 gap-3 flex-1 relative -mt-10">
+                  <div className="rounded-2xl bg-white p-1 border border-monday-border shadow-sm w-max mb-1 z-10">
+                    <StudentPhoto mahasiswa={m} size="md" />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <h3 className="font-extrabold text-monday-black text-lg line-clamp-1" title={m.name}>{m.name}</h3>
+                    <span className="font-bold text-monday-blue text-sm">{m.nim}</span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2.5 mt-2">
+                    <div className="flex items-start gap-2.5 text-monday-gray" title={prObj ? prObj.name : '-'}>
+                      <GraduationCap size={16} className="text-monday-gray shrink-0 mt-0.5" />
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-monday-gray uppercase tracking-widest leading-none">Prodi</span>
+                        <span className="text-xs font-semibold text-monday-black line-clamp-2">{prObj ? prObj.name : '-'}</span>
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    
+                    <div className="flex items-start gap-2.5 text-monday-gray" title={dosObj ? dosObj.name : '-'}>
+                      <Users size={16} className="text-monday-gray shrink-0 mt-0.5" />
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-monday-gray uppercase tracking-widest leading-none">Dosen Wali</span>
+                        <span className="text-xs font-semibold text-monday-black line-clamp-1">{dosObj ? dosObj.name : '-'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2.5 text-monday-gray" title={uObj ? uObj.email : '-'}>
+                      <Mail size={16} className="text-monday-gray shrink-0" />
+                      <span className="text-xs font-semibold text-monday-black truncate leading-none">{uObj ? uObj.email : '-'}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Footer Card */}
+                <div className="px-5 py-4 bg-monday-background/50 border-t border-monday-border flex items-center justify-between mt-auto">
+                  <button
+                    onClick={() => setSelectedMahasiswa(m)}
+                    className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5"
+                  >
+                    <Eye size={13} /> Detail
+                  </button>
+                  <ActionButtons 
+                    onEdit={() => openModal('mahasiswa', 'edit', m)}
+                    onDelete={() => handleDeleteItem('mahasiswa', m.id)}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {/* Pagination Controls (Table Mode Only) */}
+      {viewMode === 'table' && totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
           <p className="text-sm font-semibold text-monday-gray">
             Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> mahasiswa
@@ -573,6 +667,19 @@ export default function MahasiswaTab({
               <ChevronRight size={16} />
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Load More Button (Card Mode Only) */}
+      {viewMode === 'card' && visibleCountCard < filteredItems.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            type="button"
+            onClick={() => setVisibleCountCard(prev => prev + 12)}
+            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:shadow-monday-blue/30 transition-all duration-300 flex items-center gap-2"
+          >
+            Tampilkan Lebih Banyak
+          </button>
         </div>
       )}
     </div>
