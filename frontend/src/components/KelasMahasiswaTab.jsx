@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Edit3, Plus, Search, Edit, Trash2, ChevronDown, ChevronLeft, ChevronRight, Eye, X, BookOpen, Award, TrendingUp, ArrowLeft } from 'lucide-react';
+import PageHeader from './ui/PageHeader';
+import SearchInput from './ui/SearchInput';
+import ActionButtons from './ui/ActionButtons';
 
 export default function KelasMahasiswaTab({
   user,
@@ -237,7 +240,7 @@ export default function KelasMahasiswaTab({
         </div>
 
         {/* KRS Table */}
-        <div className="border border-monday-border rounded-2xl overflow-hidden bg-white">
+        <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
@@ -308,18 +311,10 @@ export default function KelasMahasiswaTab({
                           </button>
                         ) : (
                           <>
-                            <button
-                              onClick={() => openModal('kelasMahasiswa', 'edit', km)}
-                              className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteItem('kelasMahasiswa', km.id)}
-                              className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            <ActionButtons 
+                              onEdit={() => openModal('kelasMahasiswa', 'edit', km)}
+                              onDelete={() => handleDeleteItem('kelasMahasiswa', km.id)}
+                            />
                           </>
                         )}
                       </div>
@@ -406,40 +401,24 @@ export default function KelasMahasiswaTab({
   // ─── MAIN VIEW: STUDENT LIST ─────────────────────────────────────
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
-      <div className="flex items-center justify-between pb-4 border-b border-monday-border">
-        <div className="flex flex-col gap-[4px]">
-          <p className="flex items-center gap-[6px]">
-            <Edit3 className="size-6 text-monday-black" />
-            <span className="font-extrabold text-2xl text-monday-black">
-              KRS & Transkrip Nilai KHS Mahasiswa
-            </span>
-          </p>
-          <p className="font-semibold text-sm text-monday-gray">
-            Daftarkan mahasiswa ke kelas kuliah (Rencana Studi / KRS) dan pantau hasil akhir studi (Hasil Studi / KHS). Total: {filteredStudents.length} mahasiswa.
-          </p>
-        </div>
-        <button
-          onClick={() => openModal('kelasMahasiswa', 'create')}
-          className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
-        >
-          Daftarkan Kelas (KRS) <Plus size={16} />
-        </button>
-      </div>
+      <PageHeader 
+        title="KRS & Transkrip Nilai KHS Mahasiswa"
+        description={`Daftarkan mahasiswa ke kelas kuliah (Rencana Studi / KRS) dan pantau hasil akhir studi (Hasil Studi / KHS). Total: ${filteredStudents.length} mahasiswa.`}
+        icon={Edit3}
+        actionLabel="Daftarkan Kelas (KRS)"
+        actionIcon={Plus}
+        onActionClick={() => openModal('kelasMahasiswa', 'create')}
+      />
 
       <div className="flex items-center justify-between">
-        <div className="relative w-72">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
-          <input
-            type="text"
-            placeholder="Cari name / NIM mahasiswa..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-monday-background border border-monday-border rounded-2xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
-          />
-        </div>
+        <SearchInput 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari name / NIM mahasiswa..."
+        />
       </div>
 
-      <div className="border border-monday-border rounded-2xl overflow-hidden bg-white">
+      <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">

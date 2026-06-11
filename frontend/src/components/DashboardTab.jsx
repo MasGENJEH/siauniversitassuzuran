@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { Building, Award, Users, GraduationCap, Star, BookOpen, TrendingUp, CheckCircle, Calendar } from 'lucide-react';
+import MetricCard from './ui/MetricCard';
+import WelcomeBanner from './ui/WelcomeBanner';
 
 export default function DashboardTab({
   user,
@@ -105,42 +107,33 @@ export default function DashboardTab({
       {/* Summary Metric Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((stat, idx) => (
-          <div key={idx} className="bg-white border border-monday-border p-6 rounded-3xl flex items-center justify-between shadow-sm hover:-translate-y-0.5 transition-300">
-            <div className="space-y-1">
-              <p className="text-xs font-bold text-monday-gray uppercase tracking-wider">{stat.title}</p>
-              <h3 className="text-2xl font-extrabold text-monday-black">{stat.count}</h3>
-            </div>
-            <div className={`flex size-14 rounded-full ${stat.colorClass} items-center justify-center shrink-0`}>
-              <stat.icon size={24} />
-            </div>
-          </div>
+          <MetricCard 
+            key={idx}
+            title={stat.title}
+            count={stat.count}
+            icon={stat.icon}
+            colorClass={stat.colorClass}
+          />
         ))}
       </div>
 
       {/* Welcome banner */}
-      <div className="blue-gradient border border-monday-blue/20 p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-white">
-        <div className="flex gap-4">
-          <div className="bg-white/10 p-3 rounded-2xl text-monday-lime-green border border-white/20 shrink-0">
-            <Star size={24} className="text-monday-lime-green" />
-          </div>
-          <div>
-            <h4 className="font-extrabold text-lg text-white">
-              {isMahasiswa 
-                ? 'Selamat Datang di SIAKAD Suzuran Student Portal' 
-                : (user?.roles || []).some(r => r.name === 'dosen')
-                  ? 'Selamat Datang di SIAKAD Suzuran Lecturer Portal'
-                  : 'Selamat Datang di SIAKAD Suzuran Admin Portal'}
-            </h4>
-            <p className="text-xs text-monday-lime-green-char mt-1 max-w-2xl leading-relaxed">
-              {isMahasiswa 
-                ? 'Gunakan panel navigasi kiri untuk melihat jadwal kuliah mingguan Anda, melakukan registrasi kelas KRS, serta melihat hasil studi KHS di setiap semester.'
-                : (user?.roles || []).some(r => r.name === 'dosen')
-                  ? 'Gunakan panel navigasi kiri untuk mengakses portal dosen aktif, memproses nilai KHS mahasiswa bimbingan, serta memantau jadwal kuliah kelas yang Anda ampu.'
-                  : 'Gunakan panel navigasi kiri untuk melakukan pengelolaan data akademik universitas. Anda dapat mengaktifkan semester berjalan, menugaskan tim dosen pengampu, mendaftarkan mahasiswa ke kelas, serta menginput nilai KHS di portal dosen aktif.'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <WelcomeBanner 
+        title={
+          isMahasiswa 
+            ? 'Selamat Datang di SIAKAD Suzuran Student Portal' 
+            : (user?.roles || []).some(r => r.name === 'dosen')
+              ? 'Selamat Datang di SIAKAD Suzuran Lecturer Portal'
+              : 'Selamat Datang di SIAKAD Suzuran Admin Portal'
+        }
+        description={
+          isMahasiswa 
+            ? 'Gunakan panel navigasi kiri untuk melihat jadwal kuliah mingguan Anda, melakukan registrasi kelas KRS, serta melihat hasil studi KHS di setiap semester.'
+            : (user?.roles || []).some(r => r.name === 'dosen')
+              ? 'Gunakan panel navigasi kiri untuk mengakses portal dosen aktif, memproses nilai KHS mahasiswa bimbingan, serta memantau jadwal kuliah kelas yang Anda ampu.'
+              : 'Gunakan panel navigasi kiri untuk melakukan pengelolaan data akademik universitas. Anda dapat mengaktifkan semester berjalan, menugaskan tim dosen pengampu, mendaftarkan mahasiswa ke kelas, serta menginput nilai KHS di portal dosen aktif.'
+        }
+      />
 
       {/* Quick Academic Info */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

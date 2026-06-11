@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Briefcase, AlertTriangle, Search, Info, Users, GraduationCap } from 'lucide-react';
+import PageHeader from './ui/PageHeader';
+import SearchInput from './ui/SearchInput';
 
 export default function LecturerPortalTab({
   user,
@@ -30,19 +32,11 @@ export default function LecturerPortalTab({
 
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm print:border-none print:shadow-none print:bg-white print:p-0">
-      <div className="flex items-center justify-between pb-4 border-b border-monday-border">
-        <div className="flex flex-col gap-[4px] w-full">
-          <p className="flex items-center gap-[6px]">
-            <Briefcase className="size-6 text-monday-black" />
-            <span className="font-extrabold text-2xl text-monday-black">
-              Portal Dosen - Lihat Kelas Diampu & Input Nilai KHS
-            </span>
-          </p>
-          <p className="font-semibold text-sm text-monday-gray">
-            Simulasi portal login dosen pada semester aktif. Dosen dapat memantau kelas yang diampunya (baik sebagai dosen tunggal maupun bagian dari team teaching) dan melakukan input nilai akhir mahasiswa.
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Portal Dosen - Lihat Kelas Diampu & Input Nilai KHS"
+        description="Simulasi portal login dosen pada semester aktif. Dosen dapat memantau kelas yang diampunya (baik sebagai dosen tunggal maupun bagian dari team teaching) dan melakukan input nilai akhir mahasiswa."
+        icon={Briefcase}
+      />
 
       {/* Select active lecturer or Dosen profile banner */}
       {user?.roles?.some(r => r.name === 'dosen') ? (
@@ -303,15 +297,11 @@ export default function LecturerPortalTab({
                 </p>
               </div>
               
-              {/* Local Search Bar */}
               <div className="relative w-full md:w-72">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Cari name atau NIM..." 
+                <SearchInput 
                   value={adviseeSearchQuery}
                   onChange={(e) => setAdviseeSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-monday-background border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
+                  placeholder="Cari name atau NIM..."
                 />
               </div>
             </div>
@@ -325,7 +315,7 @@ export default function LecturerPortalTab({
                 );
                 
                 return filtered.length > 0 ? (
-                  <div className="border border-monday-border rounded-2xl overflow-hidden bg-white shadow-sm">
+                  <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white shadow-sm">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
@@ -434,7 +424,7 @@ export default function LecturerPortalTab({
               </div>
 
               {/* Table */}
-              <div className="border border-monday-border rounded-2xl overflow-hidden bg-white mt-4 print:border-collapse print:rounded-none">
+              <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white mt-4 print:border-collapse print:rounded-none">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray print:bg-gray-100">

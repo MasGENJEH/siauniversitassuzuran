@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Plus, Search, Edit, Trash2, ChevronDown, Eye } from 'lucide-react';
+import { Layers, Plus, Search, Edit, Trash2, ChevronDown, Eye, LayoutGrid, Table, Clock, MapPin, Users } from 'lucide-react';
+import PageHeader from './ui/PageHeader';
+import SearchInput from './ui/SearchInput';
+import ActionButtons from './ui/ActionButtons';
 
 export default function KelasKuliahTab({
   kelasKuliahs,
@@ -16,6 +19,7 @@ export default function KelasKuliahTab({
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const [selectedClassForDetail, setSelectedClassForDetail] = useState(null);
+  const [viewMode, setViewMode] = useState('table');
 
   // Reset limit to 10 when searching
   useEffect(() => {
@@ -32,140 +36,247 @@ export default function KelasKuliahTab({
 
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
-      <div className="flex items-center justify-between pb-4 border-b border-monday-border">
-        <div className="flex flex-col gap-[4px]">
-          <p className="flex items-center gap-[6px]">
-            <Layers className="size-6 text-monday-black" />
-            <span className="font-extrabold text-2xl text-monday-black">
-              Manage Kelas Kuliah & Team Teaching
-            </span>
-          </p>
-          <p className="font-semibold text-sm text-monday-gray">
-            Kelola kelas perkuliahan aktif, penugasan dosen tunggal, atau team teaching pengampu. Total: {kelasKuliahs.length} kelas terdaftar.
-          </p>
+      <PageHeader
+        title="Manage Kelas Kuliah & Team Teaching"
+        description={`Kelola kelas perkuliahan aktif, penugasan dosen tunggal, atau team teaching pengampu. Total: ${kelasKuliahs.length} kelas terdaftar.`}
+        icon={Layers}
+        actionLabel="Tambah Kelas Kuliah"
+        actionIcon={Plus}
+        onActionClick={() => openModal('kelasKuliah', 'create')}
+      />
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <SearchInput
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari kelas..."
+        />
+        <div className="flex items-center gap-1.5 bg-monday-background p-1.5 rounded-xl border border-monday-border shrink-0">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`p-2 rounded-lg transition-300 flex items-center justify-center ${viewMode === 'table' ? 'bg-white shadow-sm text-monday-blue font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Tabel"
+          >
+            <Table size={18} />
+          </button>
+          <button
+            onClick={() => setViewMode('card')}
+            className={`p-2 rounded-lg transition-300 flex items-center justify-center ${viewMode === 'card' ? 'bg-white shadow-sm text-monday-blue font-bold' : 'text-monday-gray hover:text-monday-black'}`}
+            title="Mode Card"
+          >
+            <LayoutGrid size={18} />
+          </button>
         </div>
-        <button
-          onClick={() => openModal('kelasKuliah', 'create')}
-          className="px-5 py-2.5 bg-monday-blue text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-300 flex items-center gap-2"
-        >
-          Tambah Kelas Kuliah <Plus size={16} />
-        </button>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="relative w-72">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-monday-gray" size={16} />
-          <input
-            type="text"
-            placeholder="Cari kelas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-monday-background border border-monday-border rounded-2xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black transition-300"
-          />
-        </div>
-      </div>
+      {viewMode === 'table' ? (
+        <div className="border border-monday-border rounded-2xl overflow-x-auto overflow-y-hidden bg-white">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
+                <th className="py-4 px-6">No</th>
+                <th className="py-4 px-6">Mata Kuliah</th>
+                <th className="py-4 px-6">Nama Kelas</th>
+                <th className="py-4 px-6">Tahun Akademik</th>
+                <th className="py-4 px-6">Jadwal & Ruangan</th>
+                <th className="py-4 px-6">Dosen Pengampu</th>
+                <th className="py-4 px-6">Peserta</th>
+                <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
+              {itemsToDisplay.map((k, index) => {
+                const mkObj = mataKuliahs.find(m => m.id === k.course_id);
+                const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
 
-      <div className="border border-monday-border rounded-2xl overflow-hidden bg-white">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray">
-              <th className="py-4 px-6">No</th>
-              <th className="py-4 px-6">Mata Kuliah</th>
-              <th className="py-4 px-6">Nama Kelas</th>
-              <th className="py-4 px-6">Tahun Akademik</th>
-              <th className="py-4 px-6">Jadwal & Ruangan</th>
-              <th className="py-4 px-6">Dosen Pengampu</th>
-              <th className="py-4 px-6">Peserta</th>
-              <th className="py-4 px-6 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {itemsToDisplay.map((k, index) => {
-              const mkObj = mataKuliahs.find(m => m.id === k.course_id);
-              const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
+                // Get assigned lecturers for this class
+                const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
+                const linkedDosenNames = activeLecturerLinks.map(dp => {
+                  const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+                  return d ? d.name : null;
+                }).filter(Boolean);
 
-              // Get assigned lecturers for this class
-              const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
-              const linkedDosenNames = activeLecturerLinks.map(dp => {
-                const d = lecturers.find(ds => ds.id === dp.lecturer_id);
-                return d ? d.name : null;
-              }).filter(Boolean);
+                // Get student count for this class
+                const studentCount = kelasMahasiswas.filter(km => km.course_class_id === k.id).length;
 
-              // Get student count for this class
-              const studentCount = kelasMahasiswas.filter(km => km.course_class_id === k.id).length;
-
-              return (
-                <tr key={k.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                  <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
-                  <td className="py-3.5 px-6">
-                    {mkObj ? (
-                      <div>
-                        <span className="font-bold text-monday-blue">{mkObj.code}</span>
-                        <span className="ml-2 font-semibold">{mkObj.name}</span>
+                return (
+                  <tr key={k.id} className="hover:bg-monday-gray-background/30 transition-colors">
+                    <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
+                    <td className="py-3.5 px-6">
+                      {mkObj ? (
+                        <div>
+                          <span className="font-bold text-monday-blue">{mkObj.code}</span>
+                          <span className="ml-2 font-semibold">{mkObj.name}</span>
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td className="py-3.5 px-6 font-bold">{k.class_name}</td>
+                    <td className="py-3.5 px-6">
+                      {taObj ? (
+                        <span className="px-2 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
+                          {taObj.code}
+                        </span>
+                      ) : '-'}
+                    </td>
+                    <td className="py-3.5 px-6">
+                      <div className="text-xs text-monday-gray font-semibold">
+                        <span className="font-bold text-monday-black block">{k.day}</span>
+                        <span>{k.start_time.substring(0, 5)} - {k.end_time.substring(0, 5)} ({k.room})</span>
                       </div>
-                    ) : '-'}
-                  </td>
-                  <td className="py-3.5 px-6 font-bold">{k.class_name}</td>
-                  <td className="py-3.5 px-6">
-                    {taObj ? (
-                      <span className="px-2 py-0.5 bg-monday-background border border-monday-border rounded-lg text-xs font-bold text-monday-gray">
-                        {taObj.code}
+                    </td>
+                    <td className="py-3.5 px-6">
+                      <div className="flex flex-wrap gap-1.5 items-center">
+                        {linkedDosenNames.length > 0 ? (
+                          linkedDosenNames.map((name, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg text-[11px] font-bold">
+                              {name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-monday-red text-xs font-bold italic">Belum Ada Pengampu</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-6">
+                      <span className="px-2.5 py-1 bg-monday-blue/10 rounded-full text-xs font-bold text-monday-blue font-mono">
+                        {studentCount}
                       </span>
-                    ) : '-'}
-                  </td>
-                  <td className="py-3.5 px-6">
-                    <div className="text-xs text-monday-gray font-semibold">
-                      <span className="font-bold text-monday-black block">{k.day}</span>
-                      <span>{k.start_time.substring(0, 5)} - {k.end_time.substring(0, 5)} ({k.room})</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-6">
-                    <div className="flex flex-wrap gap-1.5 items-center">
-                      {linkedDosenNames.length > 0 ? (
-                        linkedDosenNames.map((name, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg text-[11px] font-bold">
-                            {name}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-monday-red text-xs font-bold italic">Belum Ada Pengampu</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-6">
-                    <span className="px-2.5 py-1 bg-monday-blue/10 rounded-full text-xs font-bold text-monday-blue font-mono">
-                      {studentCount}
+                    </td>
+                    <td className="py-3.5 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelectedClassForDetail(k)}
+                          title="Lihat Detail & Mahasiswa"
+                          className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <ActionButtons
+                          onEdit={() => openModal('kelasKuliah', 'edit', k)}
+                          onDelete={() => handleDeleteItem('kelasKuliah', k.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {itemsToDisplay.map((k, index) => {
+            const mkObj = mataKuliahs.find(m => m.id === k.course_id);
+            const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
+
+            const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
+            const linkedDosenNames = activeLecturerLinks.map(dp => {
+              const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+              return d ? d.name : null;
+            }).filter(Boolean);
+
+            const studentCount = kelasMahasiswas.filter(km => km.course_class_id === k.id).length;
+
+            return (
+              <div key={k.id} className="group relative flex flex-col bg-white border border-monday-border rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-monday-blue/10 transition-all duration-300">
+                {/* Header Card */}
+                <div className="px-5 py-4 border-b border-monday-border bg-gradient-to-br from-monday-blue/5 to-transparent flex items-start justify-between gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="px-2.5 py-1 bg-white border border-monday-blue/20 text-monday-blue font-bold text-[10px] uppercase tracking-wider rounded-lg w-max">
+                      {mkObj ? mkObj.code : '-'}
                     </span>
-                  </td>
-                  <td className="py-3.5 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setSelectedClassForDetail(k)}
-                        title="Lihat Detail & Mahasiswa"
-                        className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        onClick={() => openModal('kelasKuliah', 'edit', k)}
-                        className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem('kelasKuliah', k.id)}
-                        className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <h3 className="font-extrabold text-monday-black text-lg line-clamp-2 leading-tight">
+                      {mkObj ? mkObj.name : 'Unknown Course'}
+                    </h3>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-center gap-1 mt-0.5">
+                    <span className="flex items-center justify-center min-w-[40px] h-10 px-2.5 rounded-2xl bg-white border border-monday-border font-extrabold text-monday-black shadow-sm text-base">
+                      {k.class_name}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Body Card */}
+                <div className="flex flex-col p-5 gap-4 flex-1">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3 text-monday-gray">
+                      <div className="p-1.5 bg-monday-background rounded-lg text-monday-black shrink-0">
+                        <Clock size={16} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Jadwal</span>
+                        <span className="text-sm font-semibold text-monday-black">{k.day}, {k.start_time.substring(0, 5)} - {k.end_time.substring(0, 5)}</span>
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+
+                    <div className="flex items-center gap-3 text-monday-gray">
+                      <div className="p-1.5 bg-monday-background rounded-lg text-monday-black shrink-0">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Ruangan</span>
+                        <span className="text-sm font-semibold text-monday-black">{k.room}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 text-monday-gray">
+                      <div className="p-1.5 bg-monday-background rounded-lg text-monday-black shrink-0 mt-0.5">
+                        <Users size={16} />
+                      </div>
+                      <div className="flex flex-col gap-1.5 flex-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Dosen Pengampu</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {linkedDosenNames.length > 0 ? (
+                            linkedDosenNames.map((name, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg text-[11px] font-bold">
+                                {name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-monday-red text-xs font-bold italic">Belum Ada Pengampu</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Card */}
+                <div className="px-5 py-4 bg-monday-background/50 border-t border-monday-border flex items-center justify-between mt-auto">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 bg-monday-blue/10 border border-monday-blue/20 rounded-full text-xs font-bold text-monday-blue font-mono flex items-center gap-1.5">
+                      <Users size={12} /> {studentCount} Peserta
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setSelectedClassForDetail(k)}
+                      title="Lihat Detail & Mahasiswa"
+                      className="p-1.5 text-monday-gray hover:text-monday-blue hover:bg-monday-blue/10 rounded-xl transition-300"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => openModal('kelasKuliah', 'edit', k)}
+                      title="Edit Kelas"
+                      className="p-1.5 text-monday-gray hover:text-amber-500 hover:bg-amber-500/10 rounded-xl transition-300"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem('kelasKuliah', k.id)}
+                      title="Hapus Kelas"
+                      className="p-1.5 text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-xl transition-300"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Load More Button */}
       {visibleCount < filteredItems.length && (
@@ -248,7 +359,7 @@ export default function KelasKuliahTab({
                   Mahasiswa Terdaftar ({enrollments.length})
                 </h4>
 
-                <div className="border border-monday-border rounded-xl overflow-hidden bg-white max-h-[300px] overflow-y-auto">
+                <div className="border border-monday-border rounded-xl overflow-x-auto overflow-y-auto bg-white max-h-[300px]">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-monday-gray-background border-b border-monday-border text-xs font-bold uppercase tracking-wider text-monday-gray sticky top-0 z-10">

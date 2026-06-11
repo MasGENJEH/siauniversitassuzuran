@@ -24,6 +24,7 @@ import ProfilAdminTab from './ProfilAdminTab';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Authentication States
@@ -541,6 +542,14 @@ export default function App() {
   return (
     <div className="flex min-h-screen bg-monday-background text-monday-black font-sans">
 
+      {/* Sidebar Overlay for Mobile */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -550,10 +559,12 @@ export default function App() {
         onLogout={handleLogout}
         isMinimized={isSidebarMinimized}
         setIsMinimized={setIsSidebarMinimized}
+        isMobileSidebarOpen={isMobileSidebarOpen}
+        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
       />
 
       {/* Main Container */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto w-full">
 
         {/* Top Header Bar */}
         <Header
@@ -563,10 +574,11 @@ export default function App() {
           fetchData={fetchData}
           user={user}
           onLogout={handleLogout}
+          setIsMobileSidebarOpen={setIsMobileSidebarOpen}
         />
 
         {/* Content Body */}
-        <div className="px-8 pb-12 w-full space-y-6 flex-1">
+        <div className="px-4 lg:px-8 pb-12 w-full space-y-6 flex-1">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-40 gap-4">
               <RefreshCw size={40} className="text-monday-blue animate-spin" />

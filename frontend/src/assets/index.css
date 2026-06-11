@@ -72,3 +72,48 @@ body {
   background-color: var(--color-monday-background);
   color: var(--color-monday-black);
 }
+
+/* Browser autofill override for dark mode support */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--monday-background) inset !important;
+    -webkit-text-fill-color: var(--monday-black) !important;
+    border-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+input:focus:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px var(--monday-card) inset !important;
+    border-color: var(--monday-blue) !important;
+}
+
+/* Custom Scrollbar to match theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-monday-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-monday-gray);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-monday-border) transparent;
+}
+
+/* Prevent table text wrapping */
+th, td {
+  white-space: nowrap;
+}

@@ -42,6 +42,7 @@ export default function ProfilMahasiswaTab({
   // File upload states
   const [photoFile, setFotoFile] = useState(null);
   const [photoPreview, setFotoPreview] = useState(null);
+  const [imgError, setImgError] = useState(false);
 
   // UI state
   const [showPassword, setShowPassword] = useState(false);
@@ -96,6 +97,7 @@ export default function ProfilMahasiswaTab({
       setFotoFile(file);
       const previewUrl = URL.createObjectURL(file);
       setFotoPreview(previewUrl);
+      setImgError(false);
       setErrors(prev => {
         const copy = { ...prev };
         delete copy.photo;
@@ -200,15 +202,15 @@ export default function ProfilMahasiswaTab({
           {/* Avatar Container */}
           <div className="relative mt-8 z-10">
             <div className="w-32 h-32 rounded-3xl border-4 border-white bg-monday-background overflow-hidden shadow-lg flex items-center justify-center text-monday-gray font-extrabold text-4xl">
-              {displayPhoto ? (
+              {displayPhoto && !imgError ? (
                 <img 
                   src={displayPhoto} 
                   alt="Profil" 
                   className="w-full h-full object-cover" 
-                  onError={(e) => { e.target.style.display = 'none'; }}
+                  onError={() => setImgError(true)}
                 />
               ) : (
-                myMahasiswa.name.charAt(0).toUpperCase()
+                <User size={48} className="text-monday-gray/50" />
               )}
             </div>
 
