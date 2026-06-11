@@ -1,25 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
-// Import Modular Components
+// Keep these as static imports (always needed for layout)
 import Sidebar from './Sidebar';
 import Header from './Header';
-import DashboardTab from './DashboardTab';
-import FakultasTab from './FakultasTab';
-import ProdiTab from './ProdiTab';
-import TahunAkademikTab from './TahunAkademikTab';
-import DosenTab from './DosenTab';
-import MahasiswaTab from './MahasiswaTab';
-import MataKuliahTab from './MataKuliahTab';
-import KelasKuliahTab from './KelasKuliahTab';
-import LecturerPortalTab from './LecturerPortalTab';
-import KelasMahasiswaTab from './KelasMahasiswaTab';
-import DynamicFormModal from './DynamicFormModal';
 import Login from './Login';
-import JadwalKuliahTab from './JadwalKuliahTab';
-import ProfilMahasiswaTab from './ProfilMahasiswaTab';
-import ProfilDosenTab from './ProfilDosenTab';
-import ProfilAdminTab from './ProfilAdminTab';
+
+// Lazy-load all tab components for code splitting
+const DashboardTab = React.lazy(() => import('./DashboardTab'));
+const FakultasTab = React.lazy(() => import('./FakultasTab'));
+const ProdiTab = React.lazy(() => import('./ProdiTab'));
+const TahunAkademikTab = React.lazy(() => import('./TahunAkademikTab'));
+const DosenTab = React.lazy(() => import('./DosenTab'));
+const MahasiswaTab = React.lazy(() => import('./MahasiswaTab'));
+const MataKuliahTab = React.lazy(() => import('./MataKuliahTab'));
+const KelasKuliahTab = React.lazy(() => import('./KelasKuliahTab'));
+const LecturerPortalTab = React.lazy(() => import('./LecturerPortalTab'));
+const KelasMahasiswaTab = React.lazy(() => import('./KelasMahasiswaTab'));
+const DynamicFormModal = React.lazy(() => import('./DynamicFormModal'));
+const JadwalKuliahTab = React.lazy(() => import('./JadwalKuliahTab'));
+const ProfilMahasiswaTab = React.lazy(() => import('./ProfilMahasiswaTab'));
+const ProfilDosenTab = React.lazy(() => import('./ProfilDosenTab'));
+const ProfilAdminTab = React.lazy(() => import('./ProfilAdminTab'));
+
+// Reusable loading spinner for Suspense fallback
+const TabLoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center py-20 gap-4">
+    <RefreshCw size={32} className="text-monday-blue animate-spin" />
+    <p className="text-monday-gray text-sm font-semibold">Memuat komponen...</p>
+  </div>
+);
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -68,8 +78,57 @@ export default function App() {
   // Active Semester Indicator Helper
   const activeSemester = academicYears.find(ta => ta.status) || null;
 
-  // Search filter query
+  // Debounced search: searchInput is immediate, searchQuery is debounced
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // --- LOOKUP MAPS (O(1) instead of O(n) Array.find) ---
+  const mataKuliahMap = useMemo(() => {
+    const map = {};
+    mataKuliahs.forEach(mk => { map[mk.id] = mk; });
+    return map;
+  }, [mataKuliahs]);
+
+  const lecturerMap = useMemo(() => {
+    const map = {};
+    lecturers.forEach(d => { map[d.id] = d; });
+    return map;
+  }, [lecturers]);
+
+  const studentMap = useMemo(() => {
+    const map = {};
+    students.forEach(m => { map[m.id] = m; });
+    return map;
+  }, [students]);
+
+  const studyProgramMap = useMemo(() => {
+    const map = {};
+    studyPrograms.forEach(p => { map[p.id] = p; });
+    return map;
+  }, [studyPrograms]);
+
+  const academicYearMap = useMemo(() => {
+    const map = {};
+    academicYears.forEach(ta => { map[ta.id] = ta; });
+    return map;
+  }, [academicYears]);
+
+  const facultyMap = useMemo(() => {
+    const map = {};
+    faculties.forEach(f => { map[f.id] = f; });
+    return map;
+  }, [faculties]);
+
+  const userMap = useMemo(() => {
+    const map = {};
+    users.forEach(u => { map[u.id] = u; });
+    return map;
+  }, [users]);
 
   // Custom authenticated API fetch wrapper
   const apiFetch = async (url, options = {}) => {
@@ -93,6 +152,14 @@ export default function App() {
     }
 
     return res;
+  };
+
+  // Shared JSON fetch helper
+  const fetchJson = async (url) => {
+    const res = await apiFetch(url);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    return data.data ? data.data : data;
   };
 
   // Refresh current user data
@@ -191,42 +258,68 @@ export default function App() {
     checkCurrentUser();
   }, [token]);
 
-  // Fetch all data helper
+  // --- ENTITY REFRESH MAP (targeted refetch instead of reloading all 10 endpoints) ---
+  const entityRefreshMap = {
+    faculties: { url: '/api/faculties', setter: setFaculties },
+    prodi: { url: '/api/study-programs', setter: setStudyPrograms },
+    tahunAkademik: { url: '/api/academic-years', setter: setAcademicYears },
+    dosen: { url: '/api/lecturers', setter: setLecturers },
+    mahasiswa: { url: '/api/students', setter: setStudents },
+    mataKuliah: { url: '/api/courses', setter: setCourses },
+    kelasKuliah: { url: '/api/course-classes', setter: setCourseClasses },
+    kelasMahasiswa: { url: '/api/enrollments', setter: setEnrollments },
+    dosenPengampu: { url: '/api/class-instructors', setter: setClassInstructors },
+    users: { url: '/api/users', setter: setUsers },
+  };
+
+  // Refresh only 1 or more specific entity types (instead of all 10)
+  const refreshEntity = async (...entityTypes) => {
+    try {
+      const promises = entityTypes.map(async (type) => {
+        const entry = entityRefreshMap[type];
+        if (entry) {
+          const data = await fetchJson(entry.url);
+          entry.setter(data);
+        }
+      });
+      await Promise.all(promises);
+    } catch (error) {
+      console.error("Error refreshing entity:", error);
+    }
+  };
+
+  // Fetch all data helper (with role-based filtering)
   const fetchData = async () => {
     setLoading(true);
     try {
-      const fetchJson = async (url) => {
-        const res = await apiFetch(url);
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        return data.data ? data.data : data;
-      };
+      const roles = user?.roles?.map(r => r.name) || [];
+      const isAdmin = roles.includes('admin');
 
-      const [
-        fakList, prodList, taList, dosList, mhsList, mkList, kkList, kmList, dpList, userList
-      ] = await Promise.all([
-        fetchJson('/api/faculties'),
-        fetchJson('/api/study-programs'),
-        fetchJson('/api/academic-years'),
-        fetchJson('/api/lecturers'),
-        fetchJson('/api/students'),
-        fetchJson('/api/courses'),
-        fetchJson('/api/course-classes'),
-        fetchJson('/api/enrollments'),
-        fetchJson('/api/class-instructors'),
-        fetchJson('/api/users')
-      ]);
+      // Base endpoints needed by all roles
+      const endpoints = [
+        { url: '/api/faculties', setter: setFaculties },
+        { url: '/api/study-programs', setter: setStudyPrograms },
+        { url: '/api/academic-years', setter: setAcademicYears },
+        { url: '/api/lecturers', setter: setLecturers },
+        { url: '/api/students', setter: setStudents },
+        { url: '/api/courses', setter: setCourses },
+        { url: '/api/course-classes', setter: setCourseClasses },
+        { url: '/api/enrollments', setter: setEnrollments },
+        { url: '/api/class-instructors', setter: setClassInstructors },
+      ];
 
-      setFaculties(fakList);
-      setStudyPrograms(prodList);
-      setAcademicYears(taList);
-      setLecturers(dosList);
-      setStudents(mhsList);
-      setCourses(mkList);
-      setCourseClasses(kkList);
-      setEnrollments(kmList);
-      setClassInstructors(dpList);
-      setUsers(userList);
+      // Only admin needs users list
+      if (isAdmin) {
+        endpoints.push({ url: '/api/users', setter: setUsers });
+      }
+
+      const results = await Promise.all(
+        endpoints.map(ep => fetchJson(ep.url))
+      );
+
+      endpoints.forEach((ep, idx) => {
+        ep.setter(results[idx]);
+      });
     } catch (error) {
       console.error("Error fetching SIAKAD data:", error);
     } finally {
@@ -327,7 +420,8 @@ export default function App() {
         const updated = await res.json();
         setEnrollments(prev => prev.map(km => km.id === enrollId ? updated : km));
         alert("Nilai mahasiswa berhasil diperbarui!");
-        fetchData();
+        // Only refresh enrollments instead of all 10 endpoints
+        refreshEntity('kelasMahasiswa');
       } else {
         const errors = await res.json();
         alert("Gagal memperbarui nilai: " + JSON.stringify(errors.errors || errors.message));
@@ -360,6 +454,22 @@ export default function App() {
       segment = 'enrollments';
     }
     return `/api/${segment}${id ? `/${id}` : ''}`;
+  };
+
+  // Map modalType to refreshEntity keys (including related entities)
+  const getRefreshEntities = (type) => {
+    switch (type) {
+      case 'faculties': return ['faculties'];
+      case 'prodi': return ['prodi'];
+      case 'tahunAkademik': return ['tahunAkademik'];
+      case 'dosen': return ['dosen'];
+      case 'mahasiswa': return ['mahasiswa'];
+      case 'mataKuliah': return ['mataKuliah'];
+      case 'kelasKuliah': return ['kelasKuliah', 'dosenPengampu']; // KelasKuliah creates dosenPengampu too
+      case 'dosenPengampu': return ['dosenPengampu'];
+      case 'kelasMahasiswa': return ['kelasMahasiswa'];
+      default: return ['faculties', 'prodi', 'tahunAkademik', 'dosen', 'mahasiswa', 'mataKuliah', 'kelasKuliah', 'kelasMahasiswa', 'dosenPengampu', 'users'];
+    }
   };
 
   // Form submit handler
@@ -418,7 +528,8 @@ export default function App() {
         }
         setShowModal(false);
         setFormData({});
-        fetchData();
+        // Targeted refresh instead of full fetchData()
+        refreshEntity(...getRefreshEntities(modalType));
       } else {
         if (responseData.errors) {
           setFormErrors(responseData.errors);
@@ -450,7 +561,8 @@ export default function App() {
       });
 
       if (res.ok) {
-        fetchData();
+        // Targeted refresh instead of full fetchData()
+        refreshEntity(...getRefreshEntities(type));
       } else {
         let errMsg = "Constraint Error";
         try {
@@ -516,7 +628,8 @@ export default function App() {
       });
 
       if (res.ok) {
-        fetchData();
+        // Only refresh academic years instead of all 10 endpoints
+        refreshEntity('tahunAkademik');
       } else {
         const err = await res.json();
         alert("Gagal mengaktifkan tahun akademik: " + err.message);
@@ -554,7 +667,7 @@ export default function App() {
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={setSearchInput}
         user={user}
         onLogout={handleLogout}
         isMinimized={isSidebarMinimized}
@@ -585,7 +698,7 @@ export default function App() {
               <p className="text-monday-gray text-sm font-semibold">Memuat data dari server...</p>
             </div>
           ) : (
-            <>
+            <Suspense fallback={<TabLoadingFallback />}>
               {/* DASHBOARD TAB */}
               {activeTab === 'dashboard' && (
                 <DashboardTab
@@ -600,6 +713,10 @@ export default function App() {
                   kelasMahasiswas={kelasMahasiswas}
                   mataKuliahs={mataKuliahs}
                   setActiveTab={setActiveTab}
+                  mataKuliahMap={mataKuliahMap}
+                  lecturerMap={lecturerMap}
+                  studentMap={studentMap}
+                  academicYearMap={academicYearMap}
                 />
               )}
 
@@ -608,7 +725,7 @@ export default function App() {
                 <FakultasTab
                   faculties={faculties}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
                 />
@@ -620,9 +737,10 @@ export default function App() {
                   studyPrograms={studyPrograms}
                   faculties={faculties}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  facultyMap={facultyMap}
                 />
               )}
 
@@ -631,7 +749,7 @@ export default function App() {
                 <TahunAkademikTab
                   tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
                   toggleTahunAkademikStatus={toggleTahunAkademikStatus}
@@ -649,9 +767,13 @@ export default function App() {
                   mataKuliahs={mataKuliahs}
                   tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
+                  userMap={userMap}
+                  studentMap={studentMap}
                 />
               )}
 
@@ -668,9 +790,15 @@ export default function App() {
                   tahunAkademiks={academicYears}
                   users={users}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  studyProgramMap={studyProgramMap}
+                  lecturerMap={lecturerMap}
+                  facultyMap={facultyMap}
+                  userMap={userMap}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
                 />
               )}
 
@@ -680,9 +808,10 @@ export default function App() {
                   mataKuliahs={mataKuliahs}
                   studyPrograms={studyPrograms}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  studyProgramMap={studyProgramMap}
                 />
               )}
 
@@ -697,9 +826,13 @@ export default function App() {
                   kelasMahasiswas={kelasMahasiswas}
                   students={students}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
+                  lecturerMap={lecturerMap}
+                  studentMap={studentMap}
                 />
               )}
 
@@ -727,6 +860,9 @@ export default function App() {
                   fetchLecturerPortalData={fetchLecturerPortalData}
                   selectClassForPortalGrades={selectClassForPortalGrades}
                   saveStudentGrade={saveStudentGrade}
+                  mataKuliahMap={mataKuliahMap}
+                  studentMap={studentMap}
+                  studyProgramMap={studyProgramMap}
                 />
               )}
 
@@ -741,9 +877,13 @@ export default function App() {
                   dosenPengampus={dosenPengampus}
                   tahunAkademiks={academicYears}
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+                  setSearchQuery={setSearchInput}
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
+                  lecturerMap={lecturerMap}
+                  studentMap={studentMap}
                 />
               )}
 
@@ -757,6 +897,10 @@ export default function App() {
                   lecturers={lecturers}
                   dosenPengampus={dosenPengampus}
                   tahunAkademiks={academicYears}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
+                  lecturerMap={lecturerMap}
+                  studentMap={studentMap}
                 />
               )}
 
@@ -781,6 +925,9 @@ export default function App() {
                   mataKuliahs={mataKuliahs}
                   tahunAkademiks={academicYears}
                   refreshUser={refreshUser}
+                  mataKuliahMap={mataKuliahMap}
+                  academicYearMap={academicYearMap}
+                  studentMap={studentMap}
                 />
               )}
 
@@ -797,32 +944,36 @@ export default function App() {
                   refreshUser={refreshUser}
                 />
               )}
-            </>
+            </Suspense>
           )}
         </div>
       </main>
 
       {/* Dynamic Form Overlay Modal */}
-      <DynamicFormModal
-        currentUser={user}
-        showModal={showModal}
-        setShowModal={setShowModal}
-        modalType={modalType}
-        modalAction={modalAction}
-        selectedItem={selectedItem}
-        formData={formData}
-        setFormData={setFormData}
-        formErrors={formErrors}
-        faculties={faculties}
-        studyPrograms={studyPrograms}
-        tahunAkademiks={academicYears}
-        lecturers={lecturers}
-        students={students}
-        mataKuliahs={mataKuliahs}
-        kelasKuliahs={kelasKuliahs}
-        users={users}
-        handleFormSubmit={handleFormSubmit}
-      />
+      {showModal && (
+        <Suspense fallback={null}>
+          <DynamicFormModal
+            currentUser={user}
+            showModal={showModal}
+            setShowModal={setShowModal}
+            modalType={modalType}
+            modalAction={modalAction}
+            selectedItem={selectedItem}
+            formData={formData}
+            setFormData={setFormData}
+            formErrors={formErrors}
+            faculties={faculties}
+            studyPrograms={studyPrograms}
+            tahunAkademiks={academicYears}
+            lecturers={lecturers}
+            students={students}
+            mataKuliahs={mataKuliahs}
+            kelasKuliahs={kelasKuliahs}
+            users={users}
+            handleFormSubmit={handleFormSubmit}
+          />
+        </Suspense>
+      )}
 
       {/* Custom Delete Confirmation Modal */}
       {showDeleteModal && (

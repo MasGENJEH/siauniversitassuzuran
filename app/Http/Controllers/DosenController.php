@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DosenRequest;
 use App\Http\Resources\DosenResource;
+use App\Models\Dosen;
 use App\Services\DosenService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,38 @@ class DosenController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('mahasiswa') && !$user->hasRole('admin')) {
+            $mhs = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+            if ($mhs) {
+                $kelasIds = \App\Models\KelasMahasiswa::where('student_id', $mhs->id)->pluck('course_class_id');
+                $lecturerIds = \App\Models\DosenPengampu::whereIn('course_class_id', $kelasIds)->pluck('lecturer_id')->toArray();
+                
+                if ($mhs->academic_advisor_id) {
+                    $lecturerIds[] = $mhs->academic_advisor_id;
+                }
+
+                $dosen = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds))->get();
+                return response()->json(DosenResource::collection($dosen));
+            }
+            return response()->json([]);
+        }
+
+        if ($user && $user->hasRole('dosen') && !$user->hasRole('admin')) {
+            $dosenModel = Dosen::where('user_id', $user->id)->first();
+            if ($dosenModel) {
+                $kelasIds = \App\Models\DosenPengampu::where('lecturer_id', $dosenModel->id)->pluck('course_class_id');
+                $lecturerIds = \App\Models\DosenPengampu::whereIn('course_class_id', $kelasIds)->pluck('lecturer_id')->toArray();
+                
+                $lecturerIds[] = $dosenModel->id;
+
+                $dosenList = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds))->get();
+                return response()->json(DosenResource::collection($dosenList));
+            }
+            return response()->json([]);
+        }
+
         $fields = ['*'];
         $dosen = $this->dosenService->getAll($fields ?: ['*']);
 

@@ -43,6 +43,7 @@ class DosenRepository
             ->whereHas('tahunAkademik', function ($query) {
                 $query->where('status', true);
             })
+            ->with(['mataKuliah:id,code,name,sks', 'tahunAkademik:id,code,name'])
             ->get();
     }
 }

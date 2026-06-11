@@ -3,7 +3,7 @@ import { Briefcase, AlertTriangle, Search, Info, Users, GraduationCap } from 'lu
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 
-export default function LecturerPortalTab({
+const LecturerPortalTab = React.memo(function LecturerPortalTab({
   user,
   lecturers,
   mataKuliahs,
@@ -24,7 +24,10 @@ export default function LecturerPortalTab({
   setUpdatingGrades,
   fetchLecturerPortalData,
   selectClassForPortalGrades,
-  saveStudentGrade
+  saveStudentGrade,
+  mataKuliahMap = {},
+  studentMap = {},
+  studyProgramMap = {}
 }) {
   const [portalSubTab, setPortalSubTab] = useState('classes'); // 'classes' | 'advisees'
   const [adviseeSearchQuery, setAdviseeSearchQuery] = useState('');
@@ -137,7 +140,7 @@ export default function LecturerPortalTab({
                 <div className="space-y-3">
                   {dosenActiveClasses.map((item) => {
                     const isSelected = selectedClassForGrades?.id === item.id;
-                    const mkObj = mataKuliahs.find(mk => mk.id === item.course_id);
+                    const mkObj = mataKuliahMap[item.course_id];
                     return (
                       <button
                         key={item.id}
@@ -179,7 +182,7 @@ export default function LecturerPortalTab({
                     <div>
                       <span className="text-xs text-monday-gray font-bold uppercase block">Mata Kuliah</span>
                       <h5 className="font-extrabold text-base text-monday-black mt-0.5">
-                        {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.name} (Kelas {selectedClassForGrades.class_name})
+                        {mataKuliahMap[selectedClassForGrades.course_id]?.name} (Kelas {selectedClassForGrades.class_name})
                       </h5>
                     </div>
                     <div className="flex items-center gap-2">
@@ -200,7 +203,7 @@ export default function LecturerPortalTab({
                     {enrolledStudentsInClass.length > 0 ? (
                       <div className="divide-y divide-monday-border">
                         {enrolledStudentsInClass.map((enroll) => {
-                          const studentData = students.find(m => m.id === enroll.student_id);
+                          const studentData = studentMap[enroll.student_id];
                           return (
                             <div key={enroll.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                               <div className="space-y-0.5">
@@ -329,7 +332,7 @@ export default function LecturerPortalTab({
                       </thead>
                       <tbody className="divide-y divide-monday-border text-sm text-monday-black">
                         {filtered.map((m, index) => {
-                          const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+                          const prObj = studyProgramMap[m.study_program_id];
                           const isAktif = m.status === 'AKTIF';
                           return (
                             <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -412,8 +415,8 @@ export default function LecturerPortalTab({
               {/* Class Meta Grid */}
               <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-monday-black bg-monday-background p-4 rounded-2xl border border-monday-border print:bg-transparent print:border-none print:p-0">
                 <div className="space-y-1">
-                  <p><span className="text-monday-gray">Mata Kuliah:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.name}</p>
-                  <p><span className="text-monday-gray">Kode MK:</span> {mataKuliahs.find(mk => mk.id === selectedClassForGrades.course_id)?.code}</p>
+                  <p><span className="text-monday-gray">Mata Kuliah:</span> {mataKuliahMap[selectedClassForGrades.course_id]?.name}</p>
+                  <p><span className="text-monday-gray">Kode MK:</span> {mataKuliahMap[selectedClassForGrades.course_id]?.code}</p>
                   <p><span className="text-monday-gray">Kelas:</span> {selectedClassForGrades.class_name}</p>
                 </div>
                 <div className="space-y-1 text-right print:text-left">
@@ -436,7 +439,7 @@ export default function LecturerPortalTab({
                   </thead>
                   <tbody className="divide-y divide-monday-border text-xs text-monday-black">
                     {enrolledStudentsInClass.map((enroll, idx) => {
-                      const studentData = students.find(m => m.id === enroll.student_id);
+                      const studentData = studentMap[enroll.student_id];
                       const isOdd = idx % 2 === 0;
                       return (
                         <tr key={enroll.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -482,4 +485,6 @@ export default function LecturerPortalTab({
       )}
     </div>
   );
-}
+});
+
+export default LecturerPortalTab;

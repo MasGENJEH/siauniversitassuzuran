@@ -4,7 +4,7 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function DosenTab({
+const DosenTab = React.memo(function DosenTab({
   lecturers,
   users,
   students = [],
@@ -15,7 +15,11 @@ export default function DosenTab({
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  mataKuliahMap = {},
+  academicYearMap = {},
+  userMap = {},
+  studentMap = {}
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleCountCard, setVisibleCountCard] = useState(12);
@@ -41,7 +45,7 @@ export default function DosenTab({
 
   // Filter items based on search query and column filters
   const filteredItems = lecturers.filter(d => {
-    const uObj = users.find(u => u.id === d.user_id);
+    const uObj = userMap[d.user_id];
     
     const matchesGlobal = d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           d.nidn.toLowerCase().includes(searchQuery.toLowerCase());
@@ -85,7 +89,7 @@ export default function DosenTab({
     if (!selectedDosen) return null;
 
     const dsn = selectedDosen;
-    const userObj = users.find(u => u.id === dsn.user_id);
+    const userObj = userMap[dsn.user_id];
 
     // Get all advisee students (mahasiswa bimbingan PA)
     const advisees = students.filter(m => m.academic_advisor_id === dsn.id);
@@ -98,8 +102,8 @@ export default function DosenTab({
     teachingLinks.forEach(dp => {
       const kk = kelasKuliahs.find(k => k.id === dp.course_class_id);
       if (kk) {
-        const mk = mataKuliahs.find(m => m.id === kk.course_id);
-        const ta = tahunAkademiks.find(t => t.id === kk.academic_year_id);
+        const mk = mataKuliahMap[kk.course_id];
+        const ta = academicYearMap[kk.academic_year_id];
         if (mk && mk.sks) {
           totalTeachingSks += Number(mk.sks);
         }
@@ -483,7 +487,7 @@ export default function DosenTab({
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
               {paginatedItems.map((d, index) => {
-                const uObj = users.find(u => u.id === d.user_id);
+                const uObj = userMap[d.user_id];
                 const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
                 const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
 
@@ -536,7 +540,7 @@ export default function DosenTab({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {cardItemsToDisplay.map((d, index) => {
-            const uObj = users.find(u => u.id === d.user_id);
+            const uObj = userMap[d.user_id];
             const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
             const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
 
@@ -652,4 +656,6 @@ export default function DosenTab({
       )}
     </div>
   );
-}
+});
+
+export default DosenTab;

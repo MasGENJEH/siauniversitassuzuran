@@ -18,6 +18,27 @@ class DosenPengampuController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('mahasiswa') && !$user->hasRole('admin')) {
+            $mhs = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+            if ($mhs) {
+                $kelasIds = \App\Models\KelasMahasiswa::where('student_id', $mhs->id)->pluck('course_class_id');
+                $dosenPengampu = \App\Models\DosenPengampu::whereIn('course_class_id', $kelasIds)->get();
+                return response()->json(DosenPengampuResource::collection($dosenPengampu));
+            }
+            return response()->json([]);
+        }
+
+        if ($user && $user->hasRole('dosen') && !$user->hasRole('admin')) {
+            $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
+            if ($dosen) {
+                $kelasIds = \App\Models\DosenPengampu::where('lecturer_id', $dosen->id)->pluck('course_class_id');
+                $dosenPengampu = \App\Models\DosenPengampu::whereIn('course_class_id', $kelasIds)->get();
+                return response()->json(DosenPengampuResource::collection($dosenPengampu));
+            }
+            return response()->json([]);
+        }
+
         $fields = ['*'];
         $dosenPengampu = $this->dosenPengampuService->getAll($fields);
 

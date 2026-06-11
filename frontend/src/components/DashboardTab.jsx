@@ -3,7 +3,7 @@ import { Building, Award, Users, GraduationCap, Star, BookOpen, TrendingUp, Chec
 import MetricCard from './ui/MetricCard';
 import WelcomeBanner from './ui/WelcomeBanner';
 
-export default function DashboardTab({
+const DashboardTab = React.memo(function DashboardTab({
   user,
   faculties,
   studyPrograms,
@@ -14,7 +14,11 @@ export default function DashboardTab({
   dosenPengampus,
   kelasMahasiswas = [],
   mataKuliahs = [],
-  setActiveTab
+  setActiveTab,
+  mataKuliahMap = {},
+  lecturerMap = {},
+  studentMap = {},
+  academicYearMap = {}
 }) {
   const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
 
@@ -49,7 +53,7 @@ export default function DashboardTab({
       const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
       if (!kk) return;
 
-      const mk = mataKuliahs.find(m => m.id === kk.course_id);
+      const mk = mataKuliahMap[kk.course_id];
       if (!mk) return;
 
       const sks = Number(mk.sks || 0);
@@ -186,4 +190,6 @@ export default function DashboardTab({
       </div>
     </div>
   );
-}
+});
+
+export default DashboardTab;

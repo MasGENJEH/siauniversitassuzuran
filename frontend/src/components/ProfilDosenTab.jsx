@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { User, Mail, Phone, Lock, Camera, CheckCircle2, AlertCircle, Eye, EyeOff, Save, Shield, Info, BookOpen, Users, Award } from 'lucide-react';
 
-export default function ProfilDosenTab({
+const ProfilDosenTab = React.memo(function ProfilDosenTab({
   user,
   lecturers,
   students = [],
@@ -9,7 +9,10 @@ export default function ProfilDosenTab({
   kelasKuliahs = [],
   mataKuliahs = [],
   tahunAkademiks = [],
-  refreshUser
+  refreshUser,
+  mataKuliahMap = {},
+  academicYearMap = {},
+  studentMap = {}
 }) {
   const fileInputRef = useRef(null);
 
@@ -31,7 +34,7 @@ export default function ProfilDosenTab({
       const kk = kelasKuliahs.find(k => k.id === dp.course_class_id);
       if (kk) {
         totalClasses++;
-        const mk = mataKuliahs.find(m => m.id === kk.course_id);
+        const mk = mataKuliahMap[kk.course_id];
         if (mk && mk.sks) {
           totalTeachingSks += Number(mk.sks);
         }
@@ -454,4 +457,6 @@ export default function ProfilDosenTab({
       </div>
     </div>
   );
-}
+});
+
+export default ProfilDosenTab;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\MahasiswaRequest;
 use App\Http\Resources\MahasiswaResource;
+use App\Models\Mahasiswa;
 use App\Services\MahasiswaService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,32 @@ class MahasiswaController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        if ($user && $user->hasRole('mahasiswa') && !$user->hasRole('admin')) {
+            $mahasiswa = Mahasiswa::with(['prodi:id,name,code', 'dosenPa:id,name,nidn'])
+                ->where('user_id', $user->id)
+                ->get();
+
+            return response()->json(MahasiswaResource::collection($mahasiswa));
+        }
+
+        if ($user && $user->hasRole('dosen') && !$user->hasRole('admin')) {
+            $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
+            if ($dosen) {
+                // Get classes taught by this dosen
+                $kelasIds = \App\Models\DosenPengampu::where('lecturer_id', $dosen->id)->pluck('course_class_id');
+                // Get students enrolled in those classes
+                $studentIds = \App\Models\KelasMahasiswa::whereIn('course_class_id', $kelasIds)->pluck('student_id')->toArray();
+                
+                $mahasiswa = Mahasiswa::with(['prodi:id,name,code', 'dosenPa:id,name,nidn'])
+                    ->where('academic_advisor_id', $dosen->id)
+                    ->orWhereIn('id', $studentIds)
+                    ->get();
+                return response()->json(MahasiswaResource::collection($mahasiswa));
+            }
+            return response()->json([]);
+        }
+
         $fields = ['*'];
         $mahasiswa = $this->mahasiswaService->getAll($fields);
 

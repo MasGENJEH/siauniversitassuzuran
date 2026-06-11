@@ -8,7 +8,8 @@ class MahasiswaRepository
 {
     public function getAll(array $fields)
     {
-        return Mahasiswa::select($fields)->latest()->get();
+        return Mahasiswa::with(['prodi:id,name,code', 'dosenPa:id,name,nidn'])
+            ->select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields)

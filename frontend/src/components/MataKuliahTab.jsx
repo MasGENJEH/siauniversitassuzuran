@@ -4,13 +4,14 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function MataKuliahTab({
+const MataKuliahTab = React.memo(function MataKuliahTab({
   mataKuliahs,
   studyPrograms,
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  studyProgramMap = {}
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const [filters, setFilters] = useState({
@@ -122,7 +123,7 @@ export default function MataKuliahTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {itemsToDisplay.map((mk, index) => {
-              const prObj = studyPrograms.find(p => p.id === mk.study_program_id);
+              const prObj = studyProgramMap[mk.study_program_id];
               return (
                 <tr key={mk.id} className="hover:bg-monday-gray-background/30 transition-colors">
                   <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
@@ -163,4 +164,6 @@ export default function MataKuliahTab({
       )}
     </div>
   );
-}
+});
+
+export default MataKuliahTab;

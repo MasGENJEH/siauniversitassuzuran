@@ -4,7 +4,7 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function KelasKuliahTab({
+const KelasKuliahTab = React.memo(function KelasKuliahTab({
   kelasKuliahs,
   mataKuliahs,
   tahunAkademiks,
@@ -15,7 +15,11 @@ export default function KelasKuliahTab({
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  mataKuliahMap = {},
+  academicYearMap = {},
+  lecturerMap = {},
+  studentMap = {}
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const [selectedClassForDetail, setSelectedClassForDetail] = useState(null);
@@ -32,7 +36,7 @@ export default function KelasKuliahTab({
   }, [searchQuery, filters]);
 
   const filteredItems = kelasKuliahs.filter(k => {
-    const mk = mataKuliahs.find(m => m.id === k.course_id);
+    const mk = mataKuliahMap[k.course_id];
     const mkName = mk ? mk.name.toLowerCase() : '';
     const mkCode = mk ? mk.code.toLowerCase() : '';
     
@@ -145,13 +149,13 @@ export default function KelasKuliahTab({
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
               {itemsToDisplay.map((k, index) => {
-                const mkObj = mataKuliahs.find(m => m.id === k.course_id);
-                const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
+                const mkObj = mataKuliahMap[k.course_id];
+                const taObj = academicYearMap[k.academic_year_id];
 
                 // Get assigned lecturers for this class
                 const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
                 const linkedDosenNames = activeLecturerLinks.map(dp => {
-                  const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+                  const d = lecturerMap[dp.lecturer_id];
                   return d ? d.name : null;
                 }).filter(Boolean);
 
@@ -225,12 +229,12 @@ export default function KelasKuliahTab({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {itemsToDisplay.map((k, index) => {
-            const mkObj = mataKuliahs.find(m => m.id === k.course_id);
-            const taObj = tahunAkademiks.find(t => t.id === k.academic_year_id);
+            const mkObj = mataKuliahMap[k.course_id];
+            const taObj = academicYearMap[k.academic_year_id];
 
             const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === k.id);
             const linkedDosenNames = activeLecturerLinks.map(dp => {
-              const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+              const d = lecturerMap[dp.lecturer_id];
               return d ? d.name : null;
             }).filter(Boolean);
 
@@ -351,13 +355,13 @@ export default function KelasKuliahTab({
       )}
       {/* Detail Modal */}
       {selectedClassForDetail && (() => {
-        const mkObj = mataKuliahs.find(m => m.id === selectedClassForDetail.course_id);
-        const taObj = tahunAkademiks.find(t => t.id === selectedClassForDetail.academic_year_id);
+        const mkObj = mataKuliahMap[selectedClassForDetail.course_id];
+        const taObj = academicYearMap[selectedClassForDetail.academic_year_id];
 
         // Dosen Pengampu
         const activeLecturerLinks = dosenPengampus.filter(dp => dp.course_class_id === selectedClassForDetail.id);
         const linkedDosenNames = activeLecturerLinks.map(dp => {
-          const d = lecturers.find(ds => ds.id === dp.lecturer_id);
+          const d = lecturerMap[dp.lecturer_id];
           return d ? d.name : null;
         }).filter(Boolean);
 
@@ -432,7 +436,7 @@ export default function KelasKuliahTab({
                     <tbody className="divide-y divide-monday-border text-sm text-monday-black">
                       {enrollments.length > 0 ? (
                         enrollments.map((en, index) => {
-                          const mhs = students.find(m => m.id === en.student_id);
+                          const mhs = studentMap[en.student_id];
                           return (
                             <tr key={en.id} className="hover:bg-monday-gray-background/30 transition-colors">
                               <td className="py-2.5 px-5 text-monday-gray font-mono font-semibold">{index + 1}</td>
@@ -476,4 +480,6 @@ export default function KelasKuliahTab({
 
     </div>
   );
-}
+});
+
+export default KelasKuliahTab;

@@ -8,7 +8,8 @@ class KelasKuliahRepository
 {
     public function getAll(array $fields)
     {
-        return KelasKuliah::select($fields)->latest()->get();
+        return KelasKuliah::with(['mataKuliah:id,code,name,sks', 'tahunAkademik:id,code,name,status'])
+            ->select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields)

@@ -100,35 +100,36 @@ class UserSeeder extends Seeder
             'Peter Parker', 'Tony Stark', 'Steve Rogers', 'Thor Odinson', 'Bruce Banner', 'Natasha Romanoff', 'Clint Barton', 'Wanda Maximoff', 'Vision', 'Stephen Strange',
             'Luke Skywalker', 'Leia Organa', 'Han Solo', 'Chewbacca', 'Darth Vader', 'Obi-Wan Kenobi', 'Yoda', 'Boba Fett', 'Lando Calrissian', 'Emperor Palpatine',
             'Harry Potter', 'Hermione Granger', 'Ron Weasley', 'Albus Dumbledore', 'Severus Snape', 'Sirius Black', 'Remus Lupin', 'Rubeus Hagrid', 'Minerva McGonagall', 'Draco Malfoy',
-            'Frodo Baggins', 'Samwise Gamgee', 'Gandalf', 'Aragorn', 'Legolas', 'Gimli', 'Boromir', 'Gollum', 'Sauron', 'Elrond'
+            'Frodo Baggins', 'Samwise Gamgee', 'Gandalf', 'Aragorn', 'Legolas', 'Gimli', 'Boromir', 'Gollum', 'Sauron', 'Elrond',
         ];
+
+        $now = now()->toDateTimeString();
+        $password = Hash::make('password123');
 
         // Dosen Users
         for ($i = 1; $i <= 50; $i++) {
             $name = $dosenNames[$i - 1];
             $users[] = [
                 'name' => $name,
-                'email' => 'dosen.' . $i . '@kampus.ac.id',
-                'password' => Hash::make('password123'),
-                'phone' => '0812' . str_pad($i, 8, '0', STR_PAD_LEFT),
-                'photo' => 'dosen_' . $i . '.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'email' => 'dosen.'.$i.'@kampus.ac.id',
+                'password' => $password,
+                'phone' => '0812'.str_pad($i, 8, '0', STR_PAD_LEFT),
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
         }
 
         // Mahasiswa Users
         for ($i = 1; $i <= 250; $i++) {
             $name = $mahasiswaNames[$i - 1];
-            
+
             $users[] = [
                 'name' => $name,
-                'email' => 'mhs.' . $i . '@kampus.ac.id',
-                'password' => Hash::make('password123'),
-                'phone' => '0857' . str_pad($i, 8, '0', STR_PAD_LEFT),
-                'photo' => 'mhs_' . (($i - 1) % 50 + 1) . '.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'email' => 'mhs.'.$i.'@kampus.ac.id',
+                'password' => $password,
+                'phone' => '0857'.str_pad($i, 8, '0', STR_PAD_LEFT),
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
         }
 
@@ -136,13 +137,14 @@ class UserSeeder extends Seeder
         $users[] = [
             'name' => 'Admin Kampus',
             'email' => 'admin@kampus.ac.id',
-            'password' => Hash::make('password123'),
+            'password' => $password,
             'phone' => '081234567890',
-            'photo' => 'admin.jpg',
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => $now,
+            'updated_at' => $now,
         ];
 
-        DB::table('users')->insert($users);
+        foreach (array_chunk($users, 100) as $chunk) {
+            DB::table('users')->insert($chunk);
+        }
     }
 }

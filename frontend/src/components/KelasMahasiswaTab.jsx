@@ -4,7 +4,7 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function KelasMahasiswaTab({
+const KelasMahasiswaTab = React.memo(function KelasMahasiswaTab({
   user,
   kelasMahasiswas,
   students,
@@ -16,7 +16,11 @@ export default function KelasMahasiswaTab({
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  mataKuliahMap = {},
+  academicYearMap = {},
+  lecturerMap = {},
+  studentMap = {}
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
@@ -40,13 +44,13 @@ export default function KelasMahasiswaTab({
   // Build student-centric data: group kelasMahasiswas by mahasiswa
   const studentSummaries = useMemo(() => {
     const activeSemester = tahunAkademiks.find(ta => ta.status) || null;
-    const studentMap = {};
+    const enrollmentsByStudent = {};
 
     kelasMahasiswas.forEach(km => {
-      if (!studentMap[km.student_id]) {
-        studentMap[km.student_id] = [];
+      if (!enrollmentsByStudent[km.student_id]) {
+        enrollmentsByStudent[km.student_id] = [];
       }
-      studentMap[km.student_id].push(km);
+      enrollmentsByStudent[km.student_id].push(km);
     });
 
     const getGradeWeight = (letter) => {
@@ -62,8 +66,8 @@ export default function KelasMahasiswaTab({
     };
 
     // Build summaries
-    return Object.entries(studentMap).map(([mahasiswaId, enrollments]) => {
-      const mhs = students.find(m => m.id === Number(mahasiswaId));
+    return Object.entries(enrollmentsByStudent).map(([mahasiswaId, enrollments]) => {
+      const mhs = studentMap[Number(mahasiswaId)];
       if (!mhs) return null;
 
       let totalSksDiambil = 0;
@@ -77,7 +81,7 @@ export default function KelasMahasiswaTab({
 
       enrollments.forEach(km => {
         const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
-        const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
+        const mk = kk ? mataKuliahMap[kk.course_id] : null;
         if (!mk) return;
 
         const sks = Number(mk.sks || 0);
@@ -259,7 +263,7 @@ export default function KelasMahasiswaTab({
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
               {selectedStudentData.enrollments.map((km, index) => {
                 const kkObj = kelasKuliahs.find(k => k.id === km.course_class_id);
-                const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.course_id) : null;
+                const mkObj = kkObj ? mataKuliahMap[kkObj.course_id] : null;
 
                 return (
                   <tr key={km.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -302,9 +306,9 @@ export default function KelasMahasiswaTab({
                           <button
                             onClick={() => {
                               const kkObj = kelasKuliahs.find(k => k.id === km.course_class_id);
-                              const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.course_id) : null;
+                              const mkObj = kkObj ? mataKuliahMap[kkObj.course_id] : null;
                               const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === km.course_class_id);
-                              const classLecturers = teachingLinks.map(dp => lecturers.find(d => d.id === dp.lecturer_id)).filter(Boolean);
+                              const classLecturers = teachingLinks.map(dp => lecturerMap[dp.lecturer_id]).filter(Boolean);
                               setViewingClass({ kk: kkObj, mk: mkObj, lecturers: classLecturers });
                             }}
                             className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5 ml-auto"
@@ -518,4 +522,6 @@ export default function KelasMahasiswaTab({
       )}
     </div>
   );
-}
+});
+
+export default KelasMahasiswaTab;

@@ -4,7 +4,7 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function MahasiswaTab({
+const MahasiswaTab = React.memo(function MahasiswaTab({
   students,
   studyPrograms,
   lecturers,
@@ -17,7 +17,13 @@ export default function MahasiswaTab({
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  studyProgramMap = {},
+  lecturerMap = {},
+  facultyMap = {},
+  userMap = {},
+  mataKuliahMap = {},
+  academicYearMap = {}
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleCountCard, setVisibleCountCard] = useState(12);
@@ -46,9 +52,9 @@ export default function MahasiswaTab({
 
   // Filter items based on search query and column filters
   const filteredItems = students.filter(m => {
-    const prObj = studyPrograms.find(p => p.id === m.study_program_id);
-    const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
-    const uObj = users.find(u => u.id === m.user_id);
+    const prObj = studyProgramMap[m.study_program_id];
+    const dosObj = lecturerMap[m.academic_advisor_id];
+    const uObj = userMap[m.user_id];
 
     const matchesGlobal = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           m.nim.toLowerCase().includes(searchQuery.toLowerCase());
@@ -101,10 +107,10 @@ export default function MahasiswaTab({
     if (!selectedMahasiswa) return null;
 
     const mhs = selectedMahasiswa;
-    const prodiObj = studyPrograms.find(p => p.id === mhs.study_program_id);
-    const dosenObj = lecturers.find(d => d.id === mhs.academic_advisor_id);
-    const fakObj = prodiObj ? (faculties || []).find(f => f.id === prodiObj.faculty_id) : null;
-    const userObj = users.find(u => u.id === mhs.user_id);
+    const prodiObj = studyProgramMap[mhs.study_program_id];
+    const dosenObj = lecturerMap[mhs.academic_advisor_id];
+    const fakObj = prodiObj ? facultyMap[prodiObj.faculty_id] : null;
+    const userObj = userMap[mhs.user_id];
 
     // Get all enrollments for this student
     const enrollments = kelasMahasiswas.filter(km => km.student_id === mhs.id);
@@ -118,8 +124,8 @@ export default function MahasiswaTab({
 
     enrollments.forEach(km => {
       const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
-      const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
-      const ta = kk ? tahunAkademiks.find(t => t.id === kk.academic_year_id) : null;
+      const mk = kk ? mataKuliahMap[kk.course_id] : null;
+      const ta = kk ? academicYearMap[kk.academic_year_id] : null;
 
       if (mk && mk.sks) totalSks += Number(mk.sks);
       if (ta) semesterSet.add(ta.id);
@@ -138,7 +144,7 @@ export default function MahasiswaTab({
     let totalSksBerbobot = 0;
     enrollments.forEach(km => {
       const kk = kelasKuliahs.find(k => k.id === km.course_class_id);
-      const mk = kk ? mataKuliahs.find(m => m.id === kk.course_id) : null;
+      const mk = kk ? mataKuliahMap[kk.course_id] : null;
       if (mk && mk.sks && km.letter_grade) {
         const bobotMap = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'E': 0 };
         const bobot = bobotMap[km.letter_grade] ?? 0;
@@ -590,9 +596,9 @@ export default function MahasiswaTab({
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
               {paginatedItems.map((m, index) => {
-                const prObj = studyPrograms.find(p => p.id === m.study_program_id);
-                const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
-                const uObj = users.find(u => u.id === m.user_id);
+                const prObj = studyProgramMap[m.study_program_id];
+                const dosObj = lecturerMap[m.academic_advisor_id];
+                const uObj = userMap[m.user_id];
 
                 return (
                   <tr key={m.id} className="hover:bg-monday-gray-background/30 transition-colors">
@@ -648,9 +654,9 @@ export default function MahasiswaTab({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {cardItemsToDisplay.map((m, index) => {
-            const prObj = studyPrograms.find(p => p.id === m.study_program_id);
-            const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
-            const uObj = users.find(u => u.id === m.user_id);
+            const prObj = studyProgramMap[m.study_program_id];
+            const dosObj = lecturerMap[m.academic_advisor_id];
+            const uObj = userMap[m.user_id];
 
             return (
               <div key={m.id} className="group relative flex flex-col bg-white border border-monday-border rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-monday-blue/10 transition-all duration-300">
@@ -776,4 +782,6 @@ export default function MahasiswaTab({
       )}
     </div>
   );
-}
+});
+
+export default MahasiswaTab;

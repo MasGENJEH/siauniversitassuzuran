@@ -4,13 +4,14 @@ import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 import ActionButtons from './ui/ActionButtons';
 
-export default function ProdiTab({
+const ProdiTab = React.memo(function ProdiTab({
   studyPrograms,
   faculties,
   searchQuery,
   setSearchQuery,
   openModal,
-  handleDeleteItem
+  handleDeleteItem,
+  facultyMap = {}
 }) {
   const [filters, setFilters] = useState({
     code: '',
@@ -101,7 +102,7 @@ export default function ProdiTab({
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
             {filteredItems.map((pr, index) => {
-              const fakObj = faculties.find(f => f.id === pr.faculty_id);
+              const fakObj = facultyMap[pr.faculty_id];
               return (
                 <tr key={pr.id} className="hover:bg-monday-gray-background/30 transition-colors">
                   <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
@@ -128,4 +129,6 @@ export default function ProdiTab({
       </div>
     </div>
   );
-}
+});
+
+export default ProdiTab;

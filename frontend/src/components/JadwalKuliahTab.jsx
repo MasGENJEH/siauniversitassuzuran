@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Calendar, Clock, MapPin, BookOpen, Users, Info, Smile } from 'lucide-react';
 
-export default function JadwalKuliahTab({
+const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
   user,
   students,
   kelasMahasiswas,
@@ -9,7 +9,11 @@ export default function JadwalKuliahTab({
   mataKuliahs,
   lecturers = [],
   dosenPengampus = [],
-  tahunAkademiks = []
+  tahunAkademiks = [],
+  mataKuliahMap = {},
+  academicYearMap = {},
+  lecturerMap = {},
+  studentMap = {}
 }) {
   const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
   
@@ -63,7 +67,7 @@ export default function JadwalKuliahTab({
       if (kk.academic_year_id !== activeSemester.id) return;
 
       // Find course details
-      const mk = mataKuliahs.find(m => m.id === kk.course_id);
+      const mk = mataKuliahMap[kk.course_id];
       if (!mk) return;
 
       totalSks += Number(mk.sks || 0);
@@ -72,7 +76,7 @@ export default function JadwalKuliahTab({
       // Find lecturers
       const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === kk.id);
       const classLecturers = teachingLinks
-        .map(dp => lecturers.find(d => d.id === dp.lecturer_id))
+        .map(dp => lecturerMap[dp.lecturer_id])
         .filter(Boolean);
 
       const dayName = (kk.day || '').toUpperCase().trim();
@@ -321,4 +325,6 @@ export default function JadwalKuliahTab({
       </div>
     </div>
   );
-}
+});
+
+export default JadwalKuliahTab;
