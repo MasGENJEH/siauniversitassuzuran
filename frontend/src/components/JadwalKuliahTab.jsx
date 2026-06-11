@@ -71,7 +71,7 @@ export default function JadwalKuliahTab({
 
       // Find lecturers
       const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === kk.id);
-      const lecturers = teachingLinks
+      const classLecturers = teachingLinks
         .map(dp => lecturers.find(d => d.id === dp.lecturer_id))
         .filter(Boolean);
 
@@ -86,7 +86,7 @@ export default function JadwalKuliahTab({
           end_time: kk.end_time,
           room: kk.room,
           mata_kuliah: mk,
-          lecturers: lecturers
+          lecturers: classLecturers
         });
       }
     });

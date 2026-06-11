@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, Building, Award, Calendar, Users, GraduationCap, BookOpen, Layers, Briefcase, Edit3, LogOut, User, Settings } from 'lucide-react';
+import { Home, Building, Award, Calendar, Users, GraduationCap, BookOpen, Layers, Briefcase, Edit3, LogOut, User, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user, onLogout, isMinimized, setIsMinimized }) {
   const roles = user?.roles || [];
 
   const mainMenuItems = [
@@ -25,28 +25,46 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
   ].filter(item => item.roles.some(role => roles.some(r => r.name === role)));
 
   return (
-    <aside className="relative flex h-auto w-[280px] shrink-0 bg-white border-r border-monday-border print:hidden">
-      <div className="flex flex-col fixed top-0 w-[280px] shrink-0 h-screen pt-[30px] px-4 gap-[24px]">
+    <aside className={`relative flex h-auto shrink-0 bg-white border-r border-monday-border transition-all duration-300 print:hidden ${isMinimized ? 'w-[88px]' : 'w-[280px]'}`}>
+      <div className={`flex flex-col fixed top-0 shrink-0 h-screen pt-[30px] gap-[24px] transition-all duration-300 ${isMinimized ? 'w-[88px] px-2' : 'w-[280px] px-4'}`}>
+
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="absolute -right-4 top-[35px] flex items-center justify-center size-8 rounded-full shadow-lg shadow-monday-blue/20 z-50 transition-all duration-300 cursor-pointer border-[3px] border-white bg-monday-blue text-white hover:scale-110 hover:bg-opacity-90 group"
+        >
+          {isMinimized ? (
+            <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+          ) : (
+            <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform duration-300" />
+          )}
+        </button>
 
         {/* Logo Brand */}
-        <div className="px-4 flex items-center gap-3">
-          <div className="bg-monday-blue p-2.5 rounded-2xl text-white">
+        <div className={`flex items-center ${isMinimized ? 'justify-center px-0' : 'px-4 gap-3'}`}>
+          <div className="bg-monday-blue p-2.5 rounded-2xl text-white shrink-0">
             <Layers size={22} />
           </div>
-          <div>
-            <h1 className="font-extrabold text-xl text-monday-black uppercase tracking-tight">SIAKAD</h1>
-            <p className="text-[9px] text-monday-gray font-extrabold tracking-widest uppercase">SUZURAN ANJAY</p>
-          </div>
+          {!isMinimized && (
+            <div className="overflow-hidden whitespace-nowrap">
+              <h1 className="font-extrabold text-xl text-monday-black uppercase tracking-tight">SIAKAD</h1>
+              <p className="text-[9px] text-monday-gray font-extrabold tracking-widest uppercase">SUZURAN ANJAY</p>
+            </div>
+          )}
         </div>
 
-        <hr className="border-monday-border mx-4" />
+        <hr className={`border-monday-border ${isMinimized ? 'mx-2' : 'mx-4'}`} />
 
         {/* Nav List */}
-        <div className="flex flex-col gap-4 overflow-y-auto hide-scrollbar h-full pb-[100px]">
+        <div className={`flex flex-col gap-4 overflow-y-auto hide-scrollbar h-full pb-[100px] ${isMinimized ? 'items-center' : ''}`}>
           {mainMenuItems.length > 0 && (
             <>
-              <p className="font-bold text-xs text-monday-gray uppercase tracking-wider px-4">Main Menu</p>
-              <nav className="space-y-1">
+              {isMinimized ? (
+                <div className="w-full flex justify-center"><hr className="border-monday-border w-6" /></div>
+              ) : (
+                <p className="font-bold text-xs text-monday-gray uppercase tracking-wider px-4">Main Menu</p>
+              )}
+              <nav className={`space-y-1 ${isMinimized ? 'flex flex-col items-center w-full px-2' : 'w-full'}`}>
                 {mainMenuItems.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -57,14 +75,20 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
                         setActiveTab(tab.id);
                         setSearchQuery('');
                       }}
-                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${isActive
+                      title={tab.label}
+                      className={`flex items-center transition-300 cursor-pointer ${
+                        isMinimized 
+                          ? 'justify-center p-3 rounded-2xl w-12 h-12' 
+                          : 'w-full gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold'
+                      } ${
+                        isActive
                           ? 'bg-monday-blue/10 text-monday-blue'
                           : 'text-monday-black hover:bg-monday-gray-background'
-                        }`}
+                      }`}
                     >
                       <Icon size={18} className={isActive ? 'text-monday-blue' : 'text-monday-black'} />
-                      <span className="flex-1 text-left">{tab.label}</span>
-                      {isActive && <div className="w-1.5 h-6 rounded-l-md bg-monday-blue ml-auto"></div>}
+                      {!isMinimized && <span className="flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis">{tab.label}</span>}
+                      {isActive && !isMinimized && <div className="w-1.5 h-6 rounded-l-md bg-monday-blue ml-auto"></div>}
                     </button>
                   );
                 })}
@@ -74,8 +98,12 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
 
           {portalMenuItems.length > 0 && (
             <>
-              <p className="font-bold text-xs text-monday-gray uppercase tracking-wider px-4 mt-2">Portal & Nilai</p>
-              <nav className="space-y-1">
+              {isMinimized ? (
+                <div className="w-full flex justify-center mt-2"><hr className="border-monday-border w-6" /></div>
+              ) : (
+                <p className="font-bold text-xs text-monday-gray uppercase tracking-wider px-4 mt-2">Portal & Nilai</p>
+              )}
+              <nav className={`space-y-1 ${isMinimized ? 'flex flex-col items-center w-full px-2' : 'w-full'}`}>
                 {portalMenuItems.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -86,14 +114,20 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
                         setActiveTab(tab.id);
                         setSearchQuery('');
                       }}
-                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-300 cursor-pointer ${isActive
+                      title={tab.label}
+                      className={`flex items-center transition-300 cursor-pointer ${
+                        isMinimized 
+                          ? 'justify-center p-3 rounded-2xl w-12 h-12' 
+                          : 'w-full gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold'
+                      } ${
+                        isActive
                           ? 'bg-monday-blue/10 text-monday-blue'
                           : 'text-monday-black hover:bg-monday-gray-background'
-                        }`}
+                      }`}
                     >
                       <Icon size={18} className={isActive ? 'text-monday-blue' : 'text-monday-black'} />
-                      <span className="flex-1 text-left">{tab.label}</span>
-                      {isActive && <div className="w-1.5 h-6 rounded-l-md bg-monday-blue ml-auto"></div>}
+                      {!isMinimized && <span className="flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis">{tab.label}</span>}
+                      {isActive && !isMinimized && <div className="w-1.5 h-6 rounded-l-md bg-monday-blue ml-auto"></div>}
                     </button>
                   );
                 })}
@@ -103,20 +137,27 @@ export default function Sidebar({ activeTab, setActiveTab, setSearchQuery, user,
         </div>
 
         {/* Action Panel & Footer */}
-        <div className="flex flex-col gap-2 bg-white pt-2 border-t border-monday-border mt-auto">
+        <div className={`flex flex-col gap-2 bg-white pt-2 border-t border-monday-border mt-auto ${isMinimized ? 'items-center px-0 pb-4' : ''}`}>
           {/* Logout Button */}
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold text-monday-red hover:bg-monday-red/10 transition-300 cursor-pointer"
+            title="Keluar Akun"
+            className={`flex items-center transition-300 cursor-pointer text-monday-red hover:bg-monday-red/10 ${
+              isMinimized
+                ? 'justify-center p-3 rounded-2xl w-12 h-12 mb-2'
+                : 'w-full gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold'
+            }`}
           >
-            <LogOut size={18} className="text-monday-red" />
-            <span className="flex-1 text-left">Keluar Akun</span>
+            <LogOut size={18} className="text-monday-red shrink-0" />
+            {!isMinimized && <span className="flex-1 text-left whitespace-nowrap overflow-hidden">Keluar Akun</span>}
           </button>
 
-          <div className="p-4 text-center">
-            <p className="text-xs text-monday-gray font-bold">SIAKAD v1.0.0 &copy; 2026</p>
-            <p className="text-[10px] text-monday-blue font-extrabold mt-0.5">Antigravity Design</p>
-          </div>
+          {!isMinimized && (
+            <div className="p-4 text-center whitespace-nowrap overflow-hidden">
+              <p className="text-xs text-monday-gray font-bold">SIAKAD v1.0.0 &copy; 2026</p>
+              <p className="text-[10px] text-monday-blue font-extrabold mt-0.5">Antigravity Design</p>
+            </div>
+          )}
         </div>
 
       </div>

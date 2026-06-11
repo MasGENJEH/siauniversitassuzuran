@@ -39,7 +39,7 @@ class MahasiswaRequest extends FormRequest
             'study_program_id' => [
                 'required',
                 'integer',
-                'exists:study-programs,id', // Validasi prodi wajib terdaftar di tabel prodi
+                'exists:study_programs,id', // Validasi prodi wajib terdaftar di tabel prodi
             ],
             'academic_advisor_id' => [
                 'required',

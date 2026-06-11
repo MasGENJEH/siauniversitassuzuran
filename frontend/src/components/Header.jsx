@@ -1,6 +1,8 @@
 import React from 'react';
 import { RefreshCw, GraduationCap } from 'lucide-react';
 
+import ThemeToggle from './ThemeToggle';
+
 export default function Header({ activeTab, activeSemester, loading, fetchData, user, onLogout }) {
   const roles = user?.roles || [];
   const roleLabel = roles.map(r => {
@@ -33,6 +35,8 @@ export default function Header({ activeTab, activeSemester, loading, fetchData, 
               Semester Aktif: Belum Ada
             </div>
           )}
+
+          <ThemeToggle />
 
           <button 
             onClick={fetchData} 

@@ -298,8 +298,8 @@ export default function KelasMahasiswaTab({
                               const kkObj = kelasKuliahs.find(k => k.id === km.course_class_id);
                               const mkObj = kkObj ? mataKuliahs.find(m => m.id === kkObj.course_id) : null;
                               const teachingLinks = dosenPengampus.filter(dp => dp.course_class_id === km.course_class_id);
-                              const lecturers = teachingLinks.map(dp => lecturers.find(d => d.id === dp.lecturer_id)).filter(Boolean);
-                              setViewingClass({ kk: kkObj, mk: mkObj, lecturers });
+                              const classLecturers = teachingLinks.map(dp => lecturers.find(d => d.id === dp.lecturer_id)).filter(Boolean);
+                              setViewingClass({ kk: kkObj, mk: mkObj, lecturers: classLecturers });
                             }}
                             className="px-3.5 py-1.5 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl font-bold text-xs transition-all duration-200 flex items-center gap-1.5 ml-auto"
                           >

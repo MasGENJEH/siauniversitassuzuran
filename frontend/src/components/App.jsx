@@ -23,6 +23,7 @@ import ProfilAdminTab from './ProfilAdminTab';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Authentication States
@@ -340,8 +341,14 @@ export default function App() {
     let segment = `${type}s`;
     if (type === 'faculties') {
       segment = 'faculties';
+    } else if (type === 'prodi') {
+      segment = 'study-programs';
     } else if (type === 'tahunAkademik') {
       segment = 'academic-years';
+    } else if (type === 'dosen') {
+      segment = 'lecturers';
+    } else if (type === 'mahasiswa') {
+      segment = 'students';
     } else if (type === 'mataKuliah') {
       segment = 'courses';
     } else if (type === 'kelasKuliah') {
@@ -541,6 +548,8 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         user={user}
         onLogout={handleLogout}
+        isMinimized={isSidebarMinimized}
+        setIsMinimized={setIsSidebarMinimized}
       />
 
       {/* Main Container */}

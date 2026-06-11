@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Layers, AlertCircle, RefreshCw } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -39,7 +40,10 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-monday-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-monday-background px-4">
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-[480px] bg-white border border-monday-border rounded-3xl p-8 shadow-sm flex flex-col gap-6 transition-300 hover:shadow-md">
         
         {/* Brand Logo */}
@@ -81,7 +85,7 @@ export default function Login({ onLoginSuccess }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@domain.com"
-                className="w-full pl-12 pr-4 py-3.5 bg-monday-background border border-transparent rounded-2xl text-sm font-semibold text-monday-black placeholder-monday-gray/50 focus:border-monday-blue focus:bg-white focus:outline-none transition-300"
+                className="w-full pl-12 pr-4 py-3.5 bg-monday-background border border-transparent rounded-2xl text-sm font-semibold text-monday-black placeholder-monday-gray/50 focus:border-monday-blue focus:bg-[var(--monday-card)] focus:outline-none transition-300"
               />
             </div>
           </div>
@@ -100,7 +104,7 @@ export default function Login({ onLoginSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3.5 bg-monday-background border border-transparent rounded-2xl text-sm font-semibold text-monday-black placeholder-monday-gray/50 focus:border-monday-blue focus:bg-white focus:outline-none transition-300"
+                className="w-full pl-12 pr-12 py-3.5 bg-monday-background border border-transparent rounded-2xl text-sm font-semibold text-monday-black placeholder-monday-gray/50 focus:border-monday-blue focus:bg-[var(--monday-card)] focus:outline-none transition-300"
               />
               <button
                 type="button"

@@ -28,7 +28,7 @@ class MataKuliahRequest extends FormRequest
             'study_program_id' => [
                 'required',
                 'integer',
-                'exists:study-programs,id', // Memastikan prodi pengampu wajib terdaftar di tabel prodi
+                'exists:study_programs,id', // Memastikan prodi pengampu wajib terdaftar di tabel prodi
             ],
             'name' => [
                 'required',
