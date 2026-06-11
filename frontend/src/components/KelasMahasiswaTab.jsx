@@ -18,10 +18,13 @@ export default function KelasMahasiswaTab({
   openModal,
   handleDeleteItem
 }) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(10);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [viewingClass, setViewingClass] = useState(null);
-  const itemsPerPage = 10;
+  const [filters, setFilters] = useState({
+    nim: '',
+    name: ''
+  });
 
   const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
   const myMahasiswa = useMemo(() => {
@@ -29,10 +32,10 @@ export default function KelasMahasiswaTab({
     return students.find(m => m.user_id === user.id) || null;
   }, [isMahasiswa, user, students]);
 
-  // Reset to page 1 when search query changes
+  // Reset limit to 10 when searching or filtering
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
+    setVisibleCount(10);
+  }, [searchQuery, filters]);
 
   // Build student-centric data: group kelasMahasiswas by mahasiswa
   const studentSummaries = useMemo(() => {
@@ -117,17 +120,17 @@ export default function KelasMahasiswaTab({
   }, [kelasMahasiswas, students, kelasKuliahs, mataKuliahs, tahunAkademiks]);
 
   // Filter students
-  const filteredStudents = studentSummaries.filter(s =>
-    s.mahasiswa.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.mahasiswa.nim.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredStudents = studentSummaries.filter(s => {
+    const matchesGlobal = s.mahasiswa.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          s.mahasiswa.nim.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesNim = filters.nim === '' || s.mahasiswa.nim.toLowerCase().includes(filters.nim.toLowerCase());
+    const matchesName = filters.name === '' || s.mahasiswa.name.toLowerCase().includes(filters.name.toLowerCase());
+    
+    return matchesGlobal && matchesNim && matchesName;
+  });
 
-  // Pagination
-  const totalItems = filteredStudents.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+  const itemsToDisplay = filteredStudents.slice(0, visibleCount);
 
   // Detail view: get KRS entries for selected mahasiswa
   const selectedStudentData = useMemo(() => {
@@ -430,11 +433,44 @@ export default function KelasMahasiswaTab({
               <th className="py-4 px-6 text-center">IPK</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
+            <tr className="bg-monday-background/50 border-b border-monday-border">
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter NIM..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.nim}
+                  onChange={e => setFilters({ ...filters, nim: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Nama..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.name}
+                  onChange={e => setFilters({ ...filters, name: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <button 
+                  onClick={() => setFilters({ nim: '', name: '' })}
+                  className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                  title="Reset Filter"
+                >
+                  Reset
+                </button>
+              </th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {paginatedStudents.map((s, index) => (
+            {itemsToDisplay.map((s, index) => (
               <tr key={s.mahasiswa.id} className="hover:bg-monday-gray-background/30 transition-colors">
-                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{startIndex + index + 1}</td>
+                <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{s.mahasiswa.nim}</td>
                 <td className="py-3.5 px-6 font-semibold">{s.mahasiswa.name}</td>
                 <td className="py-3.5 px-6 text-center">
@@ -457,7 +493,7 @@ export default function KelasMahasiswaTab({
                 </td>
               </tr>
             ))}
-            {paginatedStudents.length === 0 && (
+            {itemsToDisplay.length === 0 && (
               <tr>
                 <td colSpan={7} className="py-12 text-center text-monday-gray font-semibold italic">
                   {searchQuery ? 'Tidak ada mahasiswa yang cocok dengan pencarian.' : 'Belum ada data KRS mahasiswa.'}
@@ -468,45 +504,16 @@ export default function KelasMahasiswaTab({
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
-          <p className="text-sm font-semibold text-monday-gray">
-            Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> mahasiswa
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="p-2 border border-monday-border rounded-xl text-monday-gray hover:text-monday-black hover:bg-monday-gray-background disabled:opacity-50 disabled:pointer-events-none transition-300"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-xl font-bold text-xs transition-300 ${
-                    currentPage === page
-                      ? 'bg-monday-blue text-white shadow-md shadow-monday-blue/15'
-                      : 'border border-monday-border text-monday-gray hover:text-monday-black hover:bg-monday-gray-background'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="p-2 border border-monday-border rounded-xl text-monday-gray hover:text-monday-black hover:bg-monday-gray-background disabled:opacity-50 disabled:pointer-events-none transition-300"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+      {/* Load More Button */}
+      {visibleCount < filteredStudents.length && (
+        <div className="flex justify-center mt-2">
+          <button
+            type="button"
+            onClick={() => setVisibleCount(prev => prev + 10)}
+            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs transition-all duration-300 flex items-center gap-2"
+          >
+            Tampilkan Lebih Banyak <ChevronDown size={14} />
+          </button>
         </div>
       )}
     </div>

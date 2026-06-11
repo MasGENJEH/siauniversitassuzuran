@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, Plus, Search, Edit, Trash2, Check } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
@@ -12,6 +12,23 @@ export default function TahunAkademikTab({
   handleDeleteItem,
   toggleTahunAkademikStatus
 }) {
+  const [filters, setFilters] = useState({
+    code: '',
+    name: '',
+    status: ''
+  });
+
+  const filteredItems = tahunAkademiks.filter(ta => {
+    const matchesGlobal = ta.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          ta.code.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesCode = filters.code === '' || ta.code.toLowerCase().includes(filters.code.toLowerCase());
+    const matchesName = filters.name === '' || ta.name.toLowerCase().includes(filters.name.toLowerCase());
+    const matchesStatus = filters.status === '' || (filters.status === '1' ? ta.status === true || ta.status === 1 : ta.status === false || ta.status === 0);
+    
+    return matchesGlobal && matchesCode && matchesName && matchesStatus;
+  });
+
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <PageHeader 
@@ -41,12 +58,50 @@ export default function TahunAkademikTab({
               <th className="py-4 px-6 text-center">Status Keaktifan</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
+            <tr className="bg-monday-background/50 border-b border-monday-border">
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Kode..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.code}
+                  onChange={e => setFilters({ ...filters, code: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Nama..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.name}
+                  onChange={e => setFilters({ ...filters, name: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <select
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                  value={filters.status}
+                  onChange={e => setFilters({ ...filters, status: e.target.value })}
+                >
+                  <option value="">Semua Status</option>
+                  <option value="1">Aktif</option>
+                  <option value="0">Tidak Aktif</option>
+                </select>
+              </th>
+              <th className="py-2 px-6">
+                <button 
+                  onClick={() => setFilters({ code: '', name: '', status: '' })}
+                  className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                  title="Reset Filter"
+                >
+                  Reset
+                </button>
+              </th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {tahunAkademiks.filter(ta => 
-              ta.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              ta.code.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((ta, index) => (
+            {filteredItems.map((ta, index) => (
               <tr key={ta.id} className="hover:bg-monday-gray-background/30 transition-colors">
                 <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{ta.code}</td>

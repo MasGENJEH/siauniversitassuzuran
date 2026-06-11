@@ -13,16 +13,29 @@ export default function MataKuliahTab({
   handleDeleteItem
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
+  const [filters, setFilters] = useState({
+    code: '',
+    name: '',
+    sks: '',
+    study_program_id: ''
+  });
 
   // Reset limit to 10 when searching
   useEffect(() => {
     setVisibleCount(10);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
-  const filteredItems = mataKuliahs.filter(mk => 
-    mk.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    mk.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = mataKuliahs.filter(mk => {
+    const matchesGlobal = mk.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          mk.code.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesCode = filters.code === '' || mk.code.toLowerCase().includes(filters.code.toLowerCase());
+    const matchesName = filters.name === '' || mk.name.toLowerCase().includes(filters.name.toLowerCase());
+    const matchesSks = filters.sks === '' || String(mk.sks) === String(filters.sks);
+    const matchesProdi = filters.study_program_id === '' || String(mk.study_program_id) === String(filters.study_program_id);
+
+    return matchesGlobal && matchesCode && matchesName && matchesSks && matchesProdi;
+  });
 
   const itemsToDisplay = filteredItems.slice(0, visibleCount);
 
@@ -55,6 +68,56 @@ export default function MataKuliahTab({
               <th className="py-4 px-6">SKS</th>
               <th className="py-4 px-6">Program Studi</th>
               <th className="py-4 px-6 text-right">Aksi</th>
+            </tr>
+            <tr className="bg-monday-background/50 border-b border-monday-border">
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Kode..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.code}
+                  onChange={e => setFilters({ ...filters, code: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Nama..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.name}
+                  onChange={e => setFilters({ ...filters, name: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <select
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                  value={filters.sks}
+                  onChange={e => setFilters({ ...filters, sks: e.target.value })}
+                >
+                  <option value="">Semua SKS</option>
+                  {[...Array(6)].map((_, i) => <option key={i+1} value={i+1}>{i+1} SKS</option>)}
+                </select>
+              </th>
+              <th className="py-2 px-6">
+                <select
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                  value={filters.study_program_id}
+                  onChange={e => setFilters({ ...filters, study_program_id: e.target.value })}
+                >
+                  <option value="">Semua Prodi</option>
+                  {studyPrograms.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </th>
+              <th className="py-2 px-6">
+                <button 
+                  onClick={() => setFilters({ code: '', name: '', sks: '', study_program_id: '' })}
+                  className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                  title="Reset Filter"
+                >
+                  Reset
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">

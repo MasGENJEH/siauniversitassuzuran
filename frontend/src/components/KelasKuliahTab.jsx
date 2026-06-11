@@ -20,16 +20,31 @@ export default function KelasKuliahTab({
   const [visibleCount, setVisibleCount] = useState(10);
   const [selectedClassForDetail, setSelectedClassForDetail] = useState(null);
   const [viewMode, setViewMode] = useState('table');
+  const [filters, setFilters] = useState({
+    course_id: '',
+    class_name: '',
+    academic_year_id: ''
+  });
 
   // Reset limit to 10 when searching
   useEffect(() => {
     setVisibleCount(10);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   const filteredItems = kelasKuliahs.filter(k => {
     const mk = mataKuliahs.find(m => m.id === k.course_id);
     const mkName = mk ? mk.name.toLowerCase() : '';
-    return k.class_name.toLowerCase().includes(searchQuery.toLowerCase()) || mkName.includes(searchQuery.toLowerCase());
+    const mkCode = mk ? mk.code.toLowerCase() : '';
+    
+    const matchesGlobal = k.class_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          mkName.includes(searchQuery.toLowerCase()) || 
+                          mkCode.includes(searchQuery.toLowerCase());
+                          
+    const matchesCourse = filters.course_id === '' || String(k.course_id) === String(filters.course_id);
+    const matchesClassName = filters.class_name === '' || k.class_name.toLowerCase().includes(filters.class_name.toLowerCase());
+    const matchesYear = filters.academic_year_id === '' || String(k.academic_year_id) === String(filters.academic_year_id);
+
+    return matchesGlobal && matchesCourse && matchesClassName && matchesYear;
   });
 
   const itemsToDisplay = filteredItems.slice(0, visibleCount);
@@ -82,6 +97,50 @@ export default function KelasKuliahTab({
                 <th className="py-4 px-6">Dosen Pengampu</th>
                 <th className="py-4 px-6">Peserta</th>
                 <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+              <tr className="bg-monday-background/50 border-b border-monday-border">
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6">
+                  <select
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                    value={filters.course_id}
+                    onChange={e => setFilters({ ...filters, course_id: e.target.value })}
+                  >
+                    <option value="">Semua Mata Kuliah</option>
+                    {mataKuliahs.map(mk => <option key={mk.id} value={mk.id}>{mk.code} - {mk.name}</option>)}
+                  </select>
+                </th>
+                <th className="py-2 px-6">
+                  <input
+                    type="text"
+                    placeholder="Filter Kelas..."
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                    value={filters.class_name}
+                    onChange={e => setFilters({ ...filters, class_name: e.target.value })}
+                  />
+                </th>
+                <th className="py-2 px-6">
+                  <select
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                    value={filters.academic_year_id}
+                    onChange={e => setFilters({ ...filters, academic_year_id: e.target.value })}
+                  >
+                    <option value="">Semua Tahun</option>
+                    {tahunAkademiks.map(t => <option key={t.id} value={t.id}>{t.code}</option>)}
+                  </select>
+                </th>
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6">
+                  <button 
+                    onClick={() => setFilters({ course_id: '', class_name: '', academic_year_id: '' })}
+                    className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                    title="Reset Filter"
+                  >
+                    Reset
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">

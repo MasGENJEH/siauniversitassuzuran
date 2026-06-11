@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Award, Plus, Search, Edit, Trash2 } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
@@ -12,6 +12,23 @@ export default function ProdiTab({
   openModal,
   handleDeleteItem
 }) {
+  const [filters, setFilters] = useState({
+    code: '',
+    name: '',
+    faculty_id: ''
+  });
+
+  const filteredItems = studyPrograms.filter(p => {
+    const matchesGlobal = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          p.code.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesCode = filters.code === '' || p.code.toLowerCase().includes(filters.code.toLowerCase());
+    const matchesName = filters.name === '' || p.name.toLowerCase().includes(filters.name.toLowerCase());
+    const matchesFaculty = filters.faculty_id === '' || String(p.faculty_id) === String(filters.faculty_id);
+    
+    return matchesGlobal && matchesCode && matchesName && matchesFaculty;
+  });
+
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <PageHeader 
@@ -41,12 +58,49 @@ export default function ProdiTab({
               <th className="py-4 px-6">Fakultas</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
+            <tr className="bg-monday-background/50 border-b border-monday-border">
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Kode..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.code}
+                  onChange={e => setFilters({ ...filters, code: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Nama..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.name}
+                  onChange={e => setFilters({ ...filters, name: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <select
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                  value={filters.faculty_id}
+                  onChange={e => setFilters({ ...filters, faculty_id: e.target.value })}
+                >
+                  <option value="">Semua Fakultas</option>
+                  {faculties.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+              </th>
+              <th className="py-2 px-6">
+                <button 
+                  onClick={() => setFilters({ code: '', name: '', faculty_id: '' })}
+                  className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                  title="Reset Filter"
+                >
+                  Reset
+                </button>
+              </th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {studyPrograms.filter(p => 
-              p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              p.code.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((pr, index) => {
+            {filteredItems.map((pr, index) => {
               const fakObj = faculties.find(f => f.id === pr.faculty_id);
               return (
                 <tr key={pr.id} className="hover:bg-monday-gray-background/30 transition-colors">

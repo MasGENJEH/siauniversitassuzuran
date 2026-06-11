@@ -24,24 +24,53 @@ export default function MahasiswaTab({
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [viewMode, setViewMode] = useState('table');
+  const [filters, setFilters] = useState({
+    nameNim: '',
+    email: '',
+    study_program_id: '',
+    academic_advisor_id: '',
+    status: ''
+  });
   const itemsPerPage = 10;
 
-  // Reset states when search query changes
+  // Reset states when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
     setVisibleCountCard(12);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Reset showPassword when selectedMahasiswa changes
   useEffect(() => {
     setShowPassword(false);
   }, [selectedMahasiswa]);
 
-  // Filter items based on search query
-  const filteredItems = students.filter(m =>
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.nim.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter items based on search query and column filters
+  const filteredItems = students.filter(m => {
+    const prObj = studyPrograms.find(p => p.id === m.study_program_id);
+    const dosObj = lecturers.find(d => d.id === m.academic_advisor_id);
+    const uObj = users.find(u => u.id === m.user_id);
+
+    const matchesGlobal = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          m.nim.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesNameNim = filters.nameNim === '' || 
+                           m.name.toLowerCase().includes(filters.nameNim.toLowerCase()) || 
+                           m.nim.toLowerCase().includes(filters.nameNim.toLowerCase());
+                           
+    const matchesEmail = filters.email === '' || 
+                         (uObj && uObj.email.toLowerCase().includes(filters.email.toLowerCase()));
+                         
+    const matchesProdi = filters.study_program_id === '' || 
+                         String(m.study_program_id) === String(filters.study_program_id);
+                         
+    const matchesDosen = filters.academic_advisor_id === '' || 
+                         String(m.academic_advisor_id) === String(filters.academic_advisor_id);
+                         
+    const matchesStatus = filters.status === '' || 
+                          String(m.status) === String(filters.status);
+
+    return matchesGlobal && matchesNameNim && matchesEmail && matchesProdi && matchesDosen && matchesStatus;
+  });
 
   // Pagination bounds & slice for Table
   const totalItems = filteredItems.length;
@@ -494,6 +523,69 @@ export default function MahasiswaTab({
                 <th className="py-4 px-6">Dosen Wali</th>
                 <th className="py-4 px-6 text-center">Status</th>
                 <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+              <tr className="bg-monday-background/50 border-b border-monday-border">
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6">
+                  <input
+                    type="text"
+                    placeholder="Filter Nama/NIM..."
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                    value={filters.nameNim}
+                    onChange={e => setFilters({ ...filters, nameNim: e.target.value })}
+                  />
+                </th>
+                <th className="py-2 px-6">
+                  <input
+                    type="text"
+                    placeholder="Filter Email..."
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                    value={filters.email}
+                    onChange={e => setFilters({ ...filters, email: e.target.value })}
+                  />
+                </th>
+                <th className="py-2 px-6">
+                  <select
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                    value={filters.study_program_id}
+                    onChange={e => setFilters({ ...filters, study_program_id: e.target.value })}
+                  >
+                    <option value="">Semua Prodi</option>
+                    {studyPrograms.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </th>
+                <th className="py-2 px-6">
+                  <select
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                    value={filters.academic_advisor_id}
+                    onChange={e => setFilters({ ...filters, academic_advisor_id: e.target.value })}
+                  >
+                    <option value="">Semua Dosen</option>
+                    {lecturers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </th>
+                <th className="py-2 px-6">
+                  <select
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black bg-white"
+                    value={filters.status}
+                    onChange={e => setFilters({ ...filters, status: e.target.value })}
+                  >
+                    <option value="">Semua Status</option>
+                    <option value="AKTIF">AKTIF</option>
+                    <option value="CUTI">CUTI</option>
+                    <option value="LULUS">LULUS</option>
+                    <option value="DROP OUT">DROP OUT</option>
+                  </select>
+                </th>
+                <th className="py-2 px-6">
+                  <button 
+                    onClick={() => setFilters({ nameNim: '', email: '', study_program_id: '', academic_advisor_id: '', status: '' })}
+                    className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                    title="Reset Semua Filter"
+                  >
+                    Reset Filter
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">

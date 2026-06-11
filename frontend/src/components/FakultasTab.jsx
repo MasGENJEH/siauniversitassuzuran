@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Building, Plus, Search, Edit, Trash2 } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
@@ -11,6 +11,22 @@ export default function FakultasTab({
   openModal,
   handleDeleteItem
 }) {
+
+  const [filters, setFilters] = useState({
+    code: '',
+    name: ''
+  });
+
+  const filteredItems = faculties.filter(f => {
+    const matchesGlobal = f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          f.code.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesCode = filters.code === '' || f.code.toLowerCase().includes(filters.code.toLowerCase());
+    const matchesName = filters.name === '' || f.name.toLowerCase().includes(filters.name.toLowerCase());
+    
+    return matchesGlobal && matchesCode && matchesName;
+  });
+
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm">
       <PageHeader 
@@ -39,12 +55,39 @@ export default function FakultasTab({
               <th className="py-4 px-6">Nama Fakultas</th>
               <th className="py-4 px-6 text-right">Aksi</th>
             </tr>
+            <tr className="bg-monday-background/50 border-b border-monday-border">
+              <th className="py-2 px-6"></th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Kode..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.code}
+                  onChange={e => setFilters({ ...filters, code: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <input
+                  type="text"
+                  placeholder="Filter Nama..."
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                  value={filters.name}
+                  onChange={e => setFilters({ ...filters, name: e.target.value })}
+                />
+              </th>
+              <th className="py-2 px-6">
+                <button 
+                  onClick={() => setFilters({ code: '', name: '' })}
+                  className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                  title="Reset Filter"
+                >
+                  Reset
+                </button>
+              </th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-            {faculties.filter(f => 
-              f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              f.code.toLowerCase().includes(searchQuery.toLowerCase())
-            ).map((fak, index) => (
+            {filteredItems.map((fak, index) => (
               <tr key={fak.id} className="hover:bg-monday-gray-background/30 transition-colors">
                 <td className="py-3.5 px-6 text-monday-gray font-mono font-semibold">{index + 1}</td>
                 <td className="py-3.5 px-6 font-bold text-monday-blue">{fak.code}</td>

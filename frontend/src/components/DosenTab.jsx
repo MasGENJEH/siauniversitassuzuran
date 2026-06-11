@@ -22,24 +22,39 @@ export default function DosenTab({
   const [selectedDosen, setSelectedDosen] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [viewMode, setViewMode] = useState('table');
+  const [filters, setFilters] = useState({
+    nameNidn: '',
+    email: ''
+  });
   const itemsPerPage = 10;
 
-  // Reset states when search query changes
+  // Reset states when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
     setVisibleCountCard(12);
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   // Reset showPassword when selectedDosen changes
   useEffect(() => {
     setShowPassword(false);
   }, [selectedDosen]);
 
-  // Filter items based on search query
-  const filteredItems = lecturers.filter(d =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.nidn.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter items based on search query and column filters
+  const filteredItems = lecturers.filter(d => {
+    const uObj = users.find(u => u.id === d.user_id);
+    
+    const matchesGlobal = d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          d.nidn.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+    const matchesNameNidn = filters.nameNidn === '' || 
+                            d.name.toLowerCase().includes(filters.nameNidn.toLowerCase()) || 
+                            d.nidn.toLowerCase().includes(filters.nameNidn.toLowerCase());
+                            
+    const matchesEmail = filters.email === '' || 
+                         (uObj && uObj.email.toLowerCase().includes(filters.email.toLowerCase()));
+
+    return matchesGlobal && matchesNameNidn && matchesEmail;
+  });
 
   // Pagination bounds & slice for Table
   const totalItems = filteredItems.length;
@@ -432,6 +447,38 @@ export default function DosenTab({
                 <th className="py-4 px-6 text-center">Kelas Diampu</th>
                 <th className="py-4 px-6 text-center">Mahasiswa Wali</th>
                 <th className="py-4 px-6 text-right">Aksi</th>
+              </tr>
+              <tr className="bg-monday-background/50 border-b border-monday-border">
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6">
+                  <input
+                    type="text"
+                    placeholder="Filter Dosen/NIDN..."
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                    value={filters.nameNidn}
+                    onChange={e => setFilters({ ...filters, nameNidn: e.target.value })}
+                  />
+                </th>
+                <th className="py-2 px-6">
+                  <input
+                    type="text"
+                    placeholder="Filter Email..."
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-monday-border focus:outline-none focus:border-monday-blue font-normal normal-case tracking-normal text-monday-black placeholder:text-monday-gray/50 bg-white"
+                    value={filters.email}
+                    onChange={e => setFilters({ ...filters, email: e.target.value })}
+                  />
+                </th>
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6"></th>
+                <th className="py-2 px-6">
+                  <button 
+                    onClick={() => setFilters({ nameNidn: '', email: '' })}
+                    className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
+                    title="Reset Filter"
+                  >
+                    Reset
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-monday-border text-sm text-monday-black">
