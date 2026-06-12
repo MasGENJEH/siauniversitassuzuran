@@ -8,7 +8,7 @@ class MataKuliahRepository
 {
     public function getAll(array $fields)
     {
-        return MataKuliah::select($fields)->latest()->get();
+        return MataKuliah::with(['prodi:id,code,name'])->select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields)

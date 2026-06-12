@@ -32,7 +32,23 @@ const TabLoadingFallback = () => (
 );
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabState] = useState(() => {
+    return window.location.pathname.substring(1) || 'dashboard';
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTabState(window.location.pathname.substring(1) || 'dashboard');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const setActiveTab = (tabId) => {
+    window.history.pushState({}, '', '/' + tabId);
+    setActiveTabState(tabId);
+  };
+
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -881,8 +897,11 @@ export default function App() {
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
                   mataKuliahMap={mataKuliahMap}
+                  mataKuliahs={mataKuliahs}
+                  tahunAkademiks={academicYears}
+                  refreshUser={refreshUser}
+                  mataKuliahMap={mataKuliahMap}
                   academicYearMap={academicYearMap}
-                  lecturerMap={lecturerMap}
                   studentMap={studentMap}
                 />
               )}
@@ -925,9 +944,6 @@ export default function App() {
                   mataKuliahs={mataKuliahs}
                   tahunAkademiks={academicYears}
                   refreshUser={refreshUser}
-                  mataKuliahMap={mataKuliahMap}
-                  academicYearMap={academicYearMap}
-                  studentMap={studentMap}
                 />
               )}
 

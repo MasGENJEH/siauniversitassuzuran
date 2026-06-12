@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Helpers\MahasiswaHelper;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -229,9 +230,9 @@ class SiakadSeeder extends Seeder
 
         // 3. SEEDER TABEL TAHUN AKADEMIK
         DB::table('academic_years')->insert([
-            ['id' => 1, 'code' => '20241', 'name' => 'GANJIL 2024/2025', 'status' => false],
-            ['id' => 2, 'code' => '20242', 'name' => 'GENAP 2024/2025', 'status' => false],
-            ['id' => 3, 'code' => '20251', 'name' => 'GANJIL 2025/2026', 'status' => true], // Semester Aktif saat ini
+            ['id' => 1, 'code' => '20241', 'name' => 'GANJIL 2024/2025', 'start_date' => '2024-09-01', 'end_date' => '2025-02-28', 'status' => false],
+            ['id' => 2, 'code' => '20242', 'name' => 'GENAP 2024/2025', 'start_date' => '2025-03-01', 'end_date' => '2025-08-31', 'status' => false],
+            ['id' => 3, 'code' => '20251', 'name' => 'GANJIL 2025/2026', 'start_date' => '2025-09-01', 'end_date' => '2026-02-28', 'status' => true], // Semester Aktif saat ini
         ]);
 
         // 4. SEEDER TABEL DOSEN
@@ -308,14 +309,15 @@ class SiakadSeeder extends Seeder
 
         // 8. SEEDER TABEL KELAS KULIAH
         $startOptions = ['07:00', '08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
-        $getTime = function($sks) use ($startOptions) {
+        $getTime = function ($sks) use ($startOptions) {
             $durationMinutes = $sks * 50;
             $startStr = $startOptions[array_rand($startOptions)];
-            $startTime = \Carbon\Carbon::createFromFormat('H:i', $startStr);
+            $startTime = Carbon::createFromFormat('H:i', $startStr);
             $endTime = (clone $startTime)->addMinutes($durationMinutes);
+
             return [
                 'start_time' => $startTime->format('H:i:00'),
-                'end_time' => $endTime->format('H:i:00')
+                'end_time' => $endTime->format('H:i:00'),
             ];
         };
 

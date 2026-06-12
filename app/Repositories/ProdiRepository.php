@@ -8,7 +8,7 @@ class ProdiRepository
 {
     public function getAll(array $fields)
     {
-        return Prodi::select($fields)->latest()->paginate(50);
+        return Prodi::with(['fakultas:id,code,name'])->select($fields)->latest()->get();
     }
 
     public function getById(int $id, array $fields = ['*'])

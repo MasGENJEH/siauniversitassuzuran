@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Building, Award, Users, GraduationCap, Star, BookOpen, TrendingUp, CheckCircle, Calendar } from 'lucide-react';
+import { Building, Award, Users, GraduationCap, Star, BookOpen, TrendingUp, CheckCircle, Calendar, Bell, ArrowRight, Briefcase, FileText, Activity, Layers } from 'lucide-react';
 import MetricCard from './ui/MetricCard';
 import WelcomeBanner from './ui/WelcomeBanner';
 
@@ -122,7 +122,6 @@ const DashboardTab = React.memo(function DashboardTab({
       }
     });
 
-    // Total Mahasiswa Diajar (di kelas aktif tersebut)
     const activeClassIds = activeClasses.map(k => k.id);
     const uniqueStudentsInClass = new Set();
     kelasMahasiswas.forEach(km => {
@@ -131,15 +130,12 @@ const DashboardTab = React.memo(function DashboardTab({
       }
     });
 
-    // Mahasiswa Bimbingan
     const advisees = students.filter(s => s.academic_advisor_id === myDosen.id);
 
-    // Jadwal Hari Ini
     const daysIndo = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
     const todayName = daysIndo[new Date().getDay()];
     const todayClasses = activeClasses.filter(c => (c.day || '').toUpperCase().trim() === todayName);
     
-    // Sort by start_time
     todayClasses.sort((a, b) => {
       const tA = a.start_time || '';
       const tB = b.start_time || '';
@@ -181,6 +177,16 @@ const DashboardTab = React.memo(function DashboardTab({
     ];
   }, [isMahasiswa, studentMetrics, isDosen, dosenMetrics, faculties, studyPrograms, lecturers, students]);
 
+  // Dummy announcements data
+  const announcements = [
+    { id: 1, title: 'Batas Akhir Pembayaran UKT Semester Ini', date: 'Besok', type: 'Penting', color: 'bg-monday-red/10 text-monday-red border-monday-red/20' },
+    { id: 2, title: 'Jadwal Pengisian KRS Telah Dibuka', date: '3 Hari Lagi', type: 'Akademik', color: 'bg-monday-blue/10 text-monday-blue border-monday-blue/20' },
+    { id: 3, title: 'Batas Akhir Input Nilai KHS bagi Dosen', date: '1 Minggu Lagi', type: 'Dosen', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+  ];
+
+  const targetSKS = 144;
+  const sksProgress = studentMetrics ? Math.min((studentMetrics.sksLulus / targetSKS) * 100, 100).toFixed(1) : 0;
+
   return (
     <div className="space-y-6">
       {/* Summary Metric Widgets */}
@@ -201,112 +207,228 @@ const DashboardTab = React.memo(function DashboardTab({
         title={
           isMahasiswa 
             ? 'Selamat Datang di SIAKAD Suzuran Student Portal' 
-            : (user?.roles || []).some(r => r.name === 'dosen')
+            : isDosen
               ? 'Selamat Datang di SIAKAD Suzuran Lecturer Portal'
               : 'Selamat Datang di SIAKAD Suzuran Admin Portal'
         }
         description={
           isMahasiswa 
             ? 'Gunakan panel navigasi kiri untuk melihat jadwal kuliah mingguan Anda, melakukan registrasi kelas KRS, serta melihat hasil studi KHS di setiap semester.'
-            : (user?.roles || []).some(r => r.name === 'dosen')
-              ? 'Gunakan panel navigasi kiri untuk mengakses portal dosen aktif, memproses nilai KHS mahasiswa bimbingan, serta memantau jadwal kuliah kelas yang Anda ampu.'
-              : 'Gunakan panel navigasi kiri untuk melakukan pengelolaan data akademik universitas. Anda dapat mengaktifkan semester berjalan, menugaskan tim dosen pengampu, mendaftarkan mahasiswa ke kelas, serta menginput nilai KHS di portal dosen aktif.'
+            : isDosen
+              ? 'Gunakan portal dosen ini untuk memproses absensi, menjadwalkan ujian kelas, serta menginput nilai KHS mahasiswa.'
+              : 'Gunakan panel navigasi kiri untuk mengelola data akademik universitas. Anda dapat mengaktifkan semester berjalan, menugaskan dosen, dan mendaftarkan mahasiswa ke kelas.'
         }
       />
 
-      {/* Quick Academic Info */}
+      {/* Main Grid: 3 columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Active Semester widget */}
-        <div className="bg-white border border-monday-border p-6 rounded-3xl space-y-4 lg:col-span-1 shadow-sm">
-          <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">Semester Aktif</h4>
-          {activeSemester ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-monday-lime-green/20 border border-monday-lime-green/30 text-center">
-                <span className="text-2xl font-extrabold text-monday-black block">{activeSemester.code}</span>
-                <span className="text-xs text-monday-gray font-bold uppercase mt-1 block">{activeSemester.name}</span>
+        {/* Left Column (Information & Progress) */}
+        <div className="space-y-6 lg:col-span-1">
+          {/* Active Semester widget */}
+          <div className="bg-white border border-monday-border p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider mb-4">Semester Aktif</h4>
+            {activeSemester ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-monday-lime-green/20 border border-monday-lime-green/30 text-center relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                  <span className="text-2xl font-extrabold text-monday-black block relative z-10">{activeSemester.code}</span>
+                  <span className="text-xs text-monday-gray font-bold uppercase mt-1 block relative z-10">{activeSemester.name}</span>
+                </div>
+                <p className="text-[11px] text-monday-gray font-semibold leading-relaxed">
+                  Periode akademik sedang berlangsung. Segala aktivitas KRS dan input KHS terikat pada kalender semester ini.
+                </p>
               </div>
-              <p className="text-xs text-monday-gray font-semibold leading-relaxed">
-                Seluruh penugasan dosen pengampu dan pengambilan kelas kuliah mahasiswa terikat pada semester aktif ini.
-              </p>
-            </div>
-          ) : (
-            <div className="p-4 rounded-2xl bg-monday-red/10 border border-monday-red/20 text-center text-monday-red text-xs font-bold leading-normal">
-              Belum ada semester aktif! Silakan pilih tab "Tahun Akademik" untuk mengaktifkan salah satu semester akademik.
+            ) : (
+              <div className="p-4 rounded-2xl bg-monday-red/10 border border-monday-red/20 text-center text-monday-red text-xs font-bold leading-normal">
+                Belum ada semester aktif! Silakan pilih tab "Tahun Akademik" untuk mengaktifkan salah satu semester akademik.
+              </div>
+            )}
+          </div>
+
+          {/* SKS Progress (Mahasiswa Only) */}
+          {isMahasiswa && studentMetrics && (
+            <div className="bg-white border border-monday-border p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">Progress Kelulusan SKS</h4>
+                <span className="text-xs font-extrabold text-monday-blue">{sksProgress}%</span>
+              </div>
+              <div className="w-full bg-monday-background rounded-full h-3 mt-4 overflow-hidden border border-monday-border">
+                <div 
+                  className="bg-monday-blue h-3 rounded-full relative" 
+                  style={{ width: `${sksProgress}%` }}
+                >
+                  <div className="absolute top-0 left-0 bottom-0 right-0 overflow-hidden rounded-full">
+                    <div className="w-full h-full bg-white/20 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 text-[10px] font-bold text-monday-gray uppercase tracking-wider">
+                <span>{studentMetrics.sksLulus} Lulus</span>
+                <span>Target: 144 SKS</span>
+              </div>
             </div>
           )}
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-monday-border p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+              <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider mb-4">Akses Cepat</h4>
+              <div className={`grid gap-3 ${!isMahasiswa && !isDosen ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                {isMahasiswa ? (
+                  <>
+                    <button onClick={() => setActiveTab('kelas-mahasiswa')} className="flex flex-col items-center justify-center p-4 bg-monday-blue/10 rounded-2xl border border-monday-blue/20 hover:bg-monday-blue hover:text-white text-monday-blue transition-colors group">
+                      <BookOpen size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-center">Isi KRS & KHS</span>
+                    </button>
+                    <button onClick={() => setActiveTab('jadwal-kuliah')} className="flex flex-col items-center justify-center p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-600 transition-colors group">
+                      <Calendar size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-center">Jadwal Kuliah</span>
+                    </button>
+                  </>
+                ) : isDosen ? (
+                  <>
+                    <button onClick={() => setActiveTab('lecturer-portal')} className="flex flex-col items-center justify-center p-4 bg-monday-blue/10 rounded-2xl border border-monday-blue/20 hover:bg-monday-blue hover:text-white text-monday-blue transition-colors group">
+                      <Briefcase size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-center">Portal Dosen</span>
+                    </button>
+                    <button onClick={() => setActiveTab('lecturer-portal')} className="flex flex-col items-center justify-center p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-emerald-600 transition-colors group">
+                      <FileText size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-center">Input KHS</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { id: 'faculties', label: 'Fakultas', icon: Building, color: 'text-monday-blue', bg: 'bg-monday-blue/10', border: 'border-monday-blue/20', hover: 'hover:bg-monday-blue' },
+                      { id: 'prodi', label: 'Prodi', icon: Award, color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20', hover: 'hover:bg-violet-500' },
+                      { id: 'tahun-akademik', label: 'Semester', icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', hover: 'hover:bg-emerald-500' },
+                      { id: 'dosen', label: 'Dosen', icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', hover: 'hover:bg-amber-500' },
+                      { id: 'mahasiswa', label: 'Mahasiswa', icon: GraduationCap, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', hover: 'hover:bg-rose-500' },
+                      { id: 'mata-kuliah', label: 'Matkul', icon: BookOpen, color: 'text-cyan-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', hover: 'hover:bg-cyan-500' },
+                      { id: 'kelas-kuliah', label: 'Kelas', icon: Layers, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', hover: 'hover:bg-indigo-500' },
+                      { id: 'lecturer-portal', label: 'Portal', icon: Briefcase, color: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', hover: 'hover:bg-teal-500' },
+                      { id: 'kelas-mahasiswa', label: 'KRS / KHS', icon: FileText, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', hover: 'hover:bg-orange-500' },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      return (
+                        <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-colors group ${item.bg} ${item.border} ${item.color} ${item.hover} hover:text-white`}>
+                          <Icon size={20} className="mb-1 group-hover:scale-110 transition-transform" />
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-center leading-tight">{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </>
+                )}
+              </div>
+            </div>
         </div>
 
-        {/* Classes details & portal helper */}
-        <div className="bg-white border border-monday-border p-6 rounded-3xl space-y-4 lg:col-span-2 shadow-sm">
-          {(isDosen && dosenMetrics) || (isMahasiswa && studentMetrics) ? (
-            <>
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">
-                  {isMahasiswa ? 'Jadwal Kuliah Hari Ini' : 'Jadwal Mengajar Hari Ini'}
-                </h4>
-                <span className="text-xs font-bold text-monday-blue bg-monday-blue/10 px-2.5 py-1 rounded-lg">
-                  {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </span>
-              </div>
-              
-              {(isMahasiswa ? studentMetrics.todayClasses : dosenMetrics.todayClasses).length > 0 ? (
-                <div className="space-y-3 mt-4">
-                  {(isMahasiswa ? studentMetrics.todayClasses : dosenMetrics.todayClasses).map(cls => {
-                    const mk = mataKuliahMap[cls.course_id];
-                    return (
-                      <div key={cls.id} className="flex items-center justify-between p-4 bg-monday-gray-background/50 border border-monday-border rounded-2xl hover:border-monday-blue transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-monday-blue/10 p-2.5 rounded-xl text-monday-blue">
-                            <Calendar size={18} />
+        {/* Center/Right Column (Schedules & Announcements) */}
+        <div className="space-y-6 lg:col-span-2">
+          
+          {/* Today's Schedule Card */}
+          <div className="bg-white border border-monday-border p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+            {(isDosen && dosenMetrics) || (isMahasiswa && studentMetrics) ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="text-monday-gray" size={18} />
+                    <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">
+                      {isMahasiswa ? 'Jadwal Kuliah Hari Ini' : 'Jadwal Mengajar Hari Ini'}
+                    </h4>
+                  </div>
+                  <span className="text-xs font-bold text-monday-blue bg-monday-blue/10 px-3 py-1.5 rounded-xl border border-monday-blue/20 shadow-sm">
+                    {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </span>
+                </div>
+                
+                {(isMahasiswa ? studentMetrics.todayClasses : dosenMetrics.todayClasses).length > 0 ? (
+                  <div className="space-y-3">
+                    {(isMahasiswa ? studentMetrics.todayClasses : dosenMetrics.todayClasses).map(cls => {
+                      const mk = mataKuliahMap[cls.course_id];
+                      return (
+                        <div key={cls.id} className="flex items-center justify-between p-4 bg-white border border-monday-border rounded-2xl hover:border-monday-blue hover:shadow-md transition-all duration-300 group">
+                          <div className="flex items-center gap-4">
+                            <div className="bg-monday-background group-hover:bg-monday-blue/10 p-3 rounded-2xl text-monday-gray group-hover:text-monday-blue transition-colors">
+                              <BookOpen size={20} />
+                            </div>
+                            <div>
+                              <span className="font-extrabold text-sm text-monday-black block">{mk ? mk.name : 'Unknown Course'}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] font-bold text-monday-gray uppercase bg-monday-background px-2 py-0.5 rounded-md border border-monday-border">
+                                  Kelas {cls.class_code}
+                                </span>
+                                <span className="text-[11px] font-semibold text-monday-gray">{cls.room}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-bold text-sm text-monday-black block">{mk ? mk.name : 'Unknown Course'}</span>
-                            <span className="text-xs text-monday-gray font-semibold block mt-0.5">Kelas {cls.class_code} • {cls.room}</span>
+                          <div className="text-right">
+                            <span className="font-extrabold text-sm text-monday-blue block">{cls.start_time.slice(0,5)}</span>
+                            <span className="text-[10px] font-bold text-monday-gray uppercase">{cls.end_time.slice(0,5)}</span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="font-extrabold text-sm text-monday-blue block">{cls.start_time.slice(0,5)} - {cls.end_time.slice(0,5)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-8 bg-monday-background rounded-2xl border border-dashed border-monday-border text-center">
+                    <p className="text-monday-gray text-sm font-bold">
+                      {isMahasiswa ? 'Hore! Anda tidak ada jadwal kuliah hari ini.' : 'Tidak ada jadwal mengajar hari ini.'}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="text-monday-gray" size={18} />
+                  <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">Statistik Kelas & Pengampuan</h4>
                 </div>
-              ) : (
-                <div className="p-6 bg-monday-gray-background/30 rounded-2xl border border-dashed border-monday-border text-center">
-                  <p className="text-monday-gray text-xs font-bold">
-                    {isMahasiswa ? 'Tidak ada jadwal kuliah hari ini.' : 'Tidak ada jadwal mengajar hari ini.'}
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-5 bg-white rounded-2xl border border-monday-border hover:border-monday-blue transition-colors shadow-sm relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 w-16 h-16 bg-monday-blue/5 rounded-bl-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500"></div>
+                    <span className="text-monday-gray text-[11px] block font-bold uppercase tracking-wider">Total Kelas Kuliah</span>
+                    <span className="text-3xl font-extrabold text-monday-black block mt-2">{kelasKuliahs.length}</span>
+                  </div>
+                  <div className="p-5 bg-white rounded-2xl border border-monday-border hover:border-violet-500 transition-colors shadow-sm relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 w-16 h-16 bg-violet-500/5 rounded-bl-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500"></div>
+                    <span className="text-monday-gray text-[11px] block font-bold uppercase tracking-wider">Total Penugasan Pengampu</span>
+                    <span className="text-3xl font-extrabold text-monday-black block mt-2">{dosenPengampus.length}</span>
+                  </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <>
-              <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">Statistik Kelas Kuliah & Pengampuan</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-monday-background rounded-2xl border border-monday-border">
-                  <span className="text-monday-gray text-xs block font-bold">Total Kelas Kuliah</span>
-                  <span className="text-2xl font-extrabold text-monday-black block mt-1">{kelasKuliahs.length} kelas</span>
-                </div>
-                <div className="p-4 bg-monday-background rounded-2xl border border-monday-border">
-                  <span className="text-monday-gray text-xs block font-bold">Total Hubungan Pengampu</span>
-                  <span className="text-2xl font-extrabold text-monday-black block mt-1">{dosenPengampus.length} penugasan</span>
-                </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
 
-          {!isMahasiswa && (
-            <div className={`p-4 bg-monday-blue/10 rounded-2xl border border-monday-blue/20 flex items-center justify-between text-xs gap-3 ${isDosen && dosenMetrics ? 'mt-4' : ''}`}>
-              <span className="text-monday-gray font-semibold">Gunakan portal pengampu dosen aktif untuk memproses nilai KHS.</span>
-              <button
-                onClick={() => setActiveTab('lecturer-portal')}
-                className="px-4 py-2 bg-monday-blue text-white rounded-full font-bold text-xs hover:bg-opacity-90 transition-300 text-nowrap"
-              >
-                Masuk Portal Dosen
+          {/* Announcements Card */}
+          <div className="bg-white border border-monday-border p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Bell className="text-monday-gray" size={18} />
+                <h4 className="font-bold text-xs text-monday-gray uppercase tracking-wider">Papan Pengumuman</h4>
+              </div>
+              <button className="text-[10px] font-bold text-monday-blue uppercase tracking-wider flex items-center gap-1 hover:underline">
+                Lihat Semua <ArrowRight size={12} />
               </button>
             </div>
-          )}
+            
+            <div className="space-y-3">
+              {announcements.map((ann) => (
+                <div key={ann.id} className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-monday-border hover:shadow-md transition-shadow group cursor-pointer">
+                  <div className={`px-2 py-1.5 rounded-lg border text-[9px] font-extrabold uppercase tracking-widest text-center min-w-16 flex-shrink-0 ${ann.color}`}>
+                    {ann.date}
+                  </div>
+                  <div>
+                    <h5 className="font-extrabold text-sm text-monday-black group-hover:text-monday-blue transition-colors leading-tight">
+                      {ann.title}
+                    </h5>
+                    <p className="text-[11px] text-monday-gray font-semibold mt-1">Kategori: {ann.type}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

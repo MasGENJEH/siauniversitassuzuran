@@ -8,9 +8,11 @@ use App\Http\Controllers\KelasKuliahController;
 use App\Http\Controllers\KelasMahasiswaController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MataKuliahController;
+use App\Http\Controllers\CourseClassExamController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAkademikController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AbsensiController;
 use Illuminate\Support\Facades\Route;
 
 // Public Auth Routes
@@ -97,8 +99,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('enrollments/{enrollment}', [KelasMahasiswaController::class, 'destroy']);
     });
 
-    // --- Admin OR Dosen Write operations (specifically updating grades) ---
+    // --- Admin OR Dosen Write operations (specifically updating grades and attendance) ---
     Route::middleware(['role:admin|dosen'])->group(function () {
         Route::put('enrollments/{enrollment}', [KelasMahasiswaController::class, 'update']);
+        Route::get('/absensis', [AbsensiController::class, 'index']);
+        Route::post('/absensis', [AbsensiController::class, 'store']);
+        Route::post('/absensis/activate', [AbsensiController::class, 'activateMeeting']);
+        
+        // Feature: Exams (Portal Dosen)
+        Route::get('/exams', [CourseClassExamController::class, 'index']);
+        Route::post('/exams', [CourseClassExamController::class, 'store']);
+        Route::delete('/exams/{id}', [CourseClassExamController::class, 'destroy']);
     });
 });

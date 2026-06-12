@@ -47,4 +47,14 @@ class KelasKuliah extends Model
         return $this->belongsToMany(Mahasiswa::class, 'enrollments', 'course_class_id', 'student_id')
                     ->withPivot('final_score', 'letter_grade');
     }
+
+    public function meetings()
+    {
+        return $this->hasMany(CourseClassMeeting::class, 'course_class_id', 'id');
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(CourseClassExam::class, 'course_class_id', 'id');
+    }
 }

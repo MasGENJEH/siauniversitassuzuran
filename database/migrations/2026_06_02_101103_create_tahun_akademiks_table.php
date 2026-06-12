@@ -14,6 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->boolean('status')->default(false);
             $table->softDeletes();
             $table->timestamps();
