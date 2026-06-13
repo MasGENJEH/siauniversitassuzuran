@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Dosen;
+use App\Models\KelasMahasiswa;
+use App\Models\Mahasiswa;
 use Illuminate\Foundation\Http\FormRequest;
 
 class KelasMahasiswaRequest extends FormRequest
@@ -12,7 +15,7 @@ class KelasMahasiswaRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -31,22 +34,22 @@ class KelasMahasiswaRequest extends FormRequest
             // For PUT/PATCH (update)
             if ($this->isMethod('put') || $this->isMethod('patch')) {
                 $routeParam = $this->route('kelas_mahasiswa');
-                if (!$routeParam) {
+                if (! $routeParam) {
                     return false;
                 }
 
-                if ($routeParam instanceof \App\Models\KelasMahasiswa) {
+                if ($routeParam instanceof KelasMahasiswa) {
                     $kelasMahasiswa = $routeParam;
                 } else {
-                    $kelasMahasiswa = \App\Models\KelasMahasiswa::find($routeParam);
+                    $kelasMahasiswa = KelasMahasiswa::find($routeParam);
                 }
 
-                if (!$kelasMahasiswa) {
+                if (! $kelasMahasiswa) {
                     return false;
                 }
 
-                $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
-                if (!$dosen) {
+                $dosen = Dosen::where('user_id', $user->id)->first();
+                if (! $dosen) {
                     return false;
                 }
 
@@ -61,14 +64,14 @@ class KelasMahasiswaRequest extends FormRequest
 
         // Mahasiswa can only create/update their own KRS
         if ($user->hasRole('mahasiswa')) {
-            $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
-            if (!$mahasiswa) {
+            $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+            if (! $mahasiswa) {
                 return false;
             }
 
             // For POST (store) - Mahasiswa can only register classes for themselves
             if ($this->isMethod('post')) {
-                return (int)$this->input('student_id') === $mahasiswa->id;
+                return (int) $this->input('student_id') === $mahasiswa->id;
             }
 
             // For PUT/PATCH (update) - Mahasiswa is NOT allowed to update KRS records
@@ -94,7 +97,7 @@ class KelasMahasiswaRequest extends FormRequest
             'course_class_id' => [
                 'required',
                 'integer',
-                'exists:kelas_kuliahs,id',
+                'exists:course_classes,id',
             ],
             'final_score' => [
                 'nullable',

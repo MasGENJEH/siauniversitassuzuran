@@ -38,6 +38,8 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
     return parts[1] || 'classes';
   });
 
+  const [saveStatus, setSaveStatus] = useState({});
+
   useEffect(() => {
     if (activeTab && activeTab.startsWith('lecturer-portal/')) {
       setPortalSubTabState(activeTab.split('/')[1]);
@@ -51,6 +53,7 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
     setPortalSubTabState(subTab);
   };
   const [adviseeSearchQuery, setAdviseeSearchQuery] = useState('');
+  const [gradeSearchQuery, setGradeSearchQuery] = useState('');
 
   // --- Attendance Feature States ---
   const [meetings, setMeetings] = useState([]); // array of course_class_meetings
@@ -76,6 +79,7 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
   useEffect(() => {
     setExpandedMeetingId(null);
     setShowExamForm(false);
+    setGradeSearchQuery('');
   }, [selectedClassForGrades]);
 
   useEffect(() => {
@@ -440,82 +444,136 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
                   </div>
 
                   <div className="space-y-4">
-                    {enrolledStudentsInClass.length > 0 ? (
-                      <div className="divide-y divide-monday-border">
-                        {enrolledStudentsInClass.map((enroll) => {
-                          const studentData = studentMap[enroll.student_id];
-                          return (
-                            <div key={enroll.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <span className="text-xs font-mono text-monday-blue font-bold">{studentData?.nim}</span>
-                                <h5 className="font-bold text-sm text-monday-black">{studentData?.name}</h5>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <div className="space-y-1">
-                                  <label className="text-[10px] uppercase font-bold text-monday-gray block">Nilai Angka</label>
-                                  <input 
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={updatingGrades[enroll.id]?.final_score !== undefined ? updatingGrades[enroll.id].final_score : ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      let letterGrade = '';
-                                      if (val !== '') {
-                                        const score = parseFloat(val);
-                                        if (!isNaN(score)) {
-                                          if (score >= 80 && score <= 100) letterGrade = 'A';
-                                          else if (score >= 70 && score < 80) letterGrade = 'B';
-                                          else if (score >= 55 && score < 70) letterGrade = 'C';
-                                          else if (score >= 40 && score < 55) letterGrade = 'D';
-                                          else if (score >= 0 && score < 40) letterGrade = 'E';
-                                        }
-                                      }
-                                      setUpdatingGrades(prev => ({
-                                        ...prev,
-                                        [enroll.id]: { 
-                                          ...prev[enroll.id], 
-                                          final_score: val,
-                                          letter_grade: letterGrade
-                                        }
-                                      }));
-                                    }}
-                                    className="w-20 px-2 py-1 bg-white border border-monday-border rounded-lg text-center text-sm font-semibold focus:outline-none focus:border-monday-blue"
-                                    placeholder="0-100"
-                                  />
-                                </div>
+                    {(() => {
+                      const filteredStudents = enrolledStudentsInClass.filter(enroll => {
+                        const s = studentMap[enroll.student_id];
+                        if (!s) return false;
+                        const query = gradeSearchQuery.toLowerCase();
+                        return s.name.toLowerCase().includes(query) || s.nim.toLowerCase().includes(query);
+                      });
 
-                                <div className="space-y-1">
-                                  <label className="text-[10px] uppercase font-bold text-monday-gray block">Huruf</label>
-                                  <input 
-                                    type="text"
-                                    maxLength={2}
-                                    value={updatingGrades[enroll.id]?.letter_grade || ''}
-                                    disabled
-                                    className="w-12 px-2 py-1 bg-monday-gray-background border border-monday-border rounded-lg text-center text-sm font-bold text-monday-gray cursor-not-allowed"
-                                    placeholder="-"
-                                  />
-                                </div>
-
-                                <div className="pt-5">
-                                  <button
-                                    onClick={() => saveStudentGrade(enroll.id)}
-                                    className="px-4 py-1.5 bg-monday-blue text-white hover:-translate-y-0.5 hover:shadow-md hover:shadow-monday-blue/30 rounded-full text-xs font-bold transition-all duration-300"
-                                  >
-                                    Simpan
-                                  </button>
-                                </div>
+                      return (
+                        <>
+                          {enrolledStudentsInClass.length > 0 ? (
+                            <>
+                              <div className="relative mb-4">
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-monday-gray" />
+                                <input
+                                  type="text"
+                                  placeholder="Cari NIM atau Nama Mahasiswa..."
+                                  value={gradeSearchQuery}
+                                  onChange={(e) => setGradeSearchQuery(e.target.value)}
+                                  className="w-full pl-9 pr-4 py-2 bg-monday-background border border-monday-border rounded-xl text-sm font-semibold focus:outline-none focus:border-monday-blue transition-colors"
+                                />
                               </div>
+                              {filteredStudents.length > 0 ? (
+                                <div className="divide-y divide-monday-border">
+                                  {filteredStudents.map((enroll) => {
+                                    const studentData = studentMap[enroll.student_id];
+                                    return (
+                                      <div key={enroll.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="space-y-0.5">
+                                          <span className="text-xs font-mono text-monday-blue font-bold">{studentData?.nim}</span>
+                                          <h5 className="font-bold text-sm text-monday-black">{studentData?.name}</h5>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-3">
+                                          <div className="space-y-1">
+                                            <label className="text-[10px] uppercase font-bold text-monday-gray block">Nilai Angka</label>
+                                            <input 
+                                              type="number"
+                                              min="0"
+                                              max="100"
+                                              value={updatingGrades[enroll.id]?.final_score !== undefined ? updatingGrades[enroll.id].final_score : ''}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                let letterGrade = '';
+                                                if (val !== '') {
+                                                  const score = parseFloat(val);
+                                                  if (!isNaN(score)) {
+                                                    if (score >= 80 && score <= 100) letterGrade = 'A';
+                                                    else if (score >= 70 && score < 80) letterGrade = 'B';
+                                                    else if (score >= 55 && score < 70) letterGrade = 'C';
+                                                    else if (score >= 40 && score < 55) letterGrade = 'D';
+                                                    else if (score >= 0 && score < 40) letterGrade = 'E';
+                                                  }
+                                                }
+                                                setUpdatingGrades(prev => ({
+                                                  ...prev,
+                                                  [enroll.id]: { 
+                                                    ...prev[enroll.id], 
+                                                    final_score: val,
+                                                    letter_grade: letterGrade
+                                                  }
+                                                }));
+                                              }}
+                                              onBlur={async () => {
+                                                const currentVal = updatingGrades[enroll.id]?.final_score;
+                                                const originalVal = enroll.final_score !== null ? String(enroll.final_score) : '';
+                                                if (String(currentVal) !== originalVal) {
+                                                  setSaveStatus(prev => ({ ...prev, [enroll.id]: 'saving' }));
+                                                  const res = await saveStudentGrade(enroll.id, true);
+                                                  if (res && res.success) {
+                                                    setSaveStatus(prev => ({ ...prev, [enroll.id]: 'saved' }));
+                                                    setTimeout(() => setSaveStatus(prev => ({ ...prev, [enroll.id]: null })), 2500);
+                                                  } else {
+                                                    setSaveStatus(prev => ({ ...prev, [enroll.id]: 'error' }));
+                                                    setTimeout(() => setSaveStatus(prev => ({ ...prev, [enroll.id]: null })), 4000);
+                                                  }
+                                                }
+                                              }}
+                                              onKeyDown={async (e) => {
+                                                if (e.key === 'Enter') {
+                                                  e.target.blur();
+                                                }
+                                              }}
+                                              className="w-20 px-2 py-1 bg-white border border-monday-border rounded-lg text-center text-sm font-semibold focus:outline-none focus:border-monday-blue"
+                                              placeholder="0-100"
+                                            />
+                                          </div>
+
+                                          <div className="space-y-1">
+                                            <label className="text-[10px] uppercase font-bold text-monday-gray block">Huruf</label>
+                                            <input 
+                                              type="text"
+                                              maxLength={2}
+                                              value={updatingGrades[enroll.id]?.letter_grade || ''}
+                                              disabled
+                                              className="w-12 px-2 py-1 bg-monday-gray-background border border-monday-border rounded-lg text-center text-sm font-bold text-monday-gray cursor-not-allowed"
+                                              placeholder="-"
+                                            />
+                                          </div>
+
+                                          <div className="pt-5 w-20 flex justify-center">
+                                            {saveStatus[enroll.id] === 'saving' ? (
+                                              <span className="text-monday-gray text-xs font-bold animate-pulse">Menyimpan...</span>
+                                            ) : saveStatus[enroll.id] === 'saved' ? (
+                                              <span className="text-emerald-500 text-xs font-bold">Tersimpan</span>
+                                            ) : saveStatus[enroll.id] === 'error' ? (
+                                              <span className="text-monday-red text-xs font-bold">Gagal</span>
+                                            ) : (
+                                              <span className="text-monday-gray/30 text-xs font-semibold">Tersimpan</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="py-6 text-center text-xs text-monday-gray italic font-semibold">
+                                  Mahasiswa tidak ditemukan.
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="py-10 text-center text-xs text-monday-gray font-semibold">
+                              Belum ada mahasiswa terdaftar di kelas kuliah ini.
                             </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="py-10 text-center text-xs text-monday-gray font-semibold">
-                        Belum ada mahasiswa terdaftar di kelas kuliah ini.
-                      </div>
-                    )}
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               ) : (

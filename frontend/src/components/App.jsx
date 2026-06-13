@@ -418,7 +418,7 @@ export default function App() {
   };
 
   // Save student grade in Lecturer Portal
-  const saveStudentGrade = async (enrollId) => {
+  const saveStudentGrade = async (enrollId, silent = false) => {
     const gradeData = updatingGrades[enrollId];
     try {
       const originalEnrollment = kelasMahasiswas.find(km => km.id === enrollId);
@@ -437,15 +437,18 @@ export default function App() {
       if (res.ok) {
         const updated = await res.json();
         setEnrollments(prev => prev.map(km => km.id === enrollId ? updated : km));
-        alert("Nilai mahasiswa berhasil diperbarui!");
+        if (!silent) alert("Nilai mahasiswa berhasil diperbarui!");
         // Only refresh enrollments instead of all 10 endpoints
         refreshEntity('kelasMahasiswa');
+        return { success: true };
       } else {
         const errors = await res.json();
-        alert("Gagal memperbarui nilai: " + JSON.stringify(errors.errors || errors.message));
+        if (!silent) alert("Gagal memperbarui nilai: " + JSON.stringify(errors.errors || errors.message));
+        return { success: false, message: JSON.stringify(errors.errors || errors.message) };
       }
     } catch (err) {
       console.error(err);
+      return { success: false, message: "Terjadi kesalahan jaringan" };
     }
   };
 
@@ -854,6 +857,23 @@ export default function App() {
                   academicYearMap={academicYearMap}
                   lecturerMap={lecturerMap}
                   studentMap={studentMap}
+                  handleAddStudentToClass={async (course_class_id, student_id) => {
+                    try {
+                      const res = await apiFetch('/api/enrollments', {
+                        method: 'POST',
+                        body: JSON.stringify({ course_class_id, student_id })
+                      });
+                      if (res.ok) {
+                        refreshEntity('kelasMahasiswa');
+                        return { success: true };
+                      } else {
+                        const error = await res.json();
+                        return { success: false, message: error.message || 'Gagal menambahkan mahasiswa' };
+                      }
+                    } catch (e) {
+                      return { success: false, message: 'Terjadi kesalahan jaringan' };
+                    }
+                  }}
                 />
               )}
 

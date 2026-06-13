@@ -29,17 +29,17 @@ class KelasKuliahRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:50',
-                'unique:kelas_kuliahs,class_code,' . $kelasKuliahId,
+                'unique:course_classes,class_code,'.$kelasKuliahId,
             ],
             'course_id' => [
                 'required',
                 'integer',
-                'exists:mata_kuliahs,id',
+                'exists:course_classes,id',
             ],
             'academic_year_id' => [
                 'required',
                 'integer',
-                'exists:tahun_akademiks,id',
+                'exists:academic_years,id',
             ],
             'class_name' => [
                 'required',

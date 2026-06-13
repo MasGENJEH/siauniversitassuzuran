@@ -19,7 +19,8 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
   mataKuliahMap = {},
   academicYearMap = {},
   lecturerMap = {},
-  studentMap = {}
+  studentMap = {},
+  handleAddStudentToClass
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const [selectedClassForDetail, setSelectedClassForDetail] = useState(null);
@@ -30,6 +31,10 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
     academic_year_id: ''
   });
 
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+  const [isAddingStudent, setIsAddingStudent] = useState(false);
+
   // Reset limit to 10 when searching
   useEffect(() => {
     setVisibleCount(10);
@@ -39,11 +44,11 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
     const mk = mataKuliahMap[k.course_id];
     const mkName = mk ? mk.name.toLowerCase() : '';
     const mkCode = mk ? mk.code.toLowerCase() : '';
-    
-    const matchesGlobal = k.class_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          mkName.includes(searchQuery.toLowerCase()) || 
-                          mkCode.includes(searchQuery.toLowerCase());
-                          
+
+    const matchesGlobal = k.class_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      mkName.includes(searchQuery.toLowerCase()) ||
+      mkCode.includes(searchQuery.toLowerCase());
+
     const matchesCourse = filters.course_id === '' || String(k.course_id) === String(filters.course_id);
     const matchesClassName = filters.class_name === '' || k.class_name.toLowerCase().includes(filters.class_name.toLowerCase());
     const matchesYear = filters.academic_year_id === '' || String(k.academic_year_id) === String(filters.academic_year_id);
@@ -137,7 +142,7 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
                 <th className="py-2 px-6"></th>
                 <th className="py-2 px-6"></th>
                 <th className="py-2 px-6">
-                  <button 
+                  <button
                     onClick={() => setFilters({ course_id: '', class_name: '', academic_year_id: '' })}
                     className="w-full px-2.5 py-1.5 text-[11px] font-bold text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-lg transition-all flex items-center justify-center gap-1 normal-case tracking-normal"
                     title="Reset Filter"
@@ -382,12 +387,14 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
                     Informasi kelas kuliah dan list mahasiswa yang mengambil kelas ini.
                   </p>
                 </div>
-                <button
-                  onClick={() => setSelectedClassForDetail(null)}
-                  className="px-4 py-2 bg-monday-background border border-monday-border hover:bg-monday-gray-background text-monday-black rounded-full font-bold text-xs transition-300"
-                >
-                  Tutup
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedClassForDetail(null)}
+                    className="px-4 py-2 bg-monday-background border border-monday-border hover:bg-monday-gray-background text-monday-black rounded-full font-bold text-xs transition-300"
+                  >
+                    Tutup
+                  </button>
+                </div>
               </div>
 
               {/* Class Info grid */}
@@ -418,9 +425,69 @@ const KelasKuliahTab = React.memo(function KelasKuliahTab({
 
               {/* Enrolled Students Table */}
               <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-0">
-                <h4 className="font-extrabold text-sm text-monday-black uppercase tracking-wider">
-                  Mahasiswa Terdaftar ({enrollments.length})
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-monday-black uppercase tracking-wider">
+                    Mahasiswa Terdaftar ({enrollments.length})
+                  </h4>
+                  <div className="relative w-64">
+                    <div className="flex items-center border border-monday-border rounded-full bg-white px-3 py-1.5 focus-within:border-monday-blue focus-within:ring-2 focus-within:ring-monday-blue/20 transition-all">
+                      <Search size={14} className="text-monday-gray shrink-0 mr-2" />
+                      <input
+                        type="text"
+                        placeholder="Cari Mahasiswa Untuk Tambah"
+                        className="w-full text-xs font-semibold focus:outline-none bg-transparent"
+                        value={studentSearchQuery}
+                        onChange={(e) => {
+                          setStudentSearchQuery(e.target.value);
+                          setIsStudentDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsStudentDropdownOpen(true)}
+                        onBlur={() => setTimeout(() => setIsStudentDropdownOpen(false), 200)}
+                      />
+                    </div>
+                    {isStudentDropdownOpen && studentSearchQuery.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-monday-border rounded-xl shadow-xl max-h-48 overflow-y-auto z-[110]">
+                        {students.filter(s =>
+                          (s.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                            s.nim.toLowerCase().includes(studentSearchQuery.toLowerCase())) &&
+                          !enrollments.some(en => en.student_id === s.id)
+                        ).slice(0, 5).map(s => (
+                          <div
+                            key={s.id}
+                            className="px-3 py-2 hover:bg-monday-gray-background cursor-pointer text-xs font-semibold border-b border-monday-border last:border-0 flex justify-between items-center"
+                            onClick={async () => {
+                              if (!handleAddStudentToClass || isAddingStudent) return;
+                              setIsAddingStudent(true);
+                              const result = await handleAddStudentToClass(selectedClassForDetail.id, s.id);
+                              if (result.success) {
+                                setStudentSearchQuery('');
+                                setIsStudentDropdownOpen(false);
+                              } else {
+                                alert(result.message);
+                              }
+                              setIsAddingStudent(false);
+                            }}
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-monday-blue font-bold font-mono">{s.nim}</span>
+                              <span className="text-monday-black truncate max-w-[150px]">{s.name}</span>
+                            </div>
+                            <Plus size={14} className="text-monday-gray" />
+                          </div>
+                        ))}
+                        {students.filter(s =>
+                          (s.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                            s.nim.toLowerCase().includes(studentSearchQuery.toLowerCase())) &&
+                          !enrollments.some(en => en.student_id === s.id)
+                        ).length === 0 && (
+                            <div className="px-3 py-3 text-center text-xs text-monday-gray italic">
+                              Tidak ditemukan / sudah terdaftar
+                            </div>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div className="border border-monday-border rounded-xl overflow-x-auto overflow-y-auto bg-white max-h-[300px]">
                   <table className="w-full text-left border-collapse">
