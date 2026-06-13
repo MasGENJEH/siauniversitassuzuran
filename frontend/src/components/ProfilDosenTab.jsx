@@ -185,7 +185,7 @@ const ProfilDosenTab = React.memo(function ProfilDosenTab({
   // Profile Image URL Helper
   const displayPhoto = useMemo(() => {
     if (photoPreview) return photoPreview;
-    if (myDosen.photo) return `/storage/${myDosen.photo}`;
+    if (myDosen.photo) return myDosen.photo.startsWith('http') ? myDosen.photo : `/storage/${myDosen.photo}`;
     return null;
   }, [photoPreview, myDosen.photo]);
 

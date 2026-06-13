@@ -22,7 +22,7 @@ class FakultasRequest extends FormRequest
      */
     public function rules(): array
     {
-        $facultiesId = $this->route('faculties');
+        $facultiesId = $this->route('faculty');
 
         return [
             'code' => [

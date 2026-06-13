@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Briefcase, AlertTriangle, Search, Info, Users, GraduationCap, ChevronDown, ChevronUp, Calendar, Play, BookOpen, Clock, MapPin, Trash2, Edit2 } from 'lucide-react';
 import PageHeader from './ui/PageHeader';
 import SearchInput from './ui/SearchInput';
 
 const LecturerPortalTab = React.memo(function LecturerPortalTab({
+  activeTab,
   user,
   lecturers,
   mataKuliahs,
@@ -29,7 +30,26 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
   studentMap = {},
   studyProgramMap = {}
 }) {
-  const [portalSubTab, setPortalSubTab] = useState('classes'); // 'classes' | 'advisees' | 'attendance' | 'exams'
+  const [portalSubTab, setPortalSubTabState] = useState(() => {
+    if (activeTab && activeTab.startsWith('lecturer-portal/')) {
+      return activeTab.split('/')[1];
+    }
+    const parts = window.location.pathname.substring(1).split('/');
+    return parts[1] || 'classes';
+  });
+
+  useEffect(() => {
+    if (activeTab && activeTab.startsWith('lecturer-portal/')) {
+      setPortalSubTabState(activeTab.split('/')[1]);
+    } else if (activeTab === 'lecturer-portal') {
+      setPortalSubTabState('classes');
+    }
+  }, [activeTab]);
+
+  const setPortalSubTab = (subTab) => {
+    window.history.pushState({}, '', `/lecturer-portal/${subTab}`);
+    setPortalSubTabState(subTab);
+  };
   const [adviseeSearchQuery, setAdviseeSearchQuery] = useState('');
 
   // --- Attendance Feature States ---
@@ -239,7 +259,7 @@ const LecturerPortalTab = React.memo(function LecturerPortalTab({
   return (
     <div className="flex flex-col gap-6 flex-1 rounded-3xl p-6 bg-white border border-monday-border shadow-sm print:border-none print:shadow-none print:bg-white print:p-0">
       <PageHeader 
-        title="Portal Dosen"
+        title="Lecturer Portal"
         description="Simulasi portal login dosen pada semester aktif. Dosen dapat memantau kelas, jadwal ujian, dan absensi."
         icon={Briefcase}
       />

@@ -8,30 +8,38 @@ class UserRepository
 {
     public function getAll(array $fields)
     {
-        return User::select($fields)->latest()->get();
+        return User::select($fields)->with('roles')->latest()->get();
     }
 
     public function getById(int $id, array $fields)
     {
-        return User::select($fields)->findOrFail($id);
+        return User::select($fields)->with('roles')->findOrFail($id);
     }
 
     public function create(array $data)
     {
-        return User::create($data);
+        $user = User::create($data);
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
+        return $user;
     }
 
     public function update(int $id, array $data)
     {
-        $fakultas = User::findOrFail($id);
-        $fakultas->update($data);
+        $user = User::findOrFail($id);
+        $user->update($data);
+        
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
 
-        return $fakultas;
+        return $user;
     }
 
     public function delete(int $id)
     {
-        $fakultas = User::findOrFail($id);
-        $fakultas->delete();
+        $user = User::findOrFail($id);
+        $user->delete();
     }
 }

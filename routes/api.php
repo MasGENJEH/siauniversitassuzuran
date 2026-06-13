@@ -58,6 +58,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('enrollments/{enrollment}', [KelasMahasiswaController::class, 'show']);
     Route::post('enrollments', [KelasMahasiswaController::class, 'store']);
 
+    Route::get('absensis', [AbsensiController::class, 'index']);
+
     // --- Admin-only CRUD Write operations ---
     Route::middleware(['role:admin'])->group(function () {
         Route::post('faculties', [FakultasController::class, 'store']);
@@ -102,7 +104,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // --- Admin OR Dosen Write operations (specifically updating grades and attendance) ---
     Route::middleware(['role:admin|dosen'])->group(function () {
         Route::put('enrollments/{enrollment}', [KelasMahasiswaController::class, 'update']);
-        Route::get('/absensis', [AbsensiController::class, 'index']);
         Route::post('/absensis', [AbsensiController::class, 'store']);
         Route::post('/absensis/activate', [AbsensiController::class, 'activateMeeting']);
         

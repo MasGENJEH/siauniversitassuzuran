@@ -22,6 +22,8 @@ const JadwalKuliahTab = React.lazy(() => import('./JadwalKuliahTab'));
 const ProfilMahasiswaTab = React.lazy(() => import('./ProfilMahasiswaTab'));
 const ProfilDosenTab = React.lazy(() => import('./ProfilDosenTab'));
 const ProfilAdminTab = React.lazy(() => import('./ProfilAdminTab'));
+const UserTab = React.lazy(() => import('./UserTab'));
+const RoleTab = React.lazy(() => import('./RoleTab'));
 
 // Reusable loading spinner for Suspense fallback
 const TabLoadingFallback = () => (
@@ -33,12 +35,12 @@ const TabLoadingFallback = () => (
 
 export default function App() {
   const [activeTab, setActiveTabState] = useState(() => {
-    return window.location.pathname.substring(1) || 'dashboard';
+    return window.location.pathname.substring(1).split('/')[0] || 'dashboard';
   });
 
   useEffect(() => {
     const handlePopState = () => {
-      setActiveTabState(window.location.pathname.substring(1) || 'dashboard');
+      setActiveTabState(window.location.pathname.substring(1).split('/')[0] || 'dashboard');
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -468,6 +470,8 @@ export default function App() {
       segment = 'class-instructors';
     } else if (type === 'kelasMahasiswa') {
       segment = 'enrollments';
+    } else if (type === 'users') {
+      segment = 'users';
     }
     return `/api/${segment}${id ? `/${id}` : ''}`;
   };
@@ -484,6 +488,7 @@ export default function App() {
       case 'kelasKuliah': return ['kelasKuliah', 'dosenPengampu']; // KelasKuliah creates dosenPengampu too
       case 'dosenPengampu': return ['dosenPengampu'];
       case 'kelasMahasiswa': return ['kelasMahasiswa'];
+      case 'users': return ['users'];
       default: return ['faculties', 'prodi', 'tahunAkademik', 'dosen', 'mahasiswa', 'mataKuliah', 'kelasKuliah', 'kelasMahasiswa', 'dosenPengampu', 'users'];
     }
   };
@@ -673,8 +678,8 @@ export default function App() {
 
       {/* Sidebar Overlay for Mobile */}
       {isMobileSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
@@ -852,9 +857,26 @@ export default function App() {
                 />
               )}
 
+              {/* USER TAB (ADMIN) */}
+              {activeTab === 'users' && (
+                <UserTab
+                  users={users}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchInput}
+                  openModal={openModal}
+                  handleDeleteItem={handleDeleteItem}
+                />
+              )}
+
+              {/* ROLE TAB (ADMIN) */}
+              {activeTab === 'roles' && (
+                <RoleTab />
+              )}
+
               {/* PORTAL DOSEN TAB */}
-              {activeTab === 'lecturer-portal' && (
+              {activeTab.startsWith('lecturer-portal') && (
                 <LecturerPortalTab
+                  activeTab={activeTab}
                   user={user}
                   lecturers={lecturers}
                   mataKuliahs={mataKuliahs}
@@ -897,10 +919,7 @@ export default function App() {
                   openModal={openModal}
                   handleDeleteItem={handleDeleteItem}
                   mataKuliahMap={mataKuliahMap}
-                  mataKuliahs={mataKuliahs}
-                  tahunAkademiks={academicYears}
                   refreshUser={refreshUser}
-                  mataKuliahMap={mataKuliahMap}
                   academicYearMap={academicYearMap}
                   studentMap={studentMap}
                 />

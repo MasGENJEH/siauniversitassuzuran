@@ -148,7 +148,7 @@ export default function ProfilAdminTab({
   const displayPhoto = useMemo(() => {
     if (photoPreview) return photoPreview;
     // Only use user.photo if it looks like a real storage path (contains a /)
-    if (user?.photo && user.photo.includes('/')) return `/storage/${user.photo}`;
+    if (user?.photo) return user.photo.startsWith('http') ? user.photo : `/storage/${user.photo}`;
     return null;
   }, [photoPreview, user?.photo]);
 

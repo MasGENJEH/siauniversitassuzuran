@@ -64,7 +64,7 @@ export default function Header({ activeTab, activeSemester, loading, fetchData, 
         <div className="flex size-14 rounded-full bg-monday-blue items-center justify-center overflow-hidden shrink-0">
           {user?.photo && !imgError ? (
             <img 
-              src={`/storage/${user.photo}`} 
+              src={user.photo.startsWith('http') ? user.photo : `/storage/${user.photo}`} 
               alt={user.name} 
               className="size-full object-cover" 
               onError={() => setImgError(true)} 

@@ -47,6 +47,14 @@ class UserRequest extends FormRequest
                 'nullable',
                 'string', // Mengakomodasi name file gambar, ganti ke 'image|mimes:jpeg,png,jpg|max:2048' jika berupa file upload langsung
             ],
+            'roles' => [
+                'nullable',
+                'array',
+            ],
+            'roles.*' => [
+                'string',
+                'exists:roles,name',
+            ],
         ];
 
         // Aturan khusus untuk password: Wajib saat CREATE, opsional saat UPDATE (boleh dikosongkan jika tidak ganti password)

@@ -173,7 +173,7 @@ export default function ProfilMahasiswaTab({
   // Profile Image URL Helper
   const displayPhoto = useMemo(() => {
     if (photoPreview) return photoPreview;
-    if (myMahasiswa.photo) return `/storage/${myMahasiswa.photo}`;
+    if (myMahasiswa.photo) return myMahasiswa.photo.startsWith('http') ? myMahasiswa.photo : `/storage/${myMahasiswa.photo}`;
     return null;
   }, [photoPreview, myMahasiswa.photo]);
 

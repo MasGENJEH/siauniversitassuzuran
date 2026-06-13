@@ -128,7 +128,7 @@ const DosenTab = React.memo(function DosenTab({
     const sizeClasses = size === 'lg' ? 'w-28 h-28' : size === 'md' ? 'w-16 h-16' : 'w-10 h-10';
     const iconSize = size === 'lg' ? 48 : size === 'md' ? 24 : 16;
 
-    const photoUrl = dosen.photo ? `/storage/${dosen.photo}` : null;
+    const photoUrl = dosen.photo ? (dosen.photo.startsWith('http') ? dosen.photo : `/storage/${dosen.photo}`) : null;
 
     if (photoUrl && !imgError) {
       return (

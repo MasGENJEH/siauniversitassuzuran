@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Calendar, Clock, MapPin, BookOpen, Users, Info, Smile } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Calendar, Clock, MapPin, BookOpen, Users, Info, Smile, Eye, X, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react';
 
 const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
   user,
@@ -16,7 +16,7 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
   studentMap = {}
 }) {
   const isMahasiswa = (user?.roles || []).some(r => r.name === 'mahasiswa');
-  
+
   // Find current student record
   const myMahasiswa = useMemo(() => {
     if (!isMahasiswa || !user) return null;
@@ -37,6 +37,42 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
     'JUMAT': 5,
     'SABTU': 6,
     'MINGGU': 7
+  };
+
+  // Day accordion feature states
+  const [expandedDays, setExpandedDays] = useState(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU']);
+
+  const toggleDay = (dayName) => {
+    setExpandedDays(prev => 
+      prev.includes(dayName) ? prev.filter(d => d !== dayName) : [...prev, dayName]
+    );
+  };
+
+  // Absensi feature states
+  const [selectedAbsensiClass, setSelectedAbsensiClass] = useState(null);
+  const [absensiData, setAbsensiData] = useState([]);
+  const [loadingAbsensi, setLoadingAbsensi] = useState(false);
+
+  const handleViewAbsensi = async (cls) => {
+    setSelectedAbsensiClass(cls);
+    setLoadingAbsensi(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/absensis?course_class_id=${cls.id}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAbsensiData(data.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingAbsensi(false);
+    }
   };
 
   // Group and format schedule items
@@ -80,7 +116,7 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
         .filter(Boolean);
 
       const dayName = (kk.day || '').toUpperCase().trim();
-      
+
       if (daysGroup[dayName]) {
         daysGroup[dayName].push({
           id: kk.id,
@@ -231,30 +267,37 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
         {orderOfDays.map(dayName => {
           const classes = scheduleData.days[dayName] || [];
           const hasClasses = classes.length > 0;
+          const isDayExpanded = expandedDays.includes(dayName);
 
           return (
             <div key={dayName} className="flex flex-col gap-3">
               {/* Day Header */}
-              <div className="flex items-center gap-3">
-                <h3 className="font-extrabold text-base text-monday-black tracking-wider uppercase">
+              <div 
+                className="flex items-center gap-3 cursor-pointer group"
+                onClick={() => toggleDay(dayName)}
+              >
+                <div className={`p-1 rounded-md transition-all duration-300 ${isDayExpanded ? 'text-monday-blue bg-monday-blue/10 rotate-180' : 'text-monday-gray group-hover:bg-monday-gray-background group-hover:text-monday-black'}`}>
+                  <ChevronDown size={16} />
+                </div>
+                <h3 className="font-extrabold text-base text-monday-black tracking-wider uppercase group-hover:text-monday-blue transition-colors">
                   {dayName}
                 </h3>
-                <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${
-                  hasClasses 
-                    ? 'bg-monday-blue/10 text-monday-blue border-monday-blue/15' 
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${hasClasses
+                    ? 'bg-monday-blue/10 text-monday-blue border-monday-blue/15'
                     : 'bg-monday-gray-background text-monday-gray border-monday-border'
-                }`}>
+                  }`}>
                   {classes.length} Kelas
                 </span>
                 <div className="flex-1 h-px bg-monday-border" />
               </div>
 
               {/* Day Classes Grid/List */}
-              {hasClasses ? (
+              <div className={`transition-all duration-300 overflow-hidden ${isDayExpanded ? 'opacity-100 max-h-[5000px]' : 'opacity-0 max-h-0'}`}>
+                {hasClasses ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {classes.map(cls => (
-                    <div 
-                      key={cls.id} 
+                    <div
+                      key={cls.id}
                       className="flex flex-col justify-between p-5 bg-white border border-monday-border rounded-2xl hover:border-monday-blue hover:shadow-md hover:shadow-monday-blue/5 transition-all duration-300 border-l-4 border-l-monday-blue"
                     >
                       <div>
@@ -281,7 +324,7 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
                               {cls.start_time.substring(0, 5)} - {cls.end_time.substring(0, 5)}
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-xs font-semibold text-monday-gray">
                             <MapPin size={14} className="text-monday-gray" />
                             <span>Ruang {cls.room}</span>
@@ -290,7 +333,7 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
                       </div>
 
                       {/* Lecturers */}
-                      <div className="border-t border-monday-border pt-3 mt-4">
+                      <div className="border-t border-monday-border pt-3 mt-4 flex items-center justify-between">
                         <div className="flex items-start gap-2">
                           <Users size={14} className="text-monday-gray mt-0.5 shrink-0" />
                           <div className="flex flex-col">
@@ -308,6 +351,13 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
                             )}
                           </div>
                         </div>
+                        <button
+                          onClick={() => handleViewAbsensi(cls)}
+                          className="p-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-xl transition-all duration-200"
+                          title="Cek Kehadiran"
+                        >
+                          <Eye size={16} />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -319,10 +369,91 @@ const JadwalKuliahTab = React.memo(function JadwalKuliahTab({
                   <span>Tidak ada jadwal kuliah day ini. Waktunya istirahat atau belajar mandiri!</span>
                 </div>
               )}
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* Absensi Modal */}
+      {selectedAbsensiClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-monday-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-monday-border overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-monday-border bg-monday-background/30">
+              <div>
+                <h3 className="font-extrabold text-xl text-monday-black">Kehadiran Kelas</h3>
+                <p className="text-sm font-semibold text-monday-gray mt-1">
+                  {selectedAbsensiClass.mata_kuliah.name} (Kelas {selectedAbsensiClass.class_name})
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedAbsensiClass(null)}
+                className="p-2.5 bg-white border border-monday-border text-monday-gray hover:text-monday-red hover:bg-monday-red/10 rounded-2xl transition-all duration-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-1">
+              {loadingAbsensi ? (
+                <div className="py-12 text-center text-monday-gray text-sm font-bold animate-pulse">
+                  Memuat data kehadiran...
+                </div>
+              ) : absensiData.length > 0 ? (
+                <div className="space-y-4">
+                  {absensiData.map((meeting, idx) => {
+                    // Find the current student's record
+                    const myRecord = (meeting.absensis || []).find(r => r.student_id === myMahasiswa.id);
+                    const status = myRecord?.status;
+
+                    let statusBadge = (
+                      <span className="px-3 py-1 bg-monday-gray-background text-monday-gray border border-monday-border rounded-lg text-[10px] font-extrabold uppercase">
+                        Belum Diisi
+                      </span>
+                    );
+
+                    if (status === 'hadir') {
+                      statusBadge = <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1.5"><CheckCircle2 size={12} /> Hadir</span>;
+                    } else if (status === 'sakit') {
+                      statusBadge = <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1.5"><AlertCircle size={12} /> Sakit</span>;
+                    } else if (status === 'izin') {
+                      statusBadge = <span className="px-3 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1.5"><AlertCircle size={12} /> Izin</span>;
+                    } else if (status === 'alfa') {
+                      statusBadge = <span className="px-3 py-1 bg-red-100 text-red-800 border border-red-300 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1.5"><AlertCircle size={12} /> Alfa</span>;
+                    }
+
+                    return (
+                      <div key={meeting.id} className="flex items-center justify-between p-4 border border-monday-border rounded-2xl bg-white hover:bg-monday-gray-background/30 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-monday-blue/10 text-monday-blue flex items-center justify-center font-extrabold text-sm">
+                            {idx + 1}
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-sm text-monday-black">Pertemuan {idx + 1}</p>
+                            <p className="text-xs font-semibold text-monday-gray mt-0.5">
+                              {new Date(meeting.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          {statusBadge}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 bg-monday-background rounded-2xl border border-dashed border-monday-border text-center text-monday-gray text-sm font-bold flex flex-col items-center gap-2">
+                  <Info size={24} className="text-monday-gray/50" />
+                  Belum ada data kehadiran untuk kelas ini.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

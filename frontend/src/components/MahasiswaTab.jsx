@@ -199,7 +199,7 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
     const iconSize = size === 'lg' ? 48 : size === 'md' ? 24 : 16;
     const textSize = size === 'lg' ? 'text-4xl' : size === 'md' ? 'text-xl' : 'text-sm';
 
-    const photoUrl = mahasiswa.photo ? `/storage/${mahasiswa.photo}` : null;
+    const photoUrl = mahasiswa.photo ? (mahasiswa.photo.startsWith('http') ? mahasiswa.photo : `/storage/${mahasiswa.photo}`) : null;
 
     if (photoUrl && !imgError) {
       return (

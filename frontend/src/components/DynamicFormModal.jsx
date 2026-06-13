@@ -233,7 +233,7 @@ export default function DynamicFormModal({
                   </div>
                 ) : formData.photo && typeof formData.photo === 'string' ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={`/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img src={formData.photo.startsWith('http') ? formData.photo : `/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                   </div>
                 ) : null}
                 <div className="flex-1">
@@ -363,7 +363,7 @@ export default function DynamicFormModal({
                   </div>
                 ) : formData.photo && typeof formData.photo === 'string' ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-monday-blue/20 flex-shrink-0">
-                    <img src={`/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img src={formData.photo.startsWith('http') ? formData.photo : `/storage/${formData.photo}`} alt="Current" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                   </div>
                 ) : null}
                 <div className="flex-1">
@@ -686,6 +686,83 @@ export default function DynamicFormModal({
           </>
         );
       }
+
+      case 'users': {
+        const allRoles = (() => {
+          const rolesSet = new Set();
+          users.forEach(u => {
+            if (u.roles) u.roles.forEach(r => rolesSet.add(r.name));
+          });
+          return Array.from(rolesSet);
+        })();
+
+        return (
+          <>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Nama Lengkap</label>
+              <input 
+                type="text" 
+                value={formData.name || ''} 
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                placeholder="Contoh: Admin SUZURAN"
+              />
+              {formErrors.name && <p className="text-xs text-monday-red font-bold">{formErrors.name[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Email</label>
+              <input 
+                type="email" 
+                value={formData.email || ''} 
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                placeholder="Contoh: admin@kampus.ac.id"
+              />
+              {formErrors.email && <p className="text-xs text-monday-red font-bold">{formErrors.email[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Password {modalAction === 'edit' && '(Opsional)'}</label>
+              <input 
+                type="password" 
+                value={formData.password || ''} 
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-monday-border rounded-xl text-sm focus:outline-none focus:border-monday-black font-semibold text-monday-black"
+                placeholder={modalAction === 'edit' ? "Kosongkan jika tidak ingin mengubah password" : "Minimal 8 karakter"}
+              />
+              {formErrors.password && <p className="text-xs text-monday-red font-bold">{formErrors.password[0]}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-monday-gray uppercase tracking-wider block">Role / Hak Akses</label>
+              <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto border border-monday-border rounded-xl p-3 bg-monday-background/50">
+                {allRoles.map(roleName => {
+                  const isChecked = (formData.roles || []).includes(roleName);
+                  return (
+                    <label key={roleName} className="flex items-center gap-2.5 text-sm font-semibold text-monday-black cursor-pointer hover:bg-monday-gray-background/20 p-1 rounded-lg transition-colors">
+                      <input 
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const currentRoles = formData.roles || [];
+                          let nextRoles;
+                          if (e.target.checked) {
+                            nextRoles = [...currentRoles, roleName];
+                          } else {
+                            nextRoles = currentRoles.filter(r => r !== roleName);
+                          }
+                          handleInputChange('roles', nextRoles);
+                        }}
+                        className="rounded text-monday-blue focus:ring-monday-blue border-monday-border"
+                      />
+                      <span className="capitalize">{roleName}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {formErrors.roles && <p className="text-xs text-monday-red font-bold">{formErrors.roles[0]}</p>}
+            </div>
+          </>
+        );
+      }
  
       default:
         return null;
@@ -700,6 +777,7 @@ export default function DynamicFormModal({
     if (modalType === 'kelasKuliah') typeName = 'Kelas Kuliah';
     if (modalType === 'dosenPengampu') typeName = 'Tim Pengampu Dosen';
     if (modalType === 'kelasMahasiswa') typeName = 'Pendaftaran Kelas (KRS)';
+    if (modalType === 'users') typeName = 'User';
     
     return `${act} Data ${typeName}`;
   };
