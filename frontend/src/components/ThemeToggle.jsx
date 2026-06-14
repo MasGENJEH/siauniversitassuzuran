@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Palette } from 'lucide-react';
+import { Sun, Moon, Palette, Droplet } from 'lucide-react';
 
 export default function ThemeToggle() {
-  // themes: 'blue' (initial colors), 'orange' (second colors), 'dark'
+  // themes: 'default' (original monday), 'blue' (first custom), 'orange' (second custom), 'dark'
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedTheme = localStorage.getItem('theme');
       if (storedTheme) {
         return storedTheme;
       }
-      return 'blue'; 
+      return 'default'; 
     }
-    return 'blue';
+    return 'default';
   });
 
   useEffect(() => {
@@ -23,19 +23,18 @@ export default function ThemeToggle() {
     
     if (theme === 'dark') {
       root.classList.add('dark');
-    } else if (theme === 'orange') {
-      root.setAttribute('data-theme', 'orange');
-    } else {
-      root.setAttribute('data-theme', 'blue');
+    } else if (theme !== 'default') {
+      root.setAttribute('data-theme', theme);
     }
     
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const cycleTheme = () => {
-    if (theme === 'blue') setTheme('orange');
+    if (theme === 'default') setTheme('blue');
+    else if (theme === 'blue') setTheme('orange');
     else if (theme === 'orange') setTheme('dark');
-    else setTheme('blue');
+    else setTheme('default');
   };
 
   return (
@@ -44,6 +43,7 @@ export default function ThemeToggle() {
       title={`Toggle Theme (Current: ${theme})`}
       className="flex size-14 rounded-full bg-monday-gray-background items-center justify-center overflow-hidden hover:opacity-80 transition-300 shrink-0 cursor-pointer text-monday-black border border-monday-border"
     >
+      {theme === 'default' && <Droplet size={20} />}
       {theme === 'blue' && <Sun size={20} />}
       {theme === 'orange' && <Palette size={20} />}
       {theme === 'dark' && <Moon size={20} />}

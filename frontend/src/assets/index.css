@@ -6,7 +6,22 @@
 @source '../**/*.js';
 @source '../**/*.jsx';
 
-:root, :root[data-theme="blue"] {
+:root, :root[data-theme="default"] {
+  --monday-background: #f3f5f9;
+  --monday-border: #e8e8e8;
+  --monday-gray: #6a7686;
+  --monday-black: #292d32;
+  --monday-blue: #1053d5;
+  --monday-gray-background: #f3f3f3;
+  --monday-lime-green: #cbee5a;
+  --monday-lime-green-char: #deff6e;
+  --monday-red: #ff5070;
+  --monday-card: #ffffff;
+  --monday-gradient-start: #1e40af;
+  --monday-gradient-end: #3b82f6;
+}
+
+:root[data-theme="blue"] {
   --monday-background: #F7F8F0;
   --monday-border: #9CD5FF;
   --monday-gray: #7AAACE;
