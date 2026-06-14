@@ -6,49 +6,65 @@
 @source '../**/*.js';
 @source '../**/*.jsx';
 
-:root {
-    --monday-background: #F7F8F0;
-    --monday-border: #9CD5FF;
-    --monday-gray: #7AAACE;
-    --monday-black: #355872;
-    --monday-blue: #7AAACE;
-    --monday-gray-background: #ffffff;
-    --monday-lime-green: #cbee5a;
-    --monday-lime-green-char: #deff6e;
-    --monday-red: #ff5070;
-    --monday-card: #ffffff;
-    --monday-gradient-start: #355872;
-    --monday-gradient-end: #7AAACE;
+:root, :root[data-theme="blue"] {
+  --monday-background: #F7F8F0;
+  --monday-border: #9CD5FF;
+  --monday-gray: #7AAACE;
+  --monday-black: #355872;
+  --monday-blue: #7AAACE;
+  --monday-gray-background: #ffffff;
+  --monday-lime-green: #cbee5a;
+  --monday-lime-green-char: #deff6e;
+  --monday-red: #ff5070;
+  --monday-card: #ffffff;
+  --monday-gradient-start: #355872;
+  --monday-gradient-end: #7AAACE;
 }
 
-:root.dark, .dark {
-    --monday-background: #0f172a;
-    --monday-border: #475569;
-    --monday-gray: #94a3b8;
-    --monday-black: #f8fafc;
-    --monday-blue: #3b82f6;
-    --monday-gray-background: #334155;
-    --monday-lime-green: #65a30d;
-    --monday-lime-green-char: #84cc16;
-    --monday-red: #e11d48;
-    --monday-card: #1e293b;
-    --monday-gradient-start: #0f172a;
-    --monday-gradient-end: #1e3a8a;
+:root[data-theme="orange"] {
+  --monday-background: #EFD2B0;
+  --monday-border: #547792;
+  --monday-gray: #547792;
+  --monday-black: #1A3263;
+  --monday-blue: #FFC570;
+  --monday-gray-background: #ffffff;
+  --monday-lime-green: #FFC570;
+  --monday-lime-green-char: #EFD2B0;
+  --monday-red: #ff5070;
+  --monday-card: #ffffff;
+  --monday-gradient-start: #1A3263;
+  --monday-gradient-end: #547792;
+}
+
+:root.dark,
+.dark {
+  --monday-background: #0f172a;
+  --monday-border: #475569;
+  --monday-gray: #94a3b8;
+  --monday-black: #f8fafc;
+  --monday-blue: #3b82f6;
+  --monday-gray-background: #334155;
+  --monday-lime-green: #65a30d;
+  --monday-lime-green-char: #84cc16;
+  --monday-red: #e11d48;
+  --monday-card: #1e293b;
+  --monday-gradient-start: #0f172a;
+  --monday-gradient-end: #1e3a8a;
 }
 
 @theme {
-    --font-sans: 'Lexend Deca', ui-sans-serif, system-ui, sans-serif;
-    
-    --color-monday-background: var(--monday-background);
-    --color-monday-border: var(--monday-border);
-    --color-monday-gray: var(--monday-gray);
-    --color-monday-black: var(--monday-black);
-    --color-monday-blue: var(--monday-blue);
-    --color-monday-gray-background: var(--monday-gray-background);
-    --color-monday-lime-green: var(--monday-lime-green);
-    --color-monday-lime-green-char: var(--monday-lime-green-char);
-    --color-monday-red: var(--monday-red);
-    --color-monday-card: var(--monday-card);
+  --font-sans: 'Lexend Deca', ui-sans-serif, system-ui, sans-serif;
+
+  --color-monday-background: var(--monday-background);
+  --color-monday-border: var(--monday-border);
+  --color-monday-gray: var(--monday-gray);
+  --color-monday-black: var(--monday-black);
+  --color-monday-blue: var(--monday-blue);
+  --color-monday-gray-background: var(--monday-gray-background);
+  --color-monday-lime-green: var(--monday-lime-green);
+  --color-monday-lime-green-char: var(--monday-lime-green-char);
+  --color-monday-red: var(--monday-red);
+  --color-monday-card: var(--monday-card);
 }
 
 .bg-white {
@@ -75,17 +91,17 @@ body {
 
 /* Browser autofill override for dark mode support */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
+input:-webkit-autofill:hover,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--monday-background) inset !important;
-    -webkit-text-fill-color: var(--monday-black) !important;
-    border-color: transparent !important;
-    transition: background-color 5000s ease-in-out 0s;
+  -webkit-box-shadow: 0 0 0 30px var(--monday-background) inset !important;
+  -webkit-text-fill-color: var(--monday-black) !important;
+  border-color: transparent !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 input:focus:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px var(--monday-card) inset !important;
-    border-color: var(--monday-blue) !important;
+  -webkit-box-shadow: 0 0 0 30px var(--monday-card) inset !important;
+  border-color: var(--monday-blue) !important;
 }
 
 /* Custom Scrollbar to match theme */
@@ -114,6 +130,7 @@ input:focus:-webkit-autofill {
 }
 
 /* Prevent table text wrapping */
-th, td {
+th,
+td {
   white-space: nowrap;
 }
