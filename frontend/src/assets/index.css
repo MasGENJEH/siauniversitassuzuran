@@ -51,6 +51,36 @@
   --monday-gradient-end: #547792;
 }
 
+:root[data-theme="earth"] {
+  --monday-background: #EEE0CC;
+  --monday-border: #BA6A4C;
+  --monday-gray: #BA6A4C;
+  --monday-black: #7B2525;
+  --monday-blue: #607456;
+  --monday-gray-background: #ffffff;
+  --monday-lime-green: #607456;
+  --monday-lime-green-char: #EEE0CC;
+  --monday-red: #ff5070;
+  --monday-card: #ffffff;
+  --monday-gradient-start: #7B2525;
+  --monday-gradient-end: #607456;
+}
+
+:root[data-theme="nautical"] {
+  --monday-background: #3B9797;
+  --monday-border: #16476A;
+  --monday-gray: #16476A;
+  --monday-black: #132440;
+  --monday-blue: #BF092F;
+  --monday-gray-background: #ffffff;
+  --monday-lime-green: #BF092F;
+  --monday-lime-green-char: #3B9797;
+  --monday-red: #ff5070;
+  --monday-card: #ffffff;
+  --monday-gradient-start: #132440;
+  --monday-gradient-end: #BF092F;
+}
+
 :root.dark,
 .dark {
   --monday-background: #0f172a;

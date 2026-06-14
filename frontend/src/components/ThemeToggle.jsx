@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Palette, Droplet } from 'lucide-react';
+import { Sun, Moon, Palette, Droplet, Leaf, Anchor } from 'lucide-react';
 
 export default function ThemeToggle() {
-  // themes: 'default' (original monday), 'blue' (first custom), 'orange' (second custom), 'dark'
+  // themes: 'default', 'blue', 'orange', 'earth', 'nautical', 'dark'
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedTheme = localStorage.getItem('theme');
@@ -33,7 +33,9 @@ export default function ThemeToggle() {
   const cycleTheme = () => {
     if (theme === 'default') setTheme('blue');
     else if (theme === 'blue') setTheme('orange');
-    else if (theme === 'orange') setTheme('dark');
+    else if (theme === 'orange') setTheme('earth');
+    else if (theme === 'earth') setTheme('nautical');
+    else if (theme === 'nautical') setTheme('dark');
     else setTheme('default');
   };
 
@@ -46,6 +48,8 @@ export default function ThemeToggle() {
       {theme === 'default' && <Droplet size={20} />}
       {theme === 'blue' && <Sun size={20} />}
       {theme === 'orange' && <Palette size={20} />}
+      {theme === 'earth' && <Leaf size={20} />}
+      {theme === 'nautical' && <Anchor size={20} />}
       {theme === 'dark' && <Moon size={20} />}
     </button>
   );
