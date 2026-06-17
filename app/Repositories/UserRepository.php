@@ -6,9 +6,18 @@ use App\Models\User;
 
 class UserRepository
 {
-    public function getAll(array $fields)
+    public function getAll(array $fields, $perPage = null)
     {
-        return User::select($fields)->with('roles')->latest()->get();
+        $query = User::select($fields)->with('roles')->latest();
+
+        if (request()->has('search') && !empty(request()->query('search'))) {
+            $search = request()->query('search');
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+        }
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function getById(int $id, array $fields)

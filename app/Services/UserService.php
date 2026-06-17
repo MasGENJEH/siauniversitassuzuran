@@ -13,9 +13,9 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function getAll(array $fields)
+    public function getAll(array $fields, $perPage = null)
     {
-        return $this->userRepository->getAll($fields);
+        return $this->userRepository->getAll($fields, $perPage);
     }
 
     public function getById(int $id, array $fields)

@@ -18,10 +18,11 @@ class UserController extends Controller
 
     public function index()
     {
+        $perPage = request()->query('size');
         $fields = ['*'];
-        $user = $this->userService->getAll($fields ?: ['*']);
+        $user = $this->userService->getAll($fields ?: ['*'], $perPage);
 
-        return response()->json(UserResource::collection($user));
+        return UserResource::collection($user);
     }
 
     public function show(int $id)

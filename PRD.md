@@ -6,11 +6,11 @@
 ## 1. Ringkasan Eksekutif
 
 **Nama Produk:** SIA Universitas Suzuran  
-**Versi:** 1.0.0  
-**Tanggal Dokumen:** 10 Juni 2026  
+**Versi:** 1.1.0  
+**Tanggal Dokumen:** 17 Juni 2026  
 **Status:** In Development  
 
-SIA Universitas Suzuran adalah Sistem Informasi Akademik berbasis web yang dirancang untuk mengelola seluruh proses akademik di lingkungan Universitas Suzuran. Sistem ini mencakup manajemen data kelembagaan (fakultas, program studi), data civitas akademika (dosen, mahasiswa), manajemen perkuliahan (mata kuliah, kelas, jadwal), serta pengelolaan nilai akademik (KRS dan KHS) — semuanya terintegrasi dalam satu platform yang dapat diakses oleh tiga jenis pengguna: Admin, Dosen, dan Mahasiswa.
+SIA Universitas Suzuran adalah Sistem Informasi Akademik berbasis web yang dirancang untuk mengelola seluruh proses akademik di lingkungan Universitas Suzuran. Sistem ini mencakup manajemen data kelembagaan (fakultas, program studi), data civitas akademika (dosen, mahasiswa, pengguna sistem), manajemen perkuliahan (mata kuliah, kelas, jadwal, absensi, ujian), serta pengelolaan nilai akademik (KRS dan KHS) — semuanya terintegrasi dalam satu platform yang dapat diakses oleh tiga jenis pengguna: Admin, Dosen, dan Mahasiswa.
 
 ---
 
@@ -25,7 +25,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 1. Menyediakan satu platform terpadu untuk seluruh kebutuhan pengelolaan akademik universitas.
 2. Mempersingkat alur pengisian KRS dan input nilai KHS.
 3. Memberikan akses real-time kepada mahasiswa untuk memantau jadwal kuliah dan hasil studi.
-4. Memberikan dosen akses langsung untuk melihat kelas yang diampu dan menginput nilai.
+4. Memberikan dosen akses langsung untuk melihat kelas yang diampu, menginput nilai, absensi, dan jadwal ujian.
 5. Menjamin keamanan dan integritas data melalui sistem autentikasi dan otorisasi berbasis peran (RBAC).
 
 ---
@@ -34,24 +34,24 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 
 | Peran | Deskripsi |
 |---|---|
-| **Admin** | Administrator universitas, memiliki akses penuh ke seluruh fitur manajemen data dan pengaturan sistem. |
-| **Dosen** | Tenaga pengajar, memiliki akses ke Portal Dosen aktif untuk melihat kelas yang diampu dan menginput nilai mahasiswa. |
-| **Mahasiswa** | Peserta didik, memiliki akses untuk melihat jadwal kuliah, melakukan registrasi kelas (KRS), dan melihat hasil studi (KHS). |
+| **Admin** | Administrator universitas, memiliki akses penuh ke seluruh fitur manajemen data, pengguna, dan pengaturan sistem. |
+| **Dosen** | Tenaga pengajar, memiliki akses ke Portal Dosen aktif untuk melihat kelas yang diampu, menginput nilai, absensi, dan jadwal ujian. |
+| **Mahasiswa** | Peserta didik, memiliki akses untuk melihat jadwal kuliah, melakukan registrasi kelas (KRS), melihat absensi, dan melihat hasil studi (KHS). |
 
 ---
 
 ## 4. Pengguna & Persona
 
 ### 4.1 Admin Akademik
-- **Tugas Utama:** Mengelola seluruh data master universitas (fakultas, prodi, dosen, mahasiswa, mata kuliah, kelas kuliah), mengaktifkan tahun akademik, dan memantau statistik akademik secara menyeluruh.
+- **Tugas Utama:** Mengelola seluruh data master universitas (fakultas, prodi, dosen, mahasiswa, mata kuliah, kelas kuliah), manajemen pengguna/role, mengaktifkan tahun akademik, dan memantau statistik akademik.
 - **Kebutuhan:** Antarmuka CRUD yang efisien, fitur pencarian cepat, dan tampilan statistik ringkas di dashboard.
 
 ### 4.2 Dosen Pengampu
-- **Tugas Utama:** Melihat daftar kelas aktif yang diampu, melihat mahasiswa terdaftar di kelasnya, dan menginput nilai akhir serta nilai huruf.
-- **Kebutuhan:** Portal dosen yang terfokus, formulir input nilai yang mudah, dan daftar mahasiswa bimbingan akademik (PA).
+- **Tugas Utama:** Melihat daftar kelas aktif yang diampu, melakukan absensi kelas, menjadwalkan ujian, melihat mahasiswa terdaftar, dan menginput nilai akhir/huruf.
+- **Kebutuhan:** Portal dosen yang terfokus, formulir input nilai dan absensi yang mudah, dan daftar mahasiswa bimbingan akademik (PA).
 
 ### 4.3 Mahasiswa
-- **Tugas Utama:** Mengambil/mendaftarkan kelas (KRS), melihat jadwal kuliah mingguan, dan memantau transkrip nilai (KHS) beserta IPK/IPS.
+- **Tugas Utama:** Mengambil/mendaftarkan kelas (KRS), melihat jadwal kuliah mingguan, memantau absensi kelas, dan memantau transkrip nilai (KHS) beserta IPK/IPS.
 - **Kebutuhan:** Tampilan KRS yang jelas, jadwal kuliah yang mudah dibaca, dan ringkasan prestasi akademik (IPK, IPS, SKS Lulus).
 
 ---
@@ -68,8 +68,17 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | AUTH-04 | Update profil: email, nomor telepon, password | Semua |
 | AUTH-05 | Upload foto profil (jpeg/png/jpg/webp, maks. 2MB) | Semua |
 | AUTH-06 | Redirect tab awal berdasarkan peran setelah login | Semua |
+| AUTH-07 | Toggle Dark Mode / Light Mode | Semua |
 
-### 5.2 Modul Dashboard
+### 5.2 Modul Manajemen Pengguna & Role
+
+| ID Fitur | Deskripsi | Role |
+|---|---|---|
+| USER-01 | Lihat daftar semua pengguna sistem beserta role-nya | Admin |
+| USER-02 | Tambah, Edit, Hapus pengguna sistem secara manual | Admin |
+| USER-03 | Tampilan daftar Role sistem yang tersedia | Admin |
+
+### 5.3 Modul Dashboard
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -79,7 +88,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | DASH-04 | Statistik total kelas kuliah dan penugasan pengampu | Admin, Dosen |
 | DASH-05 | Shortcut navigasi ke Portal Dosen | Admin, Dosen |
 
-### 5.3 Modul Manajemen Fakultas
+### 5.4 Modul Manajemen Fakultas
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -89,7 +98,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | FAK-04 | Hapus fakultas (soft delete) | Admin |
 | FAK-05 | Pencarian/filter fakultas berdasarkan nama atau kode | Admin |
 
-### 5.4 Modul Manajemen Program Studi (Prodi)
+### 5.5 Modul Manajemen Program Studi (Prodi)
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -98,7 +107,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | PRODI-03 | Edit data program studi | Admin |
 | PRODI-04 | Hapus program studi (soft delete) | Admin |
 
-### 5.5 Modul Manajemen Tahun Akademik
+### 5.6 Modul Manajemen Tahun Akademik
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -108,7 +117,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | TA-04 | Hapus tahun akademik (soft delete) | Admin |
 | TA-05 | Toggle aktivasi semester: menetapkan satu semester sebagai "AKTIF" | Admin |
 
-### 5.6 Modul Manajemen Data Dosen
+### 5.7 Modul Manajemen Data Dosen
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -118,7 +127,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | DOS-04 | Hapus data dosen (soft delete + hapus file foto) | Admin |
 | DOS-05 | Lihat detail dosen: kelas aktif yang diampu dan mahasiswa bimbingan PA | Admin |
 
-### 5.7 Modul Manajemen Data Mahasiswa
+### 5.8 Modul Manajemen Data Mahasiswa
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -129,7 +138,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | MHS-05 | Status mahasiswa: AKTIF, CUTI, LULUS, DO | Admin |
 | MHS-06 | Lihat transkrip nilai (KHS) mahasiswa | Admin |
 
-### 5.8 Modul Manajemen Mata Kuliah
+### 5.9 Modul Manajemen Mata Kuliah
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -138,7 +147,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | MK-03 | Edit mata kuliah | Admin |
 | MK-04 | Hapus mata kuliah (soft delete) | Admin |
 
-### 5.9 Modul Manajemen Kelas Kuliah
+### 5.10 Modul Manajemen Kelas Kuliah
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -149,7 +158,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | KK-05 | Penugasan dosen pengampu ke kelas (multi-dosen per kelas, melalui tabel pivot `dosen_pengampus`) | Admin |
 | KK-06 | Lihat mahasiswa yang terdaftar di suatu kelas | Admin |
 
-### 5.10 Modul KRS & KHS (Kelas Mahasiswa)
+### 5.11 Modul KRS & KHS (Kelas Mahasiswa)
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -160,7 +169,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | KRS-05 | Lihat nilai akhir (angka 0–100) dan nilai huruf (A/B/C/D/E) | Admin, Mahasiswa, Dosen |
 | KRS-06 | Input/edit nilai akhir dan nilai huruf mahasiswa | Admin, Dosen |
 
-### 5.11 Modul Portal Dosen Aktif
+### 5.12 Modul Portal Dosen Aktif (Nilai, Absensi, Ujian)
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -171,8 +180,11 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | PD-05 | Input nilai akhir (numerik) dan nilai huruf per mahasiswa di kelas | Admin, Dosen |
 | PD-06 | Simpan nilai per-mahasiswa secara individual | Admin, Dosen |
 | PD-07 | Lihat daftar mahasiswa bimbingan akademik (PA) | Admin, Dosen |
+| PD-08 | Buka sesi pertemuan kelas (aktivasi absensi harian) | Admin, Dosen |
+| PD-09 | Input absensi mahasiswa per pertemuan (Hadir, Sakit, Izin, Alpa) | Admin, Dosen |
+| PD-10 | Manajemen jadwal ujian kelas (Tambah, Lihat, Hapus ujian per kelas) | Admin, Dosen |
 
-### 5.12 Modul Jadwal Kuliah Mahasiswa
+### 5.13 Modul Jadwal Kuliah Mahasiswa
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -180,7 +192,7 @@ Pengelolaan data akademik universitas yang masih bersifat manual atau terpisah-p
 | JDW-02 | Informasi per kelas: nama MK, hari, jam, ruangan, dosen pengampu | Mahasiswa |
 | JDW-03 | Filter berdasarkan semester aktif | Mahasiswa |
 
-### 5.13 Modul Profil Pengguna
+### 5.14 Modul Profil Pengguna
 
 | ID Fitur | Deskripsi | Role |
 |---|---|---|
@@ -226,16 +238,28 @@ Dosen login
   → Nilai tersimpan → Notifikasi sukses
 ```
 
-### 6.4 Alur Admin Mengelola Data Master
+### 6.4 Alur Input Absensi dan Ujian
+```
+Dosen login
+  → Auto-redirect ke "Portal Dosen Aktif"
+  → Pilih kelas
+  → [Absensi] Klik tombol "Aktivasi Pertemuan" / "Buka Sesi"
+  → [Absensi] Ubah status kehadiran mahasiswa → Simpan Absensi
+  Atau
+  → [Ujian] Klik tombol "Manajemen Ujian"
+  → [Ujian] Isi detail Ujian (Tipe, Jadwal, Ruang, Metode) → Simpan
+```
+
+### 6.5 Alur Admin Mengelola Data Master
 ```
 Admin login → Dashboard
-  → Navigasi ke tab data (Dosen / Mahasiswa / Kelas, dll.)
+  → Navigasi ke tab data (Dosen / Mahasiswa / Kelas / User, dll.)
   → Klik tombol "Tambah" → Modal form muncul
   → Isi data → Validasi backend
   → Berhasil: data muncul di tabel
   Atau
   → Klik ikon "Edit" / "Hapus" pada baris data
-  → Konfirmasi hapus → Data di-soft-delete
+  → Konfirmasi hapus → Data di-soft-delete (atau force delete sesuai kebijakan)
 ```
 
 ---
@@ -247,10 +271,11 @@ Admin login → Dashboard
 - **Otorisasi:** Role-Based Access Control (RBAC) menggunakan Spatie Laravel Permission (peran: `admin`, `dosen`, `mahasiswa`).
 - **Validasi Input:** Semua input divalidasi di sisi server via Laravel FormRequest.
 - **File Upload:** Foto dikunci tipe MIME (jpeg/png/jpg/webp) dan ukuran maksimum 2 MB.
-- **Soft Delete:** Data tidak dihapus permanen dari database, hanya ditandai `deleted_at`.
+- **Soft Delete:** Sebagian besar data utama ditandai `deleted_at` untuk keamanan histori.
 
 ### 7.2 Performa
 - Pengambilan data dilakukan secara paralel (`Promise.all`) untuk efisiensi waktu muat.
+- Lazy Loading diterapkan pada komponen frontend.
 - Indikator loading ditampilkan selama proses pengambilan data berlangsung.
 
 ### 7.3 Ketersediaan
@@ -259,6 +284,7 @@ Admin login → Dashboard
 
 ### 7.4 Usabilitas
 - Antarmuka responsif dengan layout sidebar + konten utama.
+- Tema Terang dan Gelap (Dark Mode / Light Mode).
 - Pencarian teks real-time di setiap modul daftar data.
 - Modal form dinamis yang reusable untuk semua operasi CRUD.
 - Konfirmasi dialog sebelum aksi penghapusan.
@@ -290,26 +316,23 @@ routes/api.php
     ↓
 Controllers (Http/Controllers/)
     ↓
-Services (App/Services/)        ← Business logic
-    ↓
-Repositories (App/Repositories/) ← Data access layer
+Services (App/Services/)        ← Business logic (Opsional, tergantung kompleksitas)
     ↓
 Models (App/Models/)            ← Eloquent ORM
     ↓
 Database (Migrations + Seeders)
 ```
 
-Pattern yang digunakan: **Repository-Service Pattern** memisahkan lapisan akses data (Repository) dari logika bisnis (Service) dan controller HTTP.
-
 ### 8.3 Arsitektur Frontend
 
 ```
 resources/js/app.jsx            ← Entry point
     ↓
-components/App.jsx              ← Root state management & routing
+components/App.jsx              ← Root state management & routing (Lazy Loads sub-tabs)
     ├── Login.jsx               ← Halaman autentikasi
     ├── Sidebar.jsx             ← Navigasi berbasis peran
-    ├── Header.jsx              ← Bar atas dengan info semester & refresh
+    ├── Header.jsx              ← Bar atas dengan info semester & theme toggle
+    ├── ThemeToggle.jsx         ← Kontrol Dark/Light mode
     ├── DashboardTab.jsx
     ├── FakultasTab.jsx
     ├── ProdiTab.jsx
@@ -319,15 +342,15 @@ components/App.jsx              ← Root state management & routing
     ├── MataKuliahTab.jsx
     ├── KelasKuliahTab.jsx
     ├── KelasMahasiswaTab.jsx
-    ├── LecturerPortalTab.jsx
+    ├── LecturerPortalTab.jsx   ← Integrasi Absensi, Ujian, Nilai
     ├── JadwalKuliahTab.jsx
-    ├── ProfilMahasiswaTab.jsx
-    ├── ProfilDosenTab.jsx
-    ├── ProfilAdminTab.jsx
+    ├── UserTab.jsx             ← Manajemen Akun Pengguna
+    ├── RoleTab.jsx             ← Manajemen Role Pengguna
+    ├── Profil...Tab.jsx
     └── DynamicFormModal.jsx    ← Reusable CRUD form modal
 ```
 
-State management dilakukan secara terpusat di `App.jsx` menggunakan React hooks (`useState`, `useEffect`).
+State management dilakukan secara terpusat di `App.jsx` menggunakan React hooks (`useState`, `useEffect`, `useMemo`).
 
 ---
 
@@ -346,8 +369,11 @@ State management dilakukan secara terpusat di `App.jsx` menggunakan React hooks 
 | `mahasiswas` | `id`, `id_user`, `nim` (unique), `nama`, `id_prodi`, `id_dosen_pa`, `tahun_masuk`, `status_mahasiswa` (AKTIF/CUTI/LULUS/DO), `foto` | Data profil mahasiswa |
 | `mata_kuliahs` | `id`, `id_prodi`, `kode_mk` (unique), `nama_mk`, `sks`, `semester_plot` | Katalog mata kuliah |
 | `kelas_kuliahs` | `id`, `kode_kelas` (unique), `id_mk`, `id_ta`, `nama_kelas`, `hari`, `jam_mulai`, `jam_selesai`, `ruangan` | Sesi kelas perkuliahan |
-| `dosen_pengampus` | `id`, `id_kelas`, `id_dosen` | Pivot: penugasan dosen ke kelas (many-to-many) |
-| `kelas_mahasiswas` | `id`, `id_mahasiswa`, `id_kelas`, `nilai_akhir` (float, 0-100), `nilai_huruf` (char 1) | Pivot: KRS & KHS mahasiswa |
+| `dosen_pengampus` | `id`, `id_kelas`, `id_dosen` | Pivot: penugasan dosen ke kelas |
+| `kelas_mahasiswas` | `id`, `id_mahasiswa`, `id_kelas`, `nilai_akhir` (float), `nilai_huruf` (char) | Pivot: KRS & KHS mahasiswa |
+| `course_class_meetings` | `id`, `course_class_id`, `tanggal`, `is_active` | Sesi pertemuan kelas untuk absensi |
+| `absensis` | `id`, `course_class_meeting_id`, `student_id`, `status` | Kehadiran mahasiswa per pertemuan |
+| `course_class_exams` | `id`, `course_class_id`, `exam_type`, `tanggal`, `start_time`, `end_time`, `room`, `lecturer_id`, `method`, `notes` | Penjadwalan ujian per kelas |
 
 ### 9.2 Relasi Antar Entitas
 
@@ -357,13 +383,12 @@ Fakultas ──(1:N)──> Prodi ──(1:N)──> MataKuliah ──(1:N)─�
                       └──(1:N)──> Mahasiswa ──(N:M via kelas_mahasiswas)
                                       │
                                 Dosen ──(N:M via dosen_pengampus)──> KelasKuliah
-                                  │
-                          TahunAkademik ──(1:N)──> KelasKuliah
+                                  │                                      │
+                          TahunAkademik ──(1:N)──> KelasKuliah           ├──(1:N)──> CourseClassMeetings ──(1:N)──> Absensis
+                                                                         └──(1:N)──> CourseClassExams
 
 User ──(1:1)──> Mahasiswa atau Dosen
 ```
-
-Semua tabel utama mengimplementasikan **Soft Deletes** (kolom `deleted_at`) untuk keamanan data.
 
 ---
 
@@ -382,6 +407,7 @@ Semua tabel utama mengimplementasikan **Soft Deletes** (kolom `deleted_at`) untu
 | `POST` | `/api/logout` | Logout sesi |
 | `GET` | `/api/user` | Data pengguna yang sedang login |
 | `POST` | `/api/profile/update` | Update profil & foto pengguna |
+| `GET` | `/api/users` | Daftar semua pengguna |
 | `GET` | `/api/fakultas` | Daftar semua fakultas |
 | `GET` | `/api/prodis` | Daftar semua program studi |
 | `GET` | `/api/tahun-akademiks` | Daftar semua tahun akademik |
@@ -394,37 +420,41 @@ Semua tabel utama mengimplementasikan **Soft Deletes** (kolom `deleted_at`) untu
 | `POST` | `/api/kelas-mahasiswas` | Registrasi KRS (mahasiswa/admin) |
 | `GET` | `/api/dosens/{id}/kelas-kuliah-aktif` | Kelas aktif dosen |
 | `GET` | `/api/dosens/{id}/mahasiswa-bimbingan` | Mahasiswa PA dosen |
+| `GET` | `/api/absensis` | Daftar semua rekam absensi |
 
 ### 10.3 Endpoint Admin Only (`role:admin`)
 
-Write operations (POST, PUT, DELETE) untuk semua resource: `fakultas`, `users`, `dosens`, `mahasiswas`, `prodis`, `mata-kuliahs`, `tahun-akademiks`, `kelas-kuliahs`, `dosen-pengampus`, dan DELETE `kelas-mahasiswas`.
+Write operations (POST, PUT, DELETE) untuk resource master:
+- `users`
+- `fakultas`, `prodis`, `tahun-akademiks`
+- `dosens`, `mahasiswas`
+- `mata-kuliahs`, `kelas-kuliahs`, `dosen-pengampus`
+- Serta penghapusan data secara paksa.
 
 ### 10.4 Endpoint Admin + Dosen (`role:admin|dosen`)
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
 | `PUT` | `/api/kelas-mahasiswas/{id}` | Update nilai mahasiswa |
+| `POST` | `/api/absensis` | Simpan/Update absensi mahasiswa |
+| `POST` | `/api/absensis/activate` | Buka pertemuan kelas baru / aktivasi |
+| `GET` | `/api/exams` | Ambil data jadwal ujian kelas |
+| `POST` | `/api/exams` | Tambah/Update jadwal ujian kelas |
+| `DELETE`| `/api/exams/{id}` | Hapus ujian kelas |
 
 ---
 
 ## 11. Aturan Bisnis
 
 1. **Satu Semester Aktif:** Hanya satu `tahun_akademik` boleh berstatus `status = true` pada satu waktu. Saat admin mengaktifkan semester baru, sistem otomatis menonaktifkan yang lama.
-
-2. **NIM Otomatis:** NIM mahasiswa dibuat otomatis oleh sistem berdasarkan `prefix_nim` dari prodi dan tahun masuk (via `MahasiswaHelper::generateUniqueNim()`).
-
+2. **NIM Otomatis:** NIM mahasiswa dibuat otomatis oleh sistem berdasarkan `prefix_nim` dari prodi dan tahun masuk.
 3. **Otorisasi KRS:**
    - Mahasiswa hanya dapat mendaftarkan kelas atas nama dirinya sendiri.
    - Mahasiswa tidak dapat mengubah (PUT) entri KRS yang sudah ada.
-   - Dosen hanya dapat mengubah nilai untuk kelas yang secara eksplisit ia ditugaskan (via tabel `dosen_pengampus`).
-
-4. **Nilai:** Nilai huruf maksimal 1 karakter (A/B/C/D/E). Nilai angka berkisar antara 0–100. Keduanya bersifat opsional (nullable).
-
-5. **Normalisasi Input:** Nama mahasiswa, status, kode kelas, nama kelas, hari, dan ruangan secara otomatis dikonversi menjadi KAPITAL di sisi server sebelum disimpan.
-
-6. **Foto Profil:** File lama secara otomatis dihapus dari storage saat foto diperbarui atau pengguna dihapus.
-
-7. **Soft Delete:** Penghapusan data tidak menghapus rekaman secara permanen dari database; data hanya diberi timestamp `deleted_at` dan disembunyikan dari query normal.
+4. **Otorisasi Dosen (Nilai & Absensi & Ujian):** Dosen hanya dapat mengubah nilai, mengisi absensi, atau menjadwalkan ujian untuk kelas yang secara eksplisit ia ditugaskan (via tabel `dosen_pengampus`).
+5. **Nilai:** Nilai huruf maksimal 1 karakter (A/B/C/D/E). Nilai angka berkisar antara 0–100.
+6. **Normalisasi Input:** Data nama dan teks lain otomatis disesuaikan (misal huruf KAPITAL) sebelum disimpan.
+7. **Foto Profil:** File lama secara otomatis dihapus dari storage saat foto diperbarui atau pengguna dihapus.
 
 ---
 
@@ -447,14 +477,11 @@ Write operations (POST, PUT, DELETE) untuk semua resource: `fakultas`, `users`, 
 
 | Modul | Kriteria |
 |---|---|
-| Login | Token diterima, user data dengan roles ter-load, redirect sesuai peran. |
-| Dashboard | Statistik tampil sesuai peran; IPK/IPS dihitung dengan benar untuk mahasiswa. |
-| CRUD Data Master | Create, Read, Update, Delete berfungsi dengan validasi error yang informatif. |
+| Login & Theme | Token diterima, user ter-load, redirect sesuai peran. Pilihan tema terang/gelap tersimpan secara persisten. |
+| CRUD Master | Create, Read, Update, Delete untuk master data (User, Fakultas, Prodi, Dosen, Mahasiswa, Kelas) berfungsi baik. |
 | KRS | Mahasiswa dapat mendaftarkan kelas; entri muncul di daftar KRS. |
-| Input Nilai | Dosen dapat menyimpan nilai_akhir dan nilai_huruf; perubahan tersimpan ke database. |
-| Soft Delete | Data yang dihapus tidak muncul di daftar tetapi tetap ada di database. |
-| Upload Foto | File tersimpan di `storage/app/public/foto-*`; file lama terhapus saat diperbarui. |
-| RBAC | Admin tidak dapat mengakses resource yang tidak diizinkan; demikian sebaliknya. |
+| Portal Dosen | Dosen dapat mengisi nilai, absensi per pertemuan, serta membuat jadwal ujian. Perubahan tersimpan ke database. |
+| RBAC | Admin, Dosen, dan Mahasiswa memiliki akses dan restriksi modul sesuai perannya. |
 
 ---
 
@@ -463,3 +490,4 @@ Write operations (POST, PUT, DELETE) untuk semua resource: `fakultas`, `users`, 
 | Versi | Tanggal | Deskripsi |
 |---|---|---|
 | 1.0.0 | 10 Juni 2026 | Pembuatan dokumen PRD awal berdasarkan analisis kode sumber proyek. |
+| 1.1.0 | 17 Juni 2026 | Penambahan Modul Absensi, Modul Manajemen Ujian, Modul Manajemen Pengguna, dan Fitur Tema Gelap. |

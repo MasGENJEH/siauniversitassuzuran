@@ -15,9 +15,9 @@ class MahasiswaService
         $this->mahasiswaRepository = $mahasiswaRepository;
     }
 
-    public function getAll(array $fields)
+    public function getAll(array $fields, $perPage = null)
     {
-        return $this->mahasiswaRepository->getAll($fields);
+        return $this->mahasiswaRepository->getAll($fields, $perPage);
     }
 
     public function getById(int $id, array $fields)

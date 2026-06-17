@@ -6,9 +6,17 @@ use App\Models\Dosen;
 
 class DosenRepository
 {
-    public function getAll(array $fields)
+    public function getAll(array $fields, $perPage = null)
     {
-        return Dosen::select($fields)->latest()->get();
+        $query = Dosen::select($fields)->latest();
+        
+        if (request()->has('search') && !empty(request()->query('search'))) {
+            $search = request()->query('search');
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('nidn', 'like', "%{$search}%");
+        }
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function getById(int $id, array $fields)

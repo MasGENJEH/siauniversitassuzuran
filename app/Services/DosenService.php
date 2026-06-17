@@ -13,9 +13,9 @@ class DosenService
         $this->dosenRepository = $dosenRepository;
     }
 
-    public function getAll(array $fields)
+    public function getAll(array $fields, $perPage = null)
     {
-        return $this->dosenRepository->getAll($fields);
+        return $this->dosenRepository->getAll($fields, $perPage);
     }
 
     public function getById(int $id, array $fields)

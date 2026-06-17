@@ -21,6 +21,7 @@ class DosenController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $perPage = request()->query('size');
 
         if ($user && $user->hasRole('mahasiswa') && !$user->hasRole('admin')) {
             $mhs = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
@@ -32,8 +33,9 @@ class DosenController extends Controller
                     $lecturerIds[] = $mhs->academic_advisor_id;
                 }
 
-                $dosen = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds))->get();
-                return response()->json(DosenResource::collection($dosen));
+                $query = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds));
+                $dosen = $perPage ? $query->paginate($perPage) : $query->get();
+                return DosenResource::collection($dosen);
             }
             return response()->json([]);
         }
@@ -46,16 +48,17 @@ class DosenController extends Controller
                 
                 $lecturerIds[] = $dosenModel->id;
 
-                $dosenList = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds))->get();
-                return response()->json(DosenResource::collection($dosenList));
+                $query = Dosen::with(['user'])->whereIn('id', array_unique($lecturerIds));
+                $dosenList = $perPage ? $query->paginate($perPage) : $query->get();
+                return DosenResource::collection($dosenList);
             }
             return response()->json([]);
         }
 
         $fields = ['*'];
-        $dosen = $this->dosenService->getAll($fields ?: ['*']);
+        $dosen = $this->dosenService->getAll($fields ?: ['*'], $perPage);
 
-        return response()->json(DosenResource::collection($dosen));
+        return DosenResource::collection($dosen);
     }
 
     public function show(int $id)
