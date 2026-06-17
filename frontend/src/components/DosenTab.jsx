@@ -43,7 +43,46 @@ const DosenTab = React.memo(function DosenTab({
     setShowPassword(false);
   }, [selectedDosen]);
 
-  // Filter items based on search query and column filters
+  const [paginatedData, setPaginatedData] = useState([]);
+  const [totalServerItems, setTotalServerItems] = useState(0);
+  const [totalServerPages, setTotalServerPages] = useState(1);
+  const [loadingPage, setLoadingPage] = useState(false);
+
+  // Fetch paginated data dynamically from server
+  useEffect(() => {
+    const fetchPage = async () => {
+      setLoadingPage(true);
+      try {
+        const token = localStorage.getItem('token');
+        let url = `/api/lecturers?page=${currentPage}&size=${itemsPerPage}`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.meta) {
+            setPaginatedData(json.data);
+            setTotalServerItems(json.meta.total);
+            setTotalServerPages(json.meta.last_page);
+          } else {
+            setPaginatedData(json.data || json);
+            setTotalServerItems((json.data || json).length);
+            setTotalServerPages(1);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch paginated lecturers:", err);
+      } finally {
+        setLoadingPage(false);
+      }
+    };
+    
+    fetchPage();
+  }, [currentPage, searchQuery, viewMode]);
+
+  // Fallback filtering for non-paginated or local matching
   const filteredItems = lecturers.filter(d => {
     const uObj = userMap[d.user_id];
     
@@ -60,15 +99,22 @@ const DosenTab = React.memo(function DosenTab({
     return matchesGlobal && matchesNameNidn && matchesEmail;
   });
 
-  // Pagination bounds & slice for Table
-  const totalItems = filteredItems.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  // Apply local column filters if any.
+  const displayItems = paginatedData.filter(d => {
+    const uObj = userMap[d.user_id];
+    const matchesNameNidn = filters.nameNidn === '' || 
+                            d.name.toLowerCase().includes(filters.nameNidn.toLowerCase()) || 
+                            d.nidn.toLowerCase().includes(filters.nameNidn.toLowerCase());
+    const matchesEmail = filters.email === '' || 
+                         (uObj && uObj.email.toLowerCase().includes(filters.email.toLowerCase()));
+    return matchesNameNidn && matchesEmail;
+  });
 
-  // Bounds & slice for Card Mode
-  const cardItemsToDisplay = filteredItems.slice(0, visibleCountCard);
+  // Pagination bounds
+  const totalItems = totalServerItems;
+  const totalPages = totalServerPages;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + displayItems.length, totalItems);
 
   // Helper for pagination window
   const getPageNumbers = () => {
@@ -485,8 +531,13 @@ const DosenTab = React.memo(function DosenTab({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-              {paginatedItems.map((d, index) => {
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black relative">
+              {loadingPage && (
+                <tr>
+                  <td colSpan="6" className="py-4 text-center text-monday-gray text-xs">Memuat data...</td>
+                </tr>
+              )}
+              {!loadingPage && displayItems.map((d, index) => {
                 const uObj = userMap[d.user_id];
                 const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
                 const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
@@ -538,8 +589,11 @@ const DosenTab = React.memo(function DosenTab({
           </table>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {cardItemsToDisplay.map((d, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
+          {loadingPage && (
+             <div className="col-span-full py-12 text-center text-monday-gray text-sm">Memuat data...</div>
+          )}
+          {!loadingPage && displayItems.map((d, index) => {
             const uObj = userMap[d.user_id];
             const classCount = dosenPengampus.filter(dp => dp.lecturer_id === d.id).length;
             const adviseeCount = students.filter(m => m.academic_advisor_id === d.id).length;
@@ -597,8 +651,8 @@ const DosenTab = React.memo(function DosenTab({
       )}
 
       {/* Pagination Controls */}
-      {/* Pagination Controls (Table Mode Only) */}
-      {viewMode === 'table' && totalPages > 1 && (
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
           <p className="text-sm font-semibold text-monday-gray">
             Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> dosen
@@ -639,19 +693,6 @@ const DosenTab = React.memo(function DosenTab({
               <ChevronRight size={16} />
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Load More Button (Card Mode Only) */}
-      {viewMode === 'card' && visibleCountCard < filteredItems.length && (
-        <div className="flex justify-center mt-4">
-          <button
-            type="button"
-            onClick={() => setVisibleCountCard(prev => prev + 12)}
-            className="px-6 py-2 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-full font-bold text-xs shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:shadow-emerald-600/30 transition-all duration-300 flex items-center gap-2"
-          >
-            Tampilkan Lebih Banyak <ChevronDown size={14} />
-          </button>
         </div>
       )}
     </div>

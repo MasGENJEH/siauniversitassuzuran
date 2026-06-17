@@ -11,9 +11,48 @@ export default function UserTab({ users, searchQuery, setSearchQuery, openModal,
   });
   const itemsPerPage = 10;
 
+  const [paginatedData, setPaginatedData] = useState([]);
+  const [totalServerItems, setTotalServerItems] = useState(0);
+  const [totalServerPages, setTotalServerPages] = useState(1);
+  const [loadingPage, setLoadingPage] = useState(false);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filters]);
+
+  // Fetch paginated data dynamically from server
+  useEffect(() => {
+    const fetchPage = async () => {
+      setLoadingPage(true);
+      try {
+        const token = localStorage.getItem('token');
+        let url = `/api/users?page=${currentPage}&size=${itemsPerPage}`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.meta) {
+            setPaginatedData(json.data);
+            setTotalServerItems(json.meta.total);
+            setTotalServerPages(json.meta.last_page);
+          } else {
+            setPaginatedData(json.data || json);
+            setTotalServerItems((json.data || json).length);
+            setTotalServerPages(1);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch paginated users:", err);
+      } finally {
+        setLoadingPage(false);
+      }
+    };
+    
+    fetchPage();
+  }, [currentPage, searchQuery]);
 
   // Extract all unique roles from users to populate the role filter
   const allRoles = useMemo(() => {
@@ -26,10 +65,8 @@ export default function UserTab({ users, searchQuery, setSearchQuery, openModal,
     return Array.from(rolesSet);
   }, [users]);
 
-  const filteredItems = users.filter(u => {
-    const matchesGlobal = u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          u.email?.toLowerCase().includes(searchQuery.toLowerCase());
-                          
+  // Apply local column filters if any
+  const displayItems = paginatedData.filter(u => {
     const matchesNameEmail = filters.nameEmail === '' || 
                              u.name?.toLowerCase().includes(filters.nameEmail.toLowerCase()) || 
                              u.email?.toLowerCase().includes(filters.nameEmail.toLowerCase());
@@ -37,14 +74,13 @@ export default function UserTab({ users, searchQuery, setSearchQuery, openModal,
     const matchesRole = filters.role === '' || 
                         (u.roles && u.roles.some(r => String(r.name) === String(filters.role)));
                         
-    return matchesGlobal && matchesNameEmail && matchesRole;
+    return matchesNameEmail && matchesRole;
   });
 
-  const totalItems = filteredItems.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const totalItems = totalServerItems;
+  const totalPages = totalServerPages;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + displayItems.length, totalItems);
 
   const getPageNumbers = () => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -120,9 +156,14 @@ export default function UserTab({ users, searchQuery, setSearchQuery, openModal,
               <th className="py-2 px-4"></th>
             </tr>
           </thead>
-          <tbody className="text-sm font-semibold text-monday-black divide-y divide-monday-border">
-            {paginatedItems.length > 0 ? (
-              paginatedItems.map((user, idx) => (
+          <tbody className="text-sm font-semibold text-monday-black divide-y divide-monday-border relative">
+            {loadingPage && (
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-monday-gray text-xs">Memuat data...</td>
+              </tr>
+            )}
+            {!loadingPage && displayItems.length > 0 ? (
+              displayItems.map((user, idx) => (
                 <tr key={user.id} className="hover:bg-monday-gray-background/50 transition-colors">
                   <td className="p-4 text-center">{startIndex + idx + 1}</td>
                   <td className="p-4">
@@ -181,11 +222,13 @@ export default function UserTab({ users, searchQuery, setSearchQuery, openModal,
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="6" className="p-8 text-center text-monday-gray font-semibold">
-                  Tidak ada user yang ditemukan.
-                </td>
-              </tr>
+              !loadingPage && (
+                <tr>
+                  <td colSpan="6" className="p-8 text-center text-monday-gray font-semibold">
+                    Tidak ada user yang ditemukan.
+                  </td>
+                </tr>
+              )
             )}
           </tbody>
         </table>

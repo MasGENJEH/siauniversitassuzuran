@@ -50,7 +50,46 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
     setShowPassword(false);
   }, [selectedMahasiswa]);
 
-  // Filter items based on search query and column filters
+  const [paginatedData, setPaginatedData] = useState([]);
+  const [totalServerItems, setTotalServerItems] = useState(0);
+  const [totalServerPages, setTotalServerPages] = useState(1);
+  const [loadingPage, setLoadingPage] = useState(false);
+
+  // Fetch paginated data dynamically from server
+  useEffect(() => {
+    const fetchPage = async () => {
+      setLoadingPage(true);
+      try {
+        const token = localStorage.getItem('token');
+        let url = `/api/students?page=${currentPage}&size=${itemsPerPage}`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.meta) {
+            setPaginatedData(json.data);
+            setTotalServerItems(json.meta.total);
+            setTotalServerPages(json.meta.last_page);
+          } else {
+            setPaginatedData(json.data || json);
+            setTotalServerItems((json.data || json).length);
+            setTotalServerPages(1);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch paginated students:", err);
+      } finally {
+        setLoadingPage(false);
+      }
+    };
+    
+    fetchPage();
+  }, [currentPage, searchQuery, viewMode]);
+
+  // Fallback filtering for non-paginated or local matching
   const filteredItems = students.filter(m => {
     const prObj = studyProgramMap[m.study_program_id];
     const dosObj = lecturerMap[m.academic_advisor_id];
@@ -78,15 +117,29 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
     return matchesGlobal && matchesNameNim && matchesEmail && matchesProdi && matchesDosen && matchesStatus;
   });
 
-  // Pagination bounds & slice for Table
-  const totalItems = filteredItems.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  // Apply local column filters if any.
+  const displayItems = paginatedData.filter(m => {
+    const uObj = userMap[m.user_id];
+    const matchesNameNim = filters.nameNim === '' || 
+                           m.name.toLowerCase().includes(filters.nameNim.toLowerCase()) || 
+                           m.nim.toLowerCase().includes(filters.nameNim.toLowerCase());
+    const matchesEmail = filters.email === '' || 
+                         (uObj && uObj.email.toLowerCase().includes(filters.email.toLowerCase()));
+    const matchesProdi = filters.study_program_id === '' || 
+                         String(m.study_program_id) === String(filters.study_program_id);
+    const matchesDosen = filters.academic_advisor_id === '' || 
+                         String(m.academic_advisor_id) === String(filters.academic_advisor_id);
+    const matchesStatus = filters.status === '' || 
+                          String(m.status) === String(filters.status);
 
-  // Bounds & slice for Card Mode
-  const cardItemsToDisplay = filteredItems.slice(0, visibleCountCard);
+    return matchesNameNim && matchesEmail && matchesProdi && matchesDosen && matchesStatus;
+  });
+
+  // Pagination bounds
+  const totalItems = totalServerItems;
+  const totalPages = totalServerPages;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + displayItems.length, totalItems);
 
   // Helper for pagination window
   const getPageNumbers = () => {
@@ -594,8 +647,13 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-monday-border text-sm text-monday-black">
-              {paginatedItems.map((m, index) => {
+            <tbody className="divide-y divide-monday-border text-sm text-monday-black relative">
+              {loadingPage && (
+                <tr>
+                  <td colSpan="7" className="py-4 text-center text-monday-gray text-xs">Memuat data...</td>
+                </tr>
+              )}
+              {!loadingPage && displayItems.map((m, index) => {
                 const prObj = studyProgramMap[m.study_program_id];
                 const dosObj = lecturerMap[m.academic_advisor_id];
                 const uObj = userMap[m.user_id];
@@ -652,8 +710,11 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
           </table>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {cardItemsToDisplay.map((m, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
+          {loadingPage && (
+             <div className="col-span-full py-12 text-center text-monday-gray text-sm">Memuat data...</div>
+          )}
+          {!loadingPage && displayItems.map((m, index) => {
             const prObj = studyProgramMap[m.study_program_id];
             const dosObj = lecturerMap[m.academic_advisor_id];
             const uObj = userMap[m.user_id];
@@ -723,8 +784,8 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
         </div>
       )}
 
-      {/* Pagination Controls (Table Mode Only) */}
-      {viewMode === 'table' && totalPages > 1 && (
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 border-t border-monday-border mt-2">
           <p className="text-sm font-semibold text-monday-gray">
             Menampilkan <span className="text-monday-black font-bold">{totalItems === 0 ? 0 : startIndex + 1}</span> sampai <span className="text-monday-black font-bold">{endIndex}</span> dari <span className="text-monday-black font-bold">{totalItems}</span> mahasiswa
@@ -765,19 +826,6 @@ const MahasiswaTab = React.memo(function MahasiswaTab({
               <ChevronRight size={16} />
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Load More Button (Card Mode Only) */}
-      {viewMode === 'card' && visibleCountCard < filteredItems.length && (
-        <div className="flex justify-center mt-4">
-          <button
-            type="button"
-            onClick={() => setVisibleCountCard(prev => prev + 12)}
-            className="px-6 py-2 bg-monday-blue/10 text-monday-blue hover:bg-monday-blue hover:text-white rounded-full font-bold text-xs shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:shadow-monday-blue/30 transition-all duration-300 flex items-center gap-2"
-          >
-            Tampilkan Lebih Banyak
-          </button>
         </div>
       )}
     </div>
