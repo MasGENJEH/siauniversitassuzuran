@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: laravel_app_image
+    container_name: laravel_sia_universitas_suzuran_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    volumes:
+      - ./:/var/www
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=siauniversitassuzuran
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_sia_universitas_suzuran
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=siauniversitassuzuran
+      - MYSQL_ROOT_PASSWORD=1234
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+volumes:
+  dbdata:
